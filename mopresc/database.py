@@ -51,24 +51,3 @@ def StartEngine(uri):
     Base.metadata.create_all(engine)
 
     Session.configure(bind=engine)
-
-    """
-    session = Session()
-
-    new_pt = Patient(
-                  hospital_no = "10021",
-                  national_id_no = "A046974",
-                  name = "John Good Wind",
-                  age = 29,
-                  sex = "M",
-                  bed_no = "SW45",
-                  diagnosis = "Broken Bone" )
-    
-    new_pt.rxs = [
-        Rx(drug_name = "T. Paracetamol 500mg", drug_order = "PO TDS x 7 days", active=True),
-        Rx(drug_name = "T. Metronidazole 400mg", drug_order = "PO TDS x 7 days", active=True) ]
-    
-    
-    session.add(new_pt)
-    session.commit()
-    """

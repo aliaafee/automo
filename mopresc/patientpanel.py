@@ -1,50 +1,13 @@
 import wx
 from reportlab.lib.pagesizes import A5
 from reportlab.pdfgen import canvas
-from ObjectListView import ObjectListView, ColumnDefn
+from ObjectListView import ObjectListView, ColumnDefn, OLVEvent
 
 from images import *
+from objectlistviewmod import ObjectListViewMod, EVT_OVL_CHECK_EVENT
 from pdfviewer import PDFViewer
-from grid import *
 from generateprescription import GeneratePrescription
 from drugaddpanel import DrugAddPanel
-
-
-import  wx.lib.newevent
-OvlCheckEvent, EVT_OVL_CHECK_EVENT = wx.lib.newevent.NewEvent()
-class ObjectListViewCheck(ObjectListView):  
-    def _HandleLeftDownOnImage(self, rowIndex, subItemIndex):
-        column = self.columns[subItemIndex]
-        if not column.HasCheckState():
-            return
-
-        self._PossibleFinishCellEdit()
-        modelObject = self.GetObjectAt(rowIndex)
-        if modelObject is not None:
-            column.SetCheckState(modelObject, not column.GetCheckState(modelObject))
-
-            # Just added the event here ===================================
-            e = OvlCheckEvent(object=modelObject, value=column.GetCheckState(modelObject))
-            wx.PostEvent(self, e)
-            # =============================================================
-
-            self.RefreshIndex(rowIndex, modelObject)
-
-        
-    """
-    def _InitializeCheckBoxImages(self):
-        print "Doing This"
-        bmpChecked_16 = BitmapFromBase64(checked_16_b64)
-        bmpUnchecked_16 = BitmapFromBase64(unchecked_16_b64)
-        bmpChecked_32 = BitmapFromBase64(checked_32_b64)
-        bmpUnchecked_32 = BitmapFromBase64(unchecked_32_b64)
-
-        self.AddNamedImages(ObjectListView.NAME_CHECKED_IMAGE, bmpChecked_16, bmpChecked_32)
-        self.AddNamedImages(ObjectListView.NAME_UNCHECKED_IMAGE, bmpUnchecked_16, bmpUnchecked_32)
-        self.AddNamedImages(ObjectListView.NAME_UNDETERMINED_IMAGE, bmpUnchecked_16, bmpUnchecked_32)
-    """
-
-
 
 
 class PatientPanel(wx.Panel):
@@ -55,12 +18,9 @@ class PatientPanel(wx.Panel):
         self.patientListPanel = None
 
         self.patient = None
-        self.listIndex = None
-        #self.rxs = []
 
         sizer = wx.BoxSizer(wx.VERTICAL)
 
-        #Patients Toolbar
         self.toolbar = wx.ToolBar(self, style=wx.TB_NODIVIDER)
 
         tbPrint = self.toolbar.AddLabelTool(
@@ -123,26 +83,26 @@ class PatientPanel(wx.Panel):
         self.txtDrugName = DrugAddPanel(self, session, self)
         sizer.Add(self.txtDrugName, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, border=10)
 
-        #Prescription List
+        self.prescriptionList = ObjectListViewMod( 
+                self, 
+                style=wx.LC_REPORT|wx.SUNKEN_BORDER, 
+                cellEditMode=ObjectListView.CELLEDIT_DOUBLECLICK 
+        )
 
-        self.prescriptionList = ObjectListViewCheck(self, style=wx.LC_REPORT|wx.SUNKEN_BORDER)
         self.prescriptionList.SetColumns([
-            ColumnDefn("Drug", "left", 180, "drug_name"),
-            ColumnDefn("Order", "left", 140, "drug_order")])
+            ColumnDefn("Drug", "left", 180, "drug_name", isEditable = False),
+            ColumnDefn("Order", "left", 140, "drug_order")
+        ])
+        
         self.prescriptionList.SetEmptyListMsg("")
         self.prescriptionList.useAlternateBackColors = False
         self.prescriptionList.CreateCheckStateColumn()
+
         self.prescriptionList.Bind(EVT_OVL_CHECK_EVENT, self.OnRxCheck)
         self.prescriptionList.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.OnRxContextMenu)
+        self.prescriptionList.Bind(OLVEvent.EVT_CELL_EDIT_FINISHED, self.OnCellEditFinished)
 
-        """
-        self.prescriptionList = wx.CheckListBox(self)
-        self.prescriptionList.Bind(wx.EVT_CHECKLISTBOX, self.OnRxCheck)
-        self.prescriptionList.Bind(wx.EVT_CONTEXT_MENU, self.OnRxContextMenu)
-        #self.prescriptionList.Bind(wx.EVT_COMMAND_RIGHT_CLICK, self.OnRxContextMenu)
-        """
         sizer.Add(self.prescriptionList, 1, wx.RIGHT | wx.LEFT | wx.BOTTOM | wx. EXPAND, border=10)
-
 
         #Enter Treversal
         self.txtBed.Bind(wx.EVT_KEY_UP, self.OntxtBedKeyUp)
@@ -160,16 +120,11 @@ class PatientPanel(wx.Panel):
         self.rxMenu.Append(id, "Remove", "Remove Medication.")
         wx.EVT_MENU(self, id,  self.OnRemoveRx)
 
-        #id = 501
-        #self.rxMenu.Append(id, "Remove All", "Remove All Medications.")
-        #wx.EVT_MENU(self, id,  self.OnRemoveAllRx)
-
         self.unSet()
 
 
-    def set(self, patient, listIndex):
+    def set(self, patient):
         self.patient = patient
-        self.listIndex = listIndex
 
         self.txtHospitalNo.ChangeValue(str(patient.hospital_no))
         self.txtNationalIdNo.ChangeValue(str(patient.national_id_no))
@@ -186,7 +141,6 @@ class PatientPanel(wx.Panel):
 
     def unSet(self):
         self.patient = None
-        self.listIndex = None
 
         self.txtHospitalNo.ChangeValue("")
         self.txtNationalIdNo.ChangeValue("")
@@ -197,45 +151,21 @@ class PatientPanel(wx.Panel):
         self.txtDiagnosis.ChangeValue("")
 
         self.prescriptionList.DeleteAllItems()
-        #self.rxs = []
 
         self.Disable()
         
 
     def updateRx(self):
         self.prescriptionList.DeleteAllItems()
-        self.rxs = []
-        #index = 0
+
         for row in self.patient.rxs:
-            #grid_row = self.prescriptionList.AppendRow()
-            #self.prescriptionList.SetRow(grid_row, [bool(row.active), row.drug_name, row.drug_order ])
-            #self.prescriptionList.Insert("{0} {1}".format(row.drug_name, row.drug_order), index)
             self.prescriptionList.AddObject(row)
             if row.active:
                 self.prescriptionList.SetCheckState(row, True)
             else:
                 self.prescriptionList.SetCheckState(row, False)
-            #modelObject = self.prescriptionList.GetObjectAt(index)
-            #if row.active:
-            #    self.prescriptionList.SetCheckState(row, False)
-            #else:
-            #    self.prescriptionList.SetCheckState(row, True)
-            #if row.active:
-            #    self.prescriptionList.Check(index)
-            #else:
-            #    self.prescriptionList.Check(index, False)
-            #self.rxs.append(row)
-            #index += 1
 
         self.prescriptionList.RefreshObjects(self.prescriptionList.GetObjects())
-
-
-        #objects = self.prescriptionList.GetObjects():
-
-        #for obj in objects:
-        #    self.prescriptionList.SetCheckState(obj, True)
-
-        #self.Layout()
 
 
     def addDrug(self, drug_name, drug_order):
@@ -254,11 +184,13 @@ class PatientPanel(wx.Panel):
         self.patient.age = str(self.txtAge.GetValue())
         self.patient.sex = str(self.txtSex.GetValue())
         self.patient.diagnosis = str(self.txtDiagnosis.GetValue())
+        
+        self.patientListPanel.patientList.RefreshObjects([self.patient])
 
-        self.patientListPanel.patientList.SetStringItem(self.listIndex, 0, str(self.patient.bed_no))
-        self.patientListPanel.patientList.SetStringItem(self.listIndex, 1, str(self.patient.hospital_no))
-        self.patientListPanel.patientList.SetStringItem(self.listIndex, 2, str(self.patient.name))
+        self.session.commit()
 
+
+    def OnCellEditFinished(self, event):
         self.session.commit()
 
 
@@ -324,24 +256,6 @@ class PatientPanel(wx.Panel):
         self.session.commit()
 
         self.updateRx()
-
-    """
-    def OnRemoveAllRx(self, event):
-        dlg = wx.MessageDialog(None, 'Remove all medications?', 'Question', 
-            wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-
-        result = dlg.ShowModal()
-
-        if (result != wx.ID_YES):
-            return
-
-        for rx in self.prescriptionList.GetObjects():
-            self.session.delete(rx)
-
-        self.session.commit()
-
-        self.updateRx()
-    """
     
 
     def OnPrint(self, event):
@@ -356,7 +270,7 @@ class PatientPanel(wx.Panel):
         
         c.save()
 
-        pdfV = PDFViewer(None)
+        pdfV = PDFViewer(None, title = "Print Preview")
         pdfV.viewer.UsePrintDirect = ``False``
         pdfV.viewer.LoadFile("print.pdf")
         pdfV.Show()

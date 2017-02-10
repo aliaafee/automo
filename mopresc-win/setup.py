@@ -31,6 +31,6 @@ setup(
             'compressed' : False,
             "packages": packages
             }
-    },
-    zipfile = None
+    }#,
+    #zipfile = None
 )

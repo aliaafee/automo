@@ -1,10 +1,7 @@
 import wx
-import wx.lib.sized_controls as sc
 import wx.aui
-from wx.lib.pdfviewer import pdfViewer, pdfButtonPanel
 from wx.lib.wordwrap import wordwrap
 
-from grid import *
 from database import Session
 from images import *
 from patientlistpanel import PatientListPanel
@@ -12,17 +9,13 @@ from patientpanel import PatientPanel
 
 
 class MainFrame(wx.Frame):
-    _InvoiceCount = 0
-
     def __init__(self, parent):
         wx.Frame.__init__(
             self,
-            name = 'MainFrame',
             title = 'Ward Prescription',
             parent = parent,
             style = wx.DEFAULT_FRAME_STYLE,
             size = wx.Size(800, 600)
-            #size = wx.DisplaySize()
             )
 
         _icon = wx.EmptyIcon()
@@ -61,7 +54,6 @@ class MainFrame(wx.Frame):
 
         self.menuBar.Append(self.filemenu, "&File")
 
-        # Create the help menu
         helpMenu = wx.Menu()
 
         id = 402

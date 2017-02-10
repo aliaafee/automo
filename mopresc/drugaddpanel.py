@@ -1,16 +1,7 @@
 import wx
 
-#from promptingcombobox import PromptingComboBox
 from actextcontrol import ACTextControl
 from database import Rx, Drug
-
-
-drugList = [
-    'INJ CEFTRIAXONE 1G', 
-    'INJ METRONIDAZOLE 500MG', 
-    'TAB CATAFALM 50MG', 
-    'INJ PANTOPRAZOLE 40MG']
-
 
 
 class DrugAddPanel(wx.Panel):
@@ -68,8 +59,10 @@ class DrugAddPanel(wx.Panel):
 
     def UpdateDrugList(self):
         drugs = []
+        
         for drug in self.session.query(Drug).order_by(Drug.name):
             drugs.append(drug.name)
+            
         self.txtDrugName.SetCandidates(drugs)
             
 
@@ -95,5 +88,3 @@ class DrugAddPanel(wx.Panel):
         self.patientPanel.updateRx()
 
         self.txtDrugName.SetFocus()
-
-
