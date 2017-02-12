@@ -2,6 +2,7 @@ import wx
 from reportlab.lib.pagesizes import A5
 from reportlab.pdfgen import canvas
 from ObjectListView import ObjectListView, ColumnDefn
+import tempfile
 
 from images import *
 from database import Patient
@@ -69,9 +70,15 @@ class PatientListPanel(wx.Panel):
         self.patientList.SelectObject(self.selectedPatient)
 
         self.patientPanel.txtBed.SetFocus()
+        self.patientPanel.txtBed.SetSelection(-1,-1)
 
 
     def OnRemovePatient(self, event):
+        selectedPatients = self.patientList.GetSelectedObjects()
+
+        if len(selectedPatients) < 1:
+            return
+
         dlg = wx.MessageDialog(None, 'Remove selected patients?', 'Question', 
             wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 
@@ -82,7 +89,7 @@ class PatientListPanel(wx.Panel):
 
         self.patientPanel.unSet()
 
-        for patient in self.patientList.GetSelectedObjects():
+        for patient in selectedPatients:
             self.session.delete(patient)
 
         self.session.commit()
@@ -91,14 +98,16 @@ class PatientListPanel(wx.Panel):
 
 
     def OnPrintAll(self, event):
-        c = canvas.Canvas("print.pdf", pagesize=A5)
+        tempFile = tempfile.mktemp(".pdf")
+
+        c = canvas.Canvas(tempFile, pagesize=A5)
         for patient in self.session.query(Patient).order_by(Patient.id):
             GeneratePrescription(patient, c)
         c.save()
 
         pdfV = PDFViewer(None, title="Print Preview")
         pdfV.viewer.UsePrintDirect = ``False``
-        pdfV.viewer.LoadFile("print.pdf")
+        pdfV.viewer.LoadFile(tempFile)
         pdfV.Show()
 
 
@@ -106,6 +115,8 @@ class PatientListPanel(wx.Panel):
         listSelected = self.patientList.GetSelectedObject()
 
         if listSelected == None:
+            self.selectedPatient = None
+            self.patientPanel.unSet()
             return
 
         self.selectedPatient = listSelected

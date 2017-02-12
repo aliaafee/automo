@@ -2,6 +2,7 @@ import wx
 from reportlab.lib.pagesizes import A5
 from reportlab.pdfgen import canvas
 from ObjectListView import ObjectListView, ColumnDefn, OLVEvent
+import tempfile
 
 from images import *
 from objectlistviewmod import ObjectListViewMod, EVT_OVL_CHECK_EVENT
@@ -168,12 +169,12 @@ class PatientPanel(wx.Panel):
         self.prescriptionList.RefreshObjects(self.prescriptionList.GetObjects())
 
 
-    def addDrug(self, drug_name, drug_order):
-        drug = Rx(patient_id = self.patient.id, active = True, drug_name = drug_name, drug_order=drug_order)
-        self.session.add(drug)
-        self.session.commit()
-        self.session.refresh(self.patient)
-        self.updateRx()
+    #def addDrug(self, drug_name, drug_order):
+    #    drug = Rx(patient_id = self.patient.id, active = True, drug_name = drug_name, drug_order=drug_order)
+    #    self.session.add(drug)
+    #    self.session.commit()
+    #    self.session.refresh(self.patient)
+    #    self.updateRx()
 
 
     def OnChange(self, event):
@@ -197,31 +198,37 @@ class PatientPanel(wx.Panel):
     def OntxtBedKeyUp(self, event):
         if event.GetKeyCode() == wx.WXK_RETURN:
             self.txtHospitalNo.SetFocus()
+            self.txtHospitalNo.SetSelection(-1,-1)
             
 
     def OntxtHospitalNoKeyUp(self, event):
         if event.GetKeyCode() == wx.WXK_RETURN:
             self.txtNationalIdNo.SetFocus()
+            self.txtNationalIdNo.SetSelection(-1,-1)
 
     
     def OntxtNationalIdNoKeyUp(self, event):
         if event.GetKeyCode() == wx.WXK_RETURN:
             self.txtName.SetFocus()
+            self.txtName.SetSelection(-1,-1)
 
     
     def OntxtNameKeyUp(self, event):
         if event.GetKeyCode() == wx.WXK_RETURN:
             self.txtAge.SetFocus()
+            self.txtAge.SetSelection(-1,-1)
 
     
     def OntxtAgeKeyUp(self, event):
         if event.GetKeyCode() == wx.WXK_RETURN:
             self.txtSex.SetFocus()
+            self.txtSex.SetSelection(-1,-1)
 
     
     def OntxtSexKeyUp(self, event):
         if event.GetKeyCode() == wx.WXK_RETURN:
             self.txtDiagnosis.SetFocus()
+            self.txtDiagnosis.SetSelection(-1,-1)
 
    
     def OntxtDiagnosisKeyUp(self, event):
@@ -264,7 +271,9 @@ class PatientPanel(wx.Panel):
         
         self.session.refresh(self.patient)
 
-        c = canvas.Canvas("print.pdf", pagesize=A5)
+        tempFile = tempfile.mktemp(".pdf")
+
+        c = canvas.Canvas(tempFile, pagesize=A5)
 
         GeneratePrescription(self.patient, c)
         
@@ -272,5 +281,5 @@ class PatientPanel(wx.Panel):
 
         pdfV = PDFViewer(None, title = "Print Preview")
         pdfV.viewer.UsePrintDirect = ``False``
-        pdfV.viewer.LoadFile("print.pdf")
+        pdfV.viewer.LoadFile(tempFile)
         pdfV.Show()

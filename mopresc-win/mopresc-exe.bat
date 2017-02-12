@@ -1,3 +1,3 @@
 cd ..
-mopresc-win\src\dist\wardpresc.exe
+mopresc-win\src\final\wardpresc.exe
 pause

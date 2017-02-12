@@ -1,4 +1,5 @@
 import wx
+import time
 
 from actextcontrol import ACTextControl
 from database import Rx, Drug
@@ -67,9 +68,22 @@ class DrugAddPanel(wx.Panel):
             
 
     def OnAddDrug(self, event):
+        drug_name = self.txtDrugName.GetValue()
+        drug_order = self.txtDrugOrder.GetValue()
+
+        if drug_name == "":        
+            self.txtDrugName.SetFocus()
+            self.txtDrugName.SetSelection(-1,-1)
+            return
+
+        if drug_order == "":            
+            self.txtDrugOrder.SetFocus()
+            self.txtDrugOrder.SetSelection(-1,-1)
+            return
+
         new_presc = Rx( patient_id = self.patientPanel.patient.id,
-                        drug_name = self.txtDrugName.GetValue(),
-                        drug_order = self.txtDrugOrder.GetValue(),
+                        drug_name = drug_name,
+                        drug_order = drug_order,
                         active = True)
 
         self.session.add(new_presc)
