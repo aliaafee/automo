@@ -8,6 +8,7 @@ from images import *
 from database import Patient
 from pdfviewer import PDFViewer
 from generateprescription import GeneratePrescription
+from patientlistprint import GeneratePatientList
 
 
 class PatientListPanel(wx.Panel):
@@ -31,8 +32,12 @@ class PatientListPanel(wx.Panel):
                 wx.ID_ANY, 'Remove Patient',  BitmapFromBase64(toolbar_remove_b64))
         self.Bind(wx.EVT_TOOL, self.OnRemovePatient, tbRemovePatient)
 
+        tbPrintList = toolbar.AddLabelTool(
+                wx.ID_ANY, 'Print Patients List',  BitmapFromBase64(toolbar_print_list_b64))
+        self.Bind(wx.EVT_TOOL, self.OnPrintList, tbPrintList)
+
         tbPrintAll = toolbar.AddLabelTool(
-                wx.ID_ANY, 'Print All',  BitmapFromBase64(toolbar_print_b64))
+                wx.ID_ANY, 'Print All Prescriptions',  BitmapFromBase64(toolbar_print_all_b64))
         self.Bind(wx.EVT_TOOL, self.OnPrintAll, tbPrintAll)
 
         toolbar.Realize()
@@ -101,9 +106,20 @@ class PatientListPanel(wx.Panel):
         tempFile = tempfile.mktemp(".pdf")
 
         c = canvas.Canvas(tempFile, pagesize=A5)
-        for patient in self.session.query(Patient).order_by(Patient.id):
+        for patient in self.session.query(Patient).order_by(Patient.bed_no):
             GeneratePrescription(patient, c)
         c.save()
+
+        pdfV = PDFViewer(None, title="Print Preview")
+        pdfV.viewer.UsePrintDirect = ``False``
+        pdfV.viewer.LoadFile(tempFile)
+        pdfV.Show()
+
+
+    def OnPrintList(self, event):
+        tempFile = tempfile.mktemp(".pdf")
+
+        GeneratePatientList(self.session, tempFile)
 
         pdfV = PDFViewer(None, title="Print Preview")
         pdfV.viewer.UsePrintDirect = ``False``

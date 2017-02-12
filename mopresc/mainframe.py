@@ -19,7 +19,7 @@ class MainFrame(wx.Frame):
             )
 
         _icon = wx.EmptyIcon()
-        _icon.CopyFromBitmap(BitmapFromBase64(icon_b64))
+        _icon.CopyFromBitmap(BitmapFromBase64(icon_16_b64))
         self.SetIcon(_icon)
 
         self.session = Session()

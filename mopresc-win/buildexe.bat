@@ -2,7 +2,7 @@ mkdir src
 mkdir src\dist
 copy /Y ..\mopresc\*.py src\
 copy /Y setup.py src\
-copy /Y mopresc.ico src\
+copy /Y ..\images\src\icon_pack.ico src\mopresc.ico
 cd src
 C:\Python27\python.exe setup.py py2exe
 del dist\wardpresc.exe

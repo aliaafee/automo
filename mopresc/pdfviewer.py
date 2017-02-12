@@ -10,7 +10,7 @@ class PDFViewer(sc.SizedFrame):
         super(PDFViewer, self).__init__(parent, **kwds)
 
         _icon = wx.EmptyIcon()
-        _icon.CopyFromBitmap(BitmapFromBase64(icon_b64))
+        _icon.CopyFromBitmap(BitmapFromBase64(icon_16_b64))
         self.SetIcon(_icon)
 
         paneCont = self.GetContentsPane()
