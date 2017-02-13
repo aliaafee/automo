@@ -1,3 +1,3 @@
 from subprocess import call
 
-call(["bin/wardpresc.exe"])
+call(["bin/auto-mo.exe"])

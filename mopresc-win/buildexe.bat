@@ -5,7 +5,7 @@ copy /Y setup.py src\
 copy /Y ..\images\src\icon_pack.ico src\mopresc.ico
 cd src
 C:\Python27\python.exe setup.py py2exe
-del dist\wardpresc.exe
+del dist\auto-mo.exe
 ren dist\__main__.exe auto-mo.exe
 
 mkdir final

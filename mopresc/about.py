@@ -20,7 +20,7 @@ class AboutDlg(wx.Dialog):
         sizer = wx.BoxSizer(wx.VERTICAL)
 
         ctrl = wx.StaticText(self, label=name+" "+version , size=wx.Size(-1,-1))
-        ctrl.SetFont(wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+        ctrl.SetFont(wx.Font(18, wx.FONTFAMILY_TELETYPE, wx.NORMAL, wx.BOLD))
         sizer.Add(ctrl, 0, wx.ALIGN_CENTER | wx.TOP, border=20)
 
         ctrl = wx.StaticBitmap(self, 1, image, (10, 5), (image.GetWidth(), image.GetHeight()))
