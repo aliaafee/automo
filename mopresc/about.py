@@ -5,7 +5,7 @@ from images import *
 
 class AboutDlg(wx.Dialog):
     def __init__(self, parent):
-        super(AboutDlg, self).__init__(parent, wx.ID_ANY, title="About", size=(400,325))
+        super(AboutDlg, self).__init__(parent, wx.ID_ANY, title="About", size=(300,325))
         
         image = BitmapFromBase64(icon_robot_b64)
 
@@ -13,7 +13,7 @@ class AboutDlg(wx.Dialog):
         description = wordwrap(
             "Program to automate the tedious job of hand writing prescriptions everyday."
             "",
-            350, wx.ClientDC(self))
+            250, wx.ClientDC(self))
         version = "0.1"
         copyright = "(C) 2017 Ali Aafee"
 
