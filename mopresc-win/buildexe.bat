@@ -21,7 +21,7 @@ copy ..\setup-launcher.py src-launcher\
 cd src-launcher
 C:\Python27\python.exe setup-launcher.py py2exe
 copy dist\launcher.exe ..\final
-del ..\final\wardpresc.exe
+del ..\final\auto-mo.exe
 ren ..\final\launcher.exe auto-mo.exe
 
 

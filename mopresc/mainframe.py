@@ -1,11 +1,11 @@
 import wx
 import wx.aui
-from wx.lib.wordwrap import wordwrap
 
 from database import Session
 from images import *
 from patientlistpanel import PatientListPanel
 from patientpanel import PatientPanel
+from about import AboutDlg
 
 
 class MainFrame(wx.Frame):
@@ -92,21 +92,8 @@ class MainFrame(wx.Frame):
 
 
     def OnAboutDlg(self, event):
-        info = wx.AboutDialogInfo()
-        info.Name = "Auto MO"
-        info.Version = "0.0.1"
-        info.Copyright = "(C) 2017 Surgery Department, IT Unit"
-        info.Description = wordwrap(
-            "Program to automate the tedious job of hand writing prescriptions everyday."
-            "",
-            350, wx.ClientDC(self))
-        #info.WebSite = ("http://www.igmh.gov.mv", "IGMH Home Page")
-        info.Developers = ["Ali Aafee"]
-        info.License = wordwrap("Do what ever you want with the code.", 500,
-                                wx.ClientDC(self))
-        info.SetIcon(self.GetIcon())
-
-        wx.AboutBox(info)
+        aboutDlg = AboutDlg(None)
+        aboutDlg.Show()
 
 
     def OnExit(self, event):
