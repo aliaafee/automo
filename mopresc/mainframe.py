@@ -12,7 +12,7 @@ class MainFrame(wx.Frame):
     def __init__(self, parent):
         wx.Frame.__init__(
             self,
-            title = 'Ward Prescription',
+            title = 'Auto MO',
             parent = parent,
             style = wx.DEFAULT_FRAME_STYLE,
             size = wx.Size(800, 600)
@@ -93,7 +93,7 @@ class MainFrame(wx.Frame):
 
     def OnAboutDlg(self, event):
         info = wx.AboutDialogInfo()
-        info.Name = "Ward Prescription"
+        info.Name = "Auto MO"
         info.Version = "0.0.1"
         info.Copyright = "(C) 2017 Surgery Department, IT Unit"
         info.Description = wordwrap(
@@ -104,6 +104,7 @@ class MainFrame(wx.Frame):
         info.Developers = ["Ali Aafee"]
         info.License = wordwrap("Do what ever you want with the code.", 500,
                                 wx.ClientDC(self))
+        info.SetIcon(self.GetIcon())
 
         wx.AboutBox(info)
 

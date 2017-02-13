@@ -17,8 +17,6 @@ def GenerateHeader(patient, canvas):
 
 
 def GeneratePrescription(patient, canvas):
-    print len(patient.rxs)
-    
     canvas.setFont("Helvetica", 10)
     GenerateHeader(patient, canvas)
     
