@@ -7,8 +7,7 @@ import tempfile
 from images import *
 from database import Patient
 from pdfviewer import PDFViewer
-from generateprescription import GeneratePrescription
-from patientlistprint import GeneratePatientList
+from printing import *
 
 
 class PatientListPanel(wx.Panel):
@@ -105,10 +104,7 @@ class PatientListPanel(wx.Panel):
     def OnPrintAll(self, event):
         tempFile = tempfile.mktemp(".pdf")
 
-        c = canvas.Canvas(tempFile, pagesize=A5)
-        for patient in self.session.query(Patient).order_by(Patient.bed_no):
-            GeneratePrescription(patient, c)
-        c.save()
+        GenerateAllPrescriptions(self.session, tempFile)
 
         pdfV = PDFViewer(None, title="Print Preview")
         pdfV.viewer.UsePrintDirect = ``False``

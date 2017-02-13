@@ -7,7 +7,7 @@ import tempfile
 from images import *
 from objectlistviewmod import ObjectListViewMod, EVT_OVL_CHECK_EVENT
 from pdfviewer import PDFViewer
-from generateprescription import GeneratePrescription
+from printing import *
 from drugaddpanel import DrugAddPanel
 
 
@@ -169,14 +169,6 @@ class PatientPanel(wx.Panel):
         self.prescriptionList.RefreshObjects(self.prescriptionList.GetObjects())
 
 
-    #def addDrug(self, drug_name, drug_order):
-    #    drug = Rx(patient_id = self.patient.id, active = True, drug_name = drug_name, drug_order=drug_order)
-    #    self.session.add(drug)
-    #    self.session.commit()
-    #    self.session.refresh(self.patient)
-    #    self.updateRx()
-
-
     def OnChange(self, event):
         self.patient.hospital_no = str(self.txtHospitalNo.GetValue())
         self.patient.national_id_no = str(self.txtNationalIdNo.GetValue())
@@ -273,11 +265,7 @@ class PatientPanel(wx.Panel):
 
         tempFile = tempfile.mktemp(".pdf")
 
-        c = canvas.Canvas(tempFile, pagesize=A5)
-
-        GeneratePrescription(self.patient, c)
-        
-        c.save()
+        GeneratePrescription(self.patient, tempFile)
 
         pdfV = PDFViewer(None, title = "Print Preview")
         pdfV.viewer.UsePrintDirect = ``False``
