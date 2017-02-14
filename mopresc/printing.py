@@ -118,20 +118,19 @@ def GeneratePatientList(session, docfilename):
     doc.build(elements, canvasmaker=PageNumCanvas)
 
 
-
 def DrawPrescriptionHeader(patient, prescCanvas):
-    prescCanvas.drawString(40,513,patient.name) 
+    prescCanvas.drawString(15*mm,181*mm,patient.name) 
 
-    prescCanvas.drawString(40,491,time.strftime("%d %B %Y"))
-    prescCanvas.drawString(178,491,str(patient.age))
-    prescCanvas.drawString(218,491,patient.sex)
+    prescCanvas.drawString(15*mm,173*mm,time.strftime("%d %B %Y"))
+    prescCanvas.drawString(63*mm,173*mm,str(patient.age))
+    prescCanvas.drawString(82*mm,173*mm,patient.sex)
 
-    prescCanvas.drawString(178,469, "Bed : {0}".format(patient.bed_no))
+    prescCanvas.drawString(63*mm,165*mm, "Bed : {0}".format(patient.bed_no))
 
-    prescCanvas.drawString(318,504,str(patient.hospital_no))
-    prescCanvas.drawString(318,492,"ID No : {0}".format(patient.national_id_no))
+    prescCanvas.drawString(104*mm,177*mm,str(patient.hospital_no))
+    prescCanvas.drawString(104*mm,172*mm,"ID No : {0}".format(patient.national_id_no))
     
-    prescCanvas.drawString(40,300, patient.diagnosis)
+    prescCanvas.drawString(15*mm,106*mm, patient.diagnosis)
 
 
 def DrawPrescription(patient, prescCanvas):
@@ -140,7 +139,7 @@ def DrawPrescription(patient, prescCanvas):
     
     pages = int(math.floor(float(len(patient.rxs)) / 14.0) + 1)
 
-    position = 242
+    position = 85*mm
     index = 1
     page = 1
     for row in patient.rxs:
@@ -154,8 +153,8 @@ def DrawPrescription(patient, prescCanvas):
                 index = 1
                 page += 1
             totaIndex = ((page - 1)*14) + index
-            prescCanvas.drawString(40, position, "{0}) {1} {2}".format(totaIndex, row.drug_name, row.drug_order))
-            position -= 14
+            prescCanvas.drawString(14*mm, position, "{0}) {1} {2}".format(totaIndex, row.drug_name, row.drug_order))
+            position -= 5*mm
             index += 1
     if pages > 1:
         prescCanvas.drawString(318, 46, "page {0} of {1}".format(page, pages)) 
