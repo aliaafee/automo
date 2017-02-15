@@ -76,10 +76,10 @@ class DrugAddPanel(wx.Panel):
             self.txtDrugName.SetSelection(-1,-1)
             return
 
-        if drug_order == "":            
-            self.txtDrugOrder.SetFocus()
-            self.txtDrugOrder.SetSelection(-1,-1)
-            return
+        #if drug_order == "":            
+        #    self.txtDrugOrder.SetFocus()
+        #    self.txtDrugOrder.SetSelection(-1,-1)
+        #    return
 
         new_presc = Rx( patient_id = self.patientPanel.patient.id,
                         drug_name = drug_name,
