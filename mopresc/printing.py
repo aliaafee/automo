@@ -128,8 +128,9 @@ def DrawPrescriptionHeader(patient, prescCanvas):
 
     prescCanvas.drawString(63*mm,165*mm, "Bed : {0}".format(patient.bed_no))
 
-    prescCanvas.drawString(104*mm,177*mm,str(patient.hospital_no))
-    prescCanvas.drawString(104*mm,172*mm,"ID No : {0}".format(patient.national_id_no))
+    prescCanvas.drawString(104*mm,173*mm,str(patient.hospital_no))
+
+    prescCanvas.drawString(104*mm,165*mm,"ID No : {0}".format(patient.national_id_no))
     
     prescCanvas.drawString(15*mm,106*mm, patient.diagnosis)
 
