@@ -30,6 +30,7 @@ class Patient(Base):
     bed_no = Column(String(5))
     diagnosis = Column(String(250))
     rxs = relationship("Rx", back_populates="patient", cascade="all, delete, delete-orphan")
+    active = Column(Boolean)
 
 
 class Rx(Base):
