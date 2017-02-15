@@ -120,6 +120,12 @@ class PatientPanel(wx.Panel):
         id = 500
         self.rxMenu.Append(id, "Remove", "Remove Medication.")
         wx.EVT_MENU(self, id,  self.OnRemoveRx)
+        id = 501
+        self.rxMenu.Append(id, "Tick All", "Tick All Medications")
+        wx.EVT_MENU(self, id,  self.OnTickAllRx)
+        id = 502
+        self.rxMenu.Append(id, "Untick All", "Untick All Medications")
+        wx.EVT_MENU(self, id,  self.OnUntickAllRx)
 
         self.unSet()
 
@@ -240,6 +246,26 @@ class PatientPanel(wx.Panel):
         self.PopupMenu(self.rxMenu)
 
 
+    def OnTickAllRx(self, event):
+        rxs = self.prescriptionList.GetObjects()
+        for rx in rxs:
+            rx.active = True
+            self.prescriptionList.SetCheckState(rx, True)
+
+        self.session.commit()
+        self.prescriptionList.RefreshObjects(rxs)
+
+
+    def OnUntickAllRx(self, event):
+        rxs = self.prescriptionList.GetObjects()
+        for rx in rxs:
+            rx.active = False
+            self.prescriptionList.SetCheckState(rx, False)
+
+        self.session.commit()
+        self.prescriptionList.RefreshObjects(rxs)
+
+
     def OnRemoveRx(self, event):
         dlg = wx.MessageDialog(None, 'Remove selected medications?', 'Question', 
             wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
@@ -265,7 +291,7 @@ class PatientPanel(wx.Panel):
 
         tempFile = tempfile.mktemp(".pdf")
 
-        GeneratePrescription(self.patient, tempFile)
+        GeneratePrescription(self.session, self.patient, tempFile)
 
         pdfV = PDFViewer(None, title = "Print Preview")
         pdfV.viewer.UsePrintDirect = ``False``

@@ -10,8 +10,9 @@ from reportlab.lib.units import mm
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.pdfgen import canvas
+from sqlalchemy import and_
 
-from database import Patient
+from database import Patient, Rx
 
 
 class PageNumCanvas(canvas.Canvas):
@@ -133,11 +134,12 @@ def DrawPrescriptionHeader(patient, prescCanvas):
     prescCanvas.drawString(15*mm,106*mm, patient.diagnosis)
 
 
-def DrawPrescription(patient, prescCanvas):
+def DrawPrescription(session, patient, prescCanvas):
     prescCanvas.setFont("Helvetica", 10)
     DrawPrescriptionHeader(patient, prescCanvas)
-    
-    pages = int(math.floor(float(len(patient.rxs)) / 14.0) + 1)
+
+    activeRxCount = session.query(Rx).filter(and_(Rx.patient_id == patient.id, Rx.active == True)).count()
+    pages = int(math.floor(float(activeRxCount) / 14.0) + 1)
 
     position = 85*mm
     index = 1
@@ -161,10 +163,10 @@ def DrawPrescription(patient, prescCanvas):
     prescCanvas.showPage()
 
 
-def GeneratePrescription(patient, filename):
+def GeneratePrescription(session, patient, filename):
      prescCanvas = canvas.Canvas(filename, pagesize=A5)
 
-     DrawPrescription(patient, prescCanvas)
+     DrawPrescription(session, patient, prescCanvas)
 
      prescCanvas.save()
 
@@ -173,7 +175,7 @@ def GenerateAllPrescriptions(session, filename):
     prescCanvas = canvas.Canvas(filename, pagesize=A5)
 
     for patient in session.query(Patient).order_by(Patient.bed_no):
-        DrawPrescription(patient, prescCanvas)
+        DrawPrescription(session, patient, prescCanvas)
 
     prescCanvas.save()
     
