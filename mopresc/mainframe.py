@@ -1,11 +1,12 @@
 import wx
 import wx.aui
 
-from database import Session
+from database import Session, Drug, Diagnosis
 from images import *
 from patientlistpanel import PatientListPanel
 from patientpanel import PatientPanel
 from about import AboutDlg
+from historyeditor import HistoryEditor
 
 
 class MainFrame(wx.Frame):
@@ -54,9 +55,21 @@ class MainFrame(wx.Frame):
 
         self.menuBar.Append(self.filemenu, "&File")
 
-        helpMenu = wx.Menu()
+        toolMenu = wx.Menu()
 
         id = 402
+        about_menu_item = toolMenu.Append(id, "Edit Drug History", "Edit Drug History")
+        wx.EVT_MENU(self, id, self.OnDrugHistory)
+
+        id = 403
+        about_menu_item = toolMenu.Append(id, "Edit Diagnosis History", "Edit Diagnosis History")
+        wx.EVT_MENU(self, id, self.OnDiagnosisHistory)
+        
+        self.menuBar.Append(toolMenu, "&Tools")
+
+        helpMenu = wx.Menu()
+
+        id = 404
         about_menu_item = helpMenu.Append(id, "&About", "About this software")
         wx.EVT_MENU(self, id, self.OnAboutDlg)
         
@@ -89,6 +102,18 @@ class MainFrame(wx.Frame):
         self.SetSizer(sizer)
 
         self.Layout()
+
+
+    def OnDrugHistory(self, event):
+        editorDlg = HistoryEditor(self, self.session, Drug, title="Drug History")
+
+        editorDlg.ShowModal()
+
+
+    def OnDiagnosisHistory(self, event):
+        editorDlg = HistoryEditor(self, self.session, Diagnosis, title="Diagnosis History")
+
+        editorDlg.ShowModal()
 
 
     def OnAboutDlg(self, event):
