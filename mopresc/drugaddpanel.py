@@ -1,7 +1,7 @@
 import wx
 import time
 
-from actextcontrol import ACTextControl
+from actextcontroldb import ACTextControlDB
 from database import Rx, Drug
 
 
@@ -29,7 +29,7 @@ class DrugAddPanel(wx.Panel):
         
         sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.txtDrugName = ACTextControl(self, candidates="", add_option=True)
+        self.txtDrugName = ACTextControlDB(self, self.session, Drug)
         self.txtDrugName.Bind(wx.EVT_KEY_UP, self.OnDrugNameKeyUp)
         sizer.Add(self.txtDrugName, 1, wx.RIGHT | wx.BOTTOM | wx.EXPAND, border=5)
 
@@ -87,14 +87,7 @@ class DrugAddPanel(wx.Panel):
                         active = True)
 
         self.session.add(new_presc)
-        self.session.commit()
-
-        if self.session.query(Drug).filter(Drug.name == new_presc.drug_name).count() == 0:
-            new_drug = Drug( name = new_presc.drug_name)
-            self.session.add(new_drug)
-            self.session.commit() 
-
-            self.UpdateDrugList()
+        self.session.commit() 
 
         self.txtDrugName.ChangeValue("")
         self.txtDrugOrder.ChangeValue("")

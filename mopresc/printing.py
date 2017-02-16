@@ -82,15 +82,14 @@ def GeneratePatientList(session, docfilename):
     ]
 
     index = 1
-    for patient in session.query(Patient).order_by(Patient.bed_no):
-        if patient.active:
-            bed_no = Paragraph("<para>{0}</para>".format(patient.bed_no), styleSheet["BodyText"])
-            name = Paragraph("<para>{0}</para>".format(patient.name), styleSheet["BodyText"])
-            national_id_no = Paragraph("<para>{0}</para>".format(patient.national_id_no), styleSheet["BodyText"])
-            hospital_no = Paragraph("<para>{0}</para>".format(patient.hospital_no), styleSheet["BodyText"])
+    for patient in session.query(Patient).filter(Patient.active == True).order_by(Patient.bed_no):
+        bed_no = Paragraph("<para>{0}</para>".format(patient.bed_no), styleSheet["BodyText"])
+        name = Paragraph("<para>{0}</para>".format(patient.name), styleSheet["BodyText"])
+        national_id_no = Paragraph("<para>{0}</para>".format(patient.national_id_no), styleSheet["BodyText"])
+        hospital_no = Paragraph("<para>{0}</para>".format(patient.hospital_no), styleSheet["BodyText"])
 
-            data.append([bed_no, name, national_id_no, hospital_no])
-            index += 1
+        data.append([bed_no, name, national_id_no, hospital_no])
+        index += 1
 
     t=Table(
         data, 
@@ -175,9 +174,8 @@ def GeneratePrescription(session, patient, filename):
 def GenerateAllPrescriptions(session, filename):
     prescCanvas = canvas.Canvas(filename, pagesize=A5)
 
-    for patient in session.query(Patient).order_by(Patient.bed_no):
-        if patient.active:
-            DrawPrescription(session, patient, prescCanvas)
+    for patient in session.query(Patient).filter(Patient.active == True).order_by(Patient.bed_no):
+        DrawPrescription(session, patient, prescCanvas)
 
     prescCanvas.save()
     

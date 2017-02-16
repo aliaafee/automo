@@ -111,7 +111,7 @@ class PatientListPanel(wx.Panel):
         if len(selectedPatients) < 1:
             return
 
-        dlg = wx.MessageDialog(None, 'Remove selected patients?', 'Question', 
+        dlg = wx.MessageDialog(None, 'Remove selected patients?', 'Remove Patient', 
             wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 
         result = dlg.ShowModal()
@@ -162,6 +162,12 @@ class PatientListPanel(wx.Panel):
 
 
     def OnPrintAll(self, event):
+        if self.session.query(Patient).filter(Patient.active == True).count() == 0:
+            dlg = wx.MessageDialog(None, 'Nothing to print. Add or tick patients.', 'Print All Prescriptions', 
+                                        wx.OK | wx.ICON_INFORMATION)
+            dlg.ShowModal()
+            return
+        
         tempFile = tempfile.mktemp(".pdf")
 
         GenerateAllPrescriptions(self.session, tempFile)
@@ -173,6 +179,12 @@ class PatientListPanel(wx.Panel):
 
 
     def OnPrintList(self, event):
+        if self.session.query(Patient).filter(Patient.active == True).count() == 0:
+            dlg = wx.MessageDialog(None, 'Nothing to print. Add or tick patients.', 'Print Prescription List', 
+                                        wx.OK | wx.ICON_INFORMATION)
+            dlg.ShowModal()
+            return
+
         tempFile = tempfile.mktemp(".pdf")
 
         GeneratePatientList(self.session, tempFile)

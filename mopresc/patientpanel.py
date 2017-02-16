@@ -9,6 +9,8 @@ from objectlistviewmod import ObjectListViewMod, EVT_OVL_CHECK_EVENT
 from pdfviewer import PDFViewer
 from printing import *
 from drugaddpanel import DrugAddPanel
+from actextcontroldb import ACTextControlDB, EVT_ACT_DONE_EDIT
+from database import Diagnosis
 
 
 class PatientPanel(wx.Panel):
@@ -74,14 +76,14 @@ class PatientPanel(wx.Panel):
         self.txtSex.Bind(wx.EVT_TEXT, self.OnChange)
 
         self.lblDiagnosis = wx.StaticText(self, label='Diagnosis', size=wx.Size(labelWidth,-1))
-	self.txtDiagnosis = wx.TextCtrl(self)
+        self.txtDiagnosis = ACTextControlDB(self, self.session, Diagnosis)
 	gridSizer.Add(self.lblDiagnosis, 1, wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
 	gridSizer.Add(self.txtDiagnosis, 1, wx.EXPAND)
-        self.txtDiagnosis.Bind(wx.EVT_TEXT, self.OnChange)
+        self.txtDiagnosis.Bind(EVT_ACT_DONE_EDIT, self.OnChangeDiagnosis)
 
         sizer.Add(gridSizer, 0, wx.ALL | wx.EXPAND, border=10)
 
-        self.txtDrugName = DrugAddPanel(self, session, self)
+        self.txtDrugName = DrugAddPanel(self, self.session, self)
         sizer.Add(self.txtDrugName, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, border=10)
 
         self.prescriptionList = ObjectListViewMod( 
@@ -189,6 +191,13 @@ class PatientPanel(wx.Panel):
         self.session.commit()
 
 
+    def OnChangeDiagnosis(self, event):
+        self.patient.diagnosis = str(event.value)
+        self.session.commit()
+        
+        self.patientListPanel.patientList.RefreshObjects([self.patient])
+
+
     def OnCellEditFinished(self, event):
         self.session.commit()
 
@@ -232,6 +241,7 @@ class PatientPanel(wx.Panel):
     def OntxtDiagnosisKeyUp(self, event):
         if event.GetKeyCode() == wx.WXK_RETURN:
             self.txtDrugName.txtDrugName.SetFocus()
+            self.txtDrugName.txtDrugName.SetSelection(-1,-1)
 
 
     def OnRxCheck(self, event):
@@ -267,7 +277,7 @@ class PatientPanel(wx.Panel):
 
 
     def OnRemoveRx(self, event):
-        dlg = wx.MessageDialog(None, 'Remove selected medications?', 'Question', 
+        dlg = wx.MessageDialog(None, 'Remove selected medications?', 'Remove Medication', 
             wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 
         result = dlg.ShowModal()
