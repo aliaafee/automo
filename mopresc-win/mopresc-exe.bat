@@ -1,3 +1,3 @@
 cd ..
-mopresc-win\src\final\wardpresc.exe
+mopresc-win\src\final\auto-mo.exe
 pause
