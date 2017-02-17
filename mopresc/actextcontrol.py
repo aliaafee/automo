@@ -3,6 +3,8 @@
 # Heavily borrowed ideas from http://wiki.wxpython.org/TextCtrlAutoComplete
 # Raja Selvaraj <rajajs@gmail.com>
 
+# version 0.2
+#  - Modifications by Ali Aafee to suite his needs
 
 # version 0.2
 #  - Added option to use case sensitive matches, default is false
@@ -290,10 +292,21 @@ class ACPopup(wx.PopupWindow):
         self.candidatebox.Clear()
         
         #self.candidatebox.Append(['te<b>st</b>', 'te<b>st</b>'])
+        exact_match = False
         for ch in candidates:
+            if ch.lower() == txt.lower():
+                exact_match = True
             self.candidatebox.Append(self._htmlformat(ch, txt))
 
         self.displayed_candidates = candidates
+
+        if not exact_match:
+            self.candidatebox.Append("<b>Add</b> {0}".format(txt))
+            self.add_index = self.candidatebox.GetItemCount() - 1
+            self.add_text = txt
+        else:
+            self.add_index = -1
+            self.add_text = ""
 
 
     def _htmlformat(self, text, substring):

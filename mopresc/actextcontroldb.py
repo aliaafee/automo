@@ -31,26 +31,12 @@ class ACTextControlDB(ACTextControl):
         # select candidates from database
         result = self.session.query(self.candidates_table).filter(
                     self.candidates_table.name.like("%{0}%".format(txt))
-                ).limit(10)
+                ).order_by(self.candidates_table.name)
         self.select_candidates = []
         for candidate in result:
             self.select_candidates.append(candidate.name)
-            
-        if len(self.select_candidates) == 0:
-            if not self.add_option:
-                if self.popup.IsShown():
-                    self.popup.Show(False)
 
-            else:
-                display = ['Add ' + txt]
-                self.popup._set_candidates(display, 'Add')
-                self._resize_popup(display, txt)
-                self._position_popup()
-                if not self.popup.IsShown():
-                    self.popup.Show()
-                
-        else:
-            self._show_popup(self.select_candidates, txt)
+        self._show_popup(self.select_candidates, txt)
 
 
     def _on_key_down(self, event):
@@ -94,10 +80,14 @@ class ACTextControlDB(ACTextControl):
                 #TODO: trigger event?
                 pass
             # Add option is only displayed
-            elif len(self.select_candidates) == 0:
-                #Add new candate to db table
+            elif self.popup.candidatebox.GetSelection() == -1:
+                self.popup.Show(False)
+            elif self.popup.candidatebox.GetSelection() == self.popup.add_index:
+                self.SetValue(self.popup.add_text)
+                self.SetInsertionPointEnd()
+
                 if self.session.query(self.candidates_table).filter(self.candidates_table.name == self.GetValue()).count() == 0:
-                    new_name = self.candidates_table( name = self.GetValue())
+                    new_name = self.candidates_table( name = self.popup.add_text)
                     self.session.add(new_name)
                     self.session.commit()
                     
@@ -105,26 +95,23 @@ class ACTextControlDB(ACTextControl):
                 self.popup.Show(False)
                 e = ACTextCtrlDoneEditEvent(value=self.GetValue())
                 wx.PostEvent(self, e)
-
-                
-            elif self.popup.candidatebox.GetSelection() == -1:
-                self.popup.Show(False)
-                e = ACTextCtrlDoneEditEvent(value=self.GetValue())
-                wx.PostEvent(self, e)
-
-            elif self.popup.candidatebox.GetSelection() > -1:
+            else:
                 self.SetValue(self.select_candidates[self.popup.candidatebox.GetSelection()])
                 self.SetInsertionPointEnd()
                 self.popup.Show(False)
                 e = ACTextCtrlDoneEditEvent(value=self.GetValue())
-                wx.PostEvent(self, e)
+                wx.PostEvent(self, e) 
 
         # Tab  - set selected choice as text
         elif event.GetKeyCode() == wx.WXK_TAB:
             if visible:
-                self.SetValue(self.select_candidates[self.popup.candidatebox.GetSelection()])
-                # set cursor at end of text
-                self.SetInsertionPointEnd()
+                if (self.popup.candidatebox.GetSelection() == self.popup.add_index):
+                    self.SetValue(self.popup.add_text)
+                    self.SetInsertionPointEnd()
+                else:
+                    self.SetValue(self.select_candidates[self.popup.candidatebox.GetSelection()])
+                    # set cursor at end of text
+                    self.SetInsertionPointEnd()
                 skip = False                
                 
         if skip:
