@@ -3,7 +3,7 @@
 # Heavily borrowed ideas from http://wiki.wxpython.org/TextCtrlAutoComplete
 # Raja Selvaraj <rajajs@gmail.com>
 
-# version 0.2
+# version 0.3
 #  - Modifications by Ali Aafee to suite his needs
 
 # version 0.2

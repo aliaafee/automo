@@ -7,7 +7,7 @@ setup(
     windows = [
         {
             "script": 'launcher.py',
-            "icon_resources": [(1, "mopresc.ico")]
+            "icon_resources": [(1, "automo.ico")]
         }
     ],
     #windows=['__main__.py'],
