@@ -42,13 +42,22 @@ class MainFrame(wx.Frame):
         self.filemenu = wx.Menu()
 
         id = 400
-        self.filemenu.Append(id, "Print", "Print this prescription.")
+        self.filemenu.Append(id, "Print Prescription", "Print this prescription.")
         wx.EVT_MENU(self, id,  self.patientPanel.OnPrint)
 
         id = 401
-        self.filemenu.Append(id, "Print All", "Print all prescriptions.")
+        self.filemenu.Append(id, "Print All Prescriptions", "Print all prescriptions.")
         wx.EVT_MENU(self, id,  self.patientListPanel.OnPrintAll)
 
+        id = 402
+        self.filemenu.Append(id, "Print Prescriptions List", "Print prescriptions list.")
+        wx.EVT_MENU(self, id,  self.patientListPanel.OnPrintList)
+
+        id = 403
+        self.filemenu.Append(id, "Print Census List", "Print Census list.")
+        wx.EVT_MENU(self, id,  self.patientListPanel.OnPrintCensusList)
+
+        self.filemenu.AppendSeparator()
 
         self.filemenu.Append(wx.ID_EXIT, "Exit", "Exit the program")
         wx.EVT_MENU(self, wx.ID_EXIT,  self.OnExit)
@@ -57,11 +66,11 @@ class MainFrame(wx.Frame):
 
         toolMenu = wx.Menu()
 
-        id = 402
+        id = 404
         about_menu_item = toolMenu.Append(id, "Edit Drug History", "Edit Drug History")
         wx.EVT_MENU(self, id, self.OnDrugHistory)
 
-        id = 403
+        id = 405
         about_menu_item = toolMenu.Append(id, "Edit Diagnosis History", "Edit Diagnosis History")
         wx.EVT_MENU(self, id, self.OnDiagnosisHistory)
         
@@ -69,7 +78,7 @@ class MainFrame(wx.Frame):
 
         helpMenu = wx.Menu()
 
-        id = 404
+        id = 406
         about_menu_item = helpMenu.Append(id, "&About", "About this software")
         wx.EVT_MENU(self, id, self.OnAboutDlg)
         

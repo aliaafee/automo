@@ -118,6 +118,56 @@ def GeneratePatientList(session, docfilename):
     doc.build(elements, canvasmaker=PageNumCanvas)
 
 
+def GeneratePatientCensusList(session, docfilename):
+    doc = SimpleDocTemplate(
+        docfilename, 
+        pagesize = A4,
+        rightMargin = 12,
+        leftMargin = 12,
+        topMargin = 25*mm,
+        bottomMargin = 25*mm
+    )
+
+    styleSheet = getSampleStyleSheet()
+
+    elements = []
+
+    #heading = Paragraph('Census {0}'.format(time.strftime("%d %B %Y")), styleSheet["Heading1"])
+    #elements.append(heading)
+
+    data= [
+        [Paragraph("<b>Census {0}</b>".format(time.strftime("%d %B %Y")), styleSheet["BodyText"]), '', ''],
+        ['#', 'Hosp No', 'Bed', 'Patient Name'],
+    ]
+
+    patients = session.query(Patient).filter(Patient.active == True).order_by(Patient.bed_no)
+    for i, patient in enumerate(patients):
+        index = Paragraph("<para>{0}</para>".format(i+1), styleSheet["BodyText"])
+        bed_no = Paragraph("<para>{0}</para>".format(patient.bed_no), styleSheet["BodyText"])
+        name = Paragraph("<para>{0}</para>".format(patient.name), styleSheet["BodyText"])
+        hospital_no = Paragraph("<para>{0}</para>".format(patient.hospital_no), styleSheet["BodyText"])
+
+        data.append([index, hospital_no, bed_no, name])
+
+    t=Table(
+        data, 
+        colWidths=[1*cm, 4*cm, 2.5*cm, 12*cm],
+        repeatRows=[0,1]
+    )
+
+    t.setStyle(TableStyle([
+        ('ALIGN',(0,1),(-1,1),'CENTER'),
+        ('BOX', (0,1),(-1,1),1,colors.black),
+        ('INNERGRID', (0,1), (-1,-1), 0.25, colors.black),
+        ('BOX', (0,0), (-1,-1), 1, colors.black),
+        ('SPAN', (0,0),(3,0))
+    ]))
+    
+    elements.append(t)
+
+    doc.build(elements, canvasmaker=PageNumCanvas)
+
+
 def DrawPrescriptionHeader(patient, prescCanvas):
     prescCanvas.drawString(15*mm,181*mm,patient.name) 
 

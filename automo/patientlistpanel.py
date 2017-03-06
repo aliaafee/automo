@@ -25,19 +25,23 @@ class PatientListPanel(wx.Panel):
         toolbar = wx.ToolBar(self, style=wx.TB_NODIVIDER)
 
         tbAddPatient = toolbar.AddLabelTool(
-                wx.ID_ANY, 'Add Patient',  BitmapFromBase64(toolbar_add_b64))
+                wx.ID_ANY, 'Add',  BitmapFromBase64(toolbar_add_b64), shortHelp="Add Patient")
         self.Bind(wx.EVT_TOOL, self.OnAddPatient, tbAddPatient)
 
         tbRemovePatient = toolbar.AddLabelTool(
-                wx.ID_ANY, 'Remove Patient',  BitmapFromBase64(toolbar_remove_b64))
+                wx.ID_ANY, 'Remove',  BitmapFromBase64(toolbar_remove_b64), shortHelp="Remove Selected Patients")
         self.Bind(wx.EVT_TOOL, self.OnRemovePatient, tbRemovePatient)
 
         tbPrintList = toolbar.AddLabelTool(
-                wx.ID_ANY, 'Print Patients List',  BitmapFromBase64(toolbar_print_list_b64))
+                wx.ID_ANY, 'Census',  BitmapFromBase64(toolbar_print_census_b64), shortHelp="Print Census List")
+        self.Bind(wx.EVT_TOOL, self.OnPrintCensusList, tbPrintList)
+        
+        tbPrintList = toolbar.AddLabelTool(
+                wx.ID_ANY, 'List',  BitmapFromBase64(toolbar_print_list_b64), shortHelp="Print Prescriptions List")
         self.Bind(wx.EVT_TOOL, self.OnPrintList, tbPrintList)
 
         tbPrintAll = toolbar.AddLabelTool(
-                wx.ID_ANY, 'Print All Prescriptions',  BitmapFromBase64(toolbar_print_all_b64))
+                wx.ID_ANY, 'All',  BitmapFromBase64(toolbar_print_all_b64), shortHelp="Print All Prescriptions")
         self.Bind(wx.EVT_TOOL, self.OnPrintAll, tbPrintAll)
 
         toolbar.Realize()
@@ -193,6 +197,24 @@ class PatientListPanel(wx.Panel):
         pdfV.viewer.UsePrintDirect = ``False``
         pdfV.viewer.LoadFile(tempFile)
         pdfV.Show()
+
+
+    def OnPrintCensusList(self, event):
+        if self.session.query(Patient).filter(Patient.active == True).count() == 0:
+            dlg = wx.MessageDialog(None, 'Nothing to print. Add or tick patients.', 'Print Census List', 
+                                        wx.OK | wx.ICON_INFORMATION)
+            dlg.ShowModal()
+            return
+
+        tempFile = tempfile.mktemp(".pdf")
+
+        GeneratePatientCensusList(self.session, tempFile)
+
+        pdfV = PDFViewer(None, title="Print Preview")
+        pdfV.viewer.UsePrintDirect = ``False``
+        pdfV.viewer.LoadFile(tempFile)
+        pdfV.Show()
+
 
 
     def OnPatientSelected(self, event):

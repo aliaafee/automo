@@ -27,7 +27,7 @@ class PatientPanel(wx.Panel):
         self.toolbar = wx.ToolBar(self, style=wx.TB_NODIVIDER)
 
         tbPrint = self.toolbar.AddLabelTool(
-                wx.ID_ANY, 'Print Prescription',  BitmapFromBase64(toolbar_print_one_b64))
+                wx.ID_ANY, 'Print',  BitmapFromBase64(toolbar_print_one_b64), shortHelp="Print Prescription")
         self.Bind(wx.EVT_TOOL, self.OnPrint, tbPrint)
 
         self.toolbar.Realize()
