@@ -24,5 +24,13 @@ copy dist\launcher.exe ..\final
 del ..\final\automo.exe
 ren ..\final\launcher.exe automo.exe
 
+cd ..\..
+
+mkdir ..\dist
+mkdir ..\dist\win
+mkdir ..\dist\win\automo
+
+xcopy /Y /S src\final\* ..\dist\win\automo
+
 
 pause
