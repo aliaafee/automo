@@ -1,16 +1,16 @@
+"""
+Modification of the text entry widget created by Raja Selvaraj <rajajs@gmail.com>
+to enable options list to be obtained from sqlalchemy table with field "name"
+Written to satisfy my need for a text entry widget with autocomplete.
+
+Find the original at https://github.com/RajaS/ACTextCtrl
+"""
 import wx
 import  wx.lib.newevent
 
-from actextcontrol import ACTextControl
 
 ACTextCtrlDoneEditEvent, EVT_ACT_DONE_EDIT = wx.lib.newevent.NewEvent()
 
-
-# Modification of the text entry widget created by Raja Selvaraj <rajajs@gmail.com>
-# To enable options list to be obtained from sqlalchemy table with field "name"
-# Written to satisfy my need for a text entry widget with autocomplete.
-
-import wx
 
 class ACTextControlDB(wx.TextCtrl):
     """
@@ -22,7 +22,7 @@ class ACTextControlDB(wx.TextCtrl):
         wx.TextCtrl.__init__(self, parent, style=wx.TE_PROCESS_ENTER)
 
         self.session = session
-        self.candidates_table = candidates_table        
+        self.candidates_table = candidates_table
 
         self.all_candidates = []
         self.match_at_start = False
@@ -31,6 +31,7 @@ class ACTextControlDB(wx.TextCtrl):
         self.max_candidates = 5   # maximum no. of candidates to show
         self.select_candidates = []
         self.popup = ACPopup(self)
+        self.popupsize = wx.Size(-1,-1)
 
         self._set_bindings()
 
@@ -79,9 +80,10 @@ class ACTextControlDB(wx.TextCtrl):
                 return
 
         # select candidates from database
-        result = self.session.query(self.candidates_table).filter(
-                    self.candidates_table.name.like("%{0}%".format(txt))
-                ).order_by(self.candidates_table.name)
+        result = self.session.query(self.candidates_table).\
+                                filter(self.candidates_table.name.like("%{0}%".format(txt))).\
+                                order_by(self.candidates_table.name)
+
         self.select_candidates = []
         for candidate in result:
             self.select_candidates.append(candidate.name)
@@ -90,41 +92,39 @@ class ACTextControlDB(wx.TextCtrl):
 
 
     def _show_popup(self, candidates, txt):
-            # set up the popup and bring it on
-            self._resize_popup(candidates, txt)
-            self._position_popup()
+        # set up the popup and bring it on
+        self._resize_popup(candidates, txt)
+        self._position_popup()
 
-            candidates.sort()
-            
-            if self._popdown:
-                # TODO: Allow custom ordering
-                self.popup._set_candidates(candidates, txt)
-                self.popup.candidatebox.SetSelection(0)
-                
-            else:
-                candidates.reverse()
-                self.popup._set_candidates(candidates, txt)
-                self.popup.candidatebox.SetSelection(len(candidates)-1)
+        candidates.sort()
 
-            if not self.popup.IsShown():
-                self.popup.Show()
-        
+        if self._popdown:
+            self.popup._set_candidates(candidates, txt)
+            self.popup.candidatebox.SetSelection(0)
 
-                
+        else:
+            candidates.reverse()
+            self.popup._set_candidates(candidates, txt)
+            self.popup.candidatebox.SetSelection(len(candidates)-1)
+
+        if not self.popup.IsShown():
+            self.popup.Show()
+
+
     def _on_focus_loss(self, event):
         """Close the popup when focus is lost"""
         if self.popup.IsShown():
             self.popup.Show(False)
         event.Skip()
 
-            
+
     def _on_focus(self, event):
         """
         When focus is gained,
         if empty, show all candidates,
         else, show matches
         """
-        txt =  self.GetValue()
+        txt = self.GetValue()
         if txt == '':
             self.select_candidates = self.all_candidates
             #self._show_popup(self.all_candidates, '')
@@ -133,14 +133,14 @@ class ACTextControlDB(wx.TextCtrl):
 
         event.Skip()
 
-            
+
     def _position_popup(self):
         """Calculate position for popup and
         display it"""
         left_x, upper_y = self.GetScreenPositionTuple()
         _, height = self.GetSizeTuple()
         popup_width, popup_height = self.popupsize
-        
+
         if upper_y + height + popup_height > self._screenheight:
             self._popdown = False
             self.popup.SetPosition((left_x, upper_y - popup_height))
@@ -155,23 +155,21 @@ class ACTextControlDB(wx.TextCtrl):
         # Handle empty list (no matching candidates)
         if len(candidates) == 0:
             candidate_count = 3.5 # one line
-            longest = len(entered_txt) + 4 + 4 #4 for 'Add '
-
+            #longest = len(entered_txt) + 4 + 4 #4 for 'Add '
         else:
-            # additional 3 lines needed to show all candidates without scrollbar        
+            # additional 3 lines needed to show all candidates without scrollbar
             candidate_count = min(self.max_candidates, len(candidates)) + 2.5
             longest = max([len(candidate) for candidate in candidates]) + 4
 
-        
         charheight = self.popup.candidatebox.GetCharHeight()
-        charwidth = self.popup.candidatebox.GetCharWidth()
+        #charwidth = self.popup.candidatebox.GetCharWidth()
 
         #self.popupsize = wx.Size( charwidth*longest, charheight*candidate_count )
-        self.popupsize = wx.Size( self.Size[0], charheight*candidate_count )
+        self.popupsize = wx.Size(self.Size[0], charheight*candidate_count)
 
         self.popup.candidatebox.SetSize(self.popupsize)
         self.popup.SetClientSize(self.popupsize)
-        
+
 
     def _on_key_down(self, event):
         """Handle key presses.
@@ -179,9 +177,9 @@ class ACTextControlDB(wx.TextCtrl):
         For other keys, the event is skipped and allowed
         to be caught by ontext event"""
         skip = True
-        visible = self.popup.IsShown() 
+        visible = self.popup.IsShown()
         sel = self.popup.candidatebox.GetSelection()
-        
+
         # Escape key closes the popup if it is visible
         if event.GetKeyCode() == wx.WXK_ESCAPE:
             if visible:
@@ -191,8 +189,6 @@ class ACTextControlDB(wx.TextCtrl):
         elif event.GetKeyCode() == wx.WXK_DOWN:
             if not visible:
                 skip = False
-                pass
-            # 
             if sel + 1 < self.popup.candidatebox.GetItemCount():
                 self.popup.candidatebox.SetSelection(sel + 1)
             else:
@@ -202,7 +198,6 @@ class ACTextControlDB(wx.TextCtrl):
         elif event.GetKeyCode() == wx.WXK_UP:
             if not visible:
                 skip = False
-                pass
             if sel > -1:
                 self.popup.candidatebox.SetSelection(sel - 1)
             else:
@@ -211,7 +206,6 @@ class ACTextControlDB(wx.TextCtrl):
         # Enter - use current selection for text
         elif event.GetKeyCode() == wx.WXK_RETURN:
             if not visible:
-                #TODO: trigger event?
                 pass
             # Add option is only displayed
             elif self.popup.candidatebox.GetSelection() == -1:
@@ -220,46 +214,51 @@ class ACTextControlDB(wx.TextCtrl):
                 self.SetValue(self.popup.add_text)
                 self.SetInsertionPointEnd()
 
-                if self.session.query(self.candidates_table).filter(self.candidates_table.name == self.GetValue()).count() == 0:
-                    new_name = self.candidates_table( name = self.popup.add_text)
+                candidates_count = self.session.query(self.candidates_table).\
+                                                filter(
+                                                    self.candidates_table.name == self.GetValue()
+                                                ).\
+                                                count()
+                if candidates_count == 0:
+                    new_name = self.candidates_table(name=self.popup.add_text)
                     self.session.add(new_name)
                     self.session.commit()
-                    
+
                 self.SetInsertionPointEnd()
                 self.popup.Show(False)
-                e = ACTextCtrlDoneEditEvent(value=self.GetValue())
-                wx.PostEvent(self, e)
+                done_event = ACTextCtrlDoneEditEvent(value=self.GetValue())
+                wx.PostEvent(self, done_event)
             else:
                 self.SetValue(self.select_candidates[self.popup.candidatebox.GetSelection()])
                 self.SetInsertionPointEnd()
                 self.popup.Show(False)
-                e = ACTextCtrlDoneEditEvent(value=self.GetValue())
-                wx.PostEvent(self, e) 
+                done_event = ACTextCtrlDoneEditEvent(value=self.GetValue())
+                wx.PostEvent(self, done_event)
 
         # Tab  - set selected choice as text
         elif event.GetKeyCode() == wx.WXK_TAB:
             if visible:
-                if (self.popup.candidatebox.GetSelection() == self.popup.add_index):
+                if self.popup.candidatebox.GetSelection() == self.popup.add_index:
                     self.SetValue(self.popup.add_text)
                     self.SetInsertionPointEnd()
                 else:
                     self.SetValue(self.select_candidates[self.popup.candidatebox.GetSelection()])
                     # set cursor at end of text
                     self.SetInsertionPointEnd()
-                skip = False                
-                
+                skip = False
+
         if skip:
             event.Skip()
-            
+
 
     def get_choices(self):
         """Return the current choices.
         Useful if choices have been added by the user"""
-        return self.all_candidates        
+        return self.all_candidates
 
 
 
-            
+
 class ACPopup(wx.PopupWindow):
     """
     The popup that displays the candidates for
@@ -270,6 +269,9 @@ class ACPopup(wx.PopupWindow):
         self.candidatebox = wx.SimpleHtmlListBox(self, -1, choices=[])
         self.SetSize((100, 100))
         self.displayed_candidates = []
+        self.add_index = -1
+        self.add_text = ""
+
 
     def _set_candidates(self, candidates, txt):
         """
@@ -282,13 +284,12 @@ class ACPopup(wx.PopupWindow):
 
         # Remove the current candidates
         self.candidatebox.Clear()
-        
-        #self.candidatebox.Append(['te<b>st</b>', 'te<b>st</b>'])
+
         exact_match = False
-        for ch in candidates:
-            if ch.lower() == txt.lower():
+        for candidate in candidates:
+            if candidate.lower() == txt.lower():
                 exact_match = True
-            self.candidatebox.Append(self._htmlformat(ch, txt))
+            self.candidatebox.Append(self._htmlformat(candidate, txt))
 
         self.displayed_candidates = candidates
 

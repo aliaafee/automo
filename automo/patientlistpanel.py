@@ -1,131 +1,142 @@
-import wx
-from reportlab.lib.pagesizes import A5
-from reportlab.pdfgen import canvas
-from ObjectListView import ObjectListView, ColumnDefn
+"""
+Patients list panel
+"""
 import tempfile
+import wx
+from ObjectListView import ColumnDefn
 
 from objectlistviewmod import ObjectListViewMod, EVT_OVL_CHECK_EVENT
-from images import *
 from database import Patient
 from pdfviewer import PDFViewer
-from printing import *
+from printing import generate_all_prescriptions,\
+                     generate_patient_list,\
+                     generate_patient_census_list
+from images import bitmap_from_base64,\
+                    toolbar_add_b64,\
+                    toolbar_remove_b64,\
+                    toolbar_print_census_b64,\
+                    toolbar_print_list_b64,\
+                    toolbar_print_all_b64
 
 
 class PatientListPanel(wx.Panel):
+    """
+    Patients list panel
+    """
     def __init__(self, parent, session, **kwds):
         super(PatientListPanel, self).__init__(parent, **kwds)
 
         self.session = session
 
-        self.patientPanel = None
-        self.selectedPatient = None
+        self.patient_panel = None
+        self.selected_patient = None
 
         sizer = wx.BoxSizer(wx.VERTICAL)
 
         toolbar = wx.ToolBar(self, style=wx.TB_NODIVIDER)
 
-        tbAddPatient = toolbar.AddLabelTool(
-                wx.ID_ANY, 'Add',  BitmapFromBase64(toolbar_add_b64), shortHelp="Add Patient")
-        self.Bind(wx.EVT_TOOL, self.OnAddPatient, tbAddPatient)
+        tb_add_patient = toolbar.AddLabelTool(
+            wx.ID_ANY, 'Add', bitmap_from_base64(toolbar_add_b64), shortHelp="Add Patient")
+        self.Bind(wx.EVT_TOOL, self.OnAddPatient, tb_add_patient)
 
-        tbRemovePatient = toolbar.AddLabelTool(
-                wx.ID_ANY, 'Remove',  BitmapFromBase64(toolbar_remove_b64), shortHelp="Remove Selected Patients")
-        self.Bind(wx.EVT_TOOL, self.OnRemovePatient, tbRemovePatient)
+        tb_remove_patient = toolbar.AddLabelTool(
+            wx.ID_ANY, 'Remove', bitmap_from_base64(toolbar_remove_b64), shortHelp="Remove Selected Patients")
+        self.Bind(wx.EVT_TOOL, self.OnRemovePatient, tb_remove_patient)
 
-        tbPrintList = toolbar.AddLabelTool(
-                wx.ID_ANY, 'Census',  BitmapFromBase64(toolbar_print_census_b64), shortHelp="Print Census List")
-        self.Bind(wx.EVT_TOOL, self.OnPrintCensusList, tbPrintList)
-        
-        tbPrintList = toolbar.AddLabelTool(
-                wx.ID_ANY, 'List',  BitmapFromBase64(toolbar_print_list_b64), shortHelp="Print Prescriptions List")
-        self.Bind(wx.EVT_TOOL, self.OnPrintList, tbPrintList)
+        tb_print_census_list = toolbar.AddLabelTool(
+            wx.ID_ANY, 'Census', bitmap_from_base64(toolbar_print_census_b64), shortHelp="Print Census List")
+        self.Bind(wx.EVT_TOOL, self.OnPrintCensusList, tb_print_census_list)
 
-        tbPrintAll = toolbar.AddLabelTool(
-                wx.ID_ANY, 'All',  BitmapFromBase64(toolbar_print_all_b64), shortHelp="Print All Prescriptions")
-        self.Bind(wx.EVT_TOOL, self.OnPrintAll, tbPrintAll)
+        tb_print_list = toolbar.AddLabelTool(
+            wx.ID_ANY, 'List', bitmap_from_base64(toolbar_print_list_b64), shortHelp="Print Prescriptions List")
+        self.Bind(wx.EVT_TOOL, self.OnPrintList, tb_print_list)
+
+        tb_print_all = toolbar.AddLabelTool(
+            wx.ID_ANY, 'All', bitmap_from_base64(toolbar_print_all_b64), shortHelp="Print All Prescriptions")
+        self.Bind(wx.EVT_TOOL, self.OnPrintAll, tb_print_all)
 
         toolbar.Realize()
 
         sizer.Add(toolbar, 0, wx.ALL | wx. EXPAND)
 
-        self.patientList = ObjectListViewMod(self, style=wx.LC_REPORT)
-        
-        #userImage = self.patientList.AddImages(BitmapFromBase64(patient_16_b64), BitmapFromBase64(patient_32_b64)) #getUser32Bitmap())        
-        
-        self.patientList.SetColumns([
+        self.patient_list = ObjectListViewMod(self, style=wx.LC_REPORT)
+
+        self.patient_list.SetColumns([
             #ColumnDefn("Bed", "left", 70, "bed_no", imageGetter=userImage),
             ColumnDefn("Bed", "left", 70, "bed_no"),
             ColumnDefn("Hospital No", "left", 70, "hospital_no"),
             ColumnDefn("Name", "left", 140, "name")
         ])
-        
-        self.patientList.SetEmptyListMsg("")
-        self.patientList.useAlternateBackColors = False
-        self.patientList.CreateCheckStateColumn()
 
-        self.patientList.Bind(EVT_OVL_CHECK_EVENT, self.OnPatientCheck)
-        self.patientList.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.OnPatientContextMenu)
-        self.patientList.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnPatientSelected)
+        self.patient_list.SetEmptyListMsg("")
+        self.patient_list.useAlternateBackColors = False
+        self.patient_list.CreateCheckStateColumn()
 
-        sizer.Add(self.patientList, 1, wx.ALL | wx. EXPAND, border=10)
+        self.patient_list.Bind(EVT_OVL_CHECK_EVENT, self.OnPatientCheck)
+        self.patient_list.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.OnPatientContextMenu)
+        self.patient_list.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnPatientSelected)
+
+        sizer.Add(self.patient_list, 1, wx.ALL | wx. EXPAND, border=10)
 
         self.SetSizer(sizer)
 
-        self.patientMenu = wx.Menu()
-        id = 600
-        self.patientMenu.Append(id, "Remove", "Remove Patient")
-        wx.EVT_MENU(self, id,  self.OnRemovePatient)
-        id = 601
-        self.patientMenu.Append(id, "Tick All", "Tick All Patients")
-        wx.EVT_MENU(self, id,  self.OnTickAllPatients)
-        id = 602
-        self.patientMenu.Append(id, "Untick All", "Untick All Patients")
-        wx.EVT_MENU(self, id,  self.OnUntickAllPatients)
+        self.patient_menu = wx.Menu()
+        menu_id = 600
+        self.patient_menu.Append(menu_id, "Remove", "Remove Patient")
+        wx.EVT_MENU(self, menu_id, self.OnRemovePatient)
+        menu_id = 601
+        self.patient_menu.Append(menu_id, "Tick All", "Tick All Patients")
+        wx.EVT_MENU(self, menu_id, self.OnTickAllPatients)
+        menu_id = 602
+        self.patient_menu.Append(menu_id, "Untick All", "Untick All Patients")
+        wx.EVT_MENU(self, menu_id, self.OnUntickAllPatients)
 
 
     def OnAddPatient(self, event):
+        """ Add new patient """
         new_pt = Patient(
-            active = True, 
-            bed_no = "", 
-            hospital_no="", 
-            national_id_no="", 
-            name="", 
-            age="", 
-            sex="", 
+            active=True,
+            bed_no="",
+            hospital_no="",
+            national_id_no="",
+            name="",
+            age="",
+            sex="",
             diagnosis=""
         )
-        
+
         self.session.add(new_pt)
         self.session.commit()
 
         self.UpdateList()
 
-        self.selectedPatient = new_pt
-        
-        self.patientPanel.set(self.selectedPatient)
-        self.patientList.SelectObject(self.selectedPatient)
+        self.selected_patient = new_pt
 
-        self.patientPanel.txtBed.SetFocus()
-        self.patientPanel.txtBed.SetSelection(-1,-1)
+        self.patient_panel.set(self.selected_patient)
+        self.patient_list.SelectObject(self.selected_patient)
+
+        self.patient_panel.txt_bed.SetFocus()
+        self.patient_panel.txt_bed.SetSelection(-1, -1)
 
 
     def OnRemovePatient(self, event):
-        selectedPatients = self.patientList.GetSelectedObjects()
+        """ Remove selected patients """
+        selected_patients = self.patient_list.GetSelectedObjects()
 
-        if len(selectedPatients) < 1:
+        if len(selected_patients) < 1:
             return
 
-        dlg = wx.MessageDialog(None, 'Remove selected patients?', 'Remove Patient', 
-            wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+        dlg = wx.MessageDialog(None, 'Remove selected patients?', 'Remove Patient',
+                               wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 
         result = dlg.ShowModal()
 
-        if (result != wx.ID_YES):
+        if result != wx.ID_YES:
             return
 
-        self.patientPanel.unSet()
+        self.patient_panel.unset()
 
-        for patient in selectedPatients:
+        for patient in selected_patients:
             self.session.delete(patient)
 
         self.session.commit()
@@ -134,6 +145,7 @@ class PatientListPanel(wx.Panel):
 
 
     def OnPatientCheck(self, event):
+        """ Save Tick patient """
         if event.value == True:
             event.object.active = True
         else:
@@ -142,103 +154,117 @@ class PatientListPanel(wx.Panel):
 
 
     def OnPatientContextMenu(self, event):
-        self.PopupMenu(self.patientMenu)
+        """ Show the context menu """
+        self.PopupMenu(self.patient_menu)
 
 
     def OnTickAllPatients(self, event):
-        patients = self.patientList.GetObjects()
+        """ Tick all patients """
+        patients = self.patient_list.GetObjects()
         for patient in patients:
             patient.active = True
-            self.patientList.SetCheckState(patient, True)
+            self.patient_list.SetCheckState(patient, True)
 
         self.session.commit()
-        self.patientList.RefreshObjects(patients)
+        self.patient_list.RefreshObjects(patients)
 
 
     def OnUntickAllPatients(self, event):
-        patients = self.patientList.GetObjects()
+        """ Untick All Patients """
+        patients = self.patient_list.GetObjects()
         for patient in patients:
             patient.active = False
-            self.patientList.SetCheckState(patient, False)
+            self.patient_list.SetCheckState(patient, False)
 
         self.session.commit()
-        self.patientList.RefreshObjects(patients)
+        self.patient_list.RefreshObjects(patients)
+
+
+    def _active_patient_count(self):
+        return self.session.query(Patient).\
+                            filter(Patient.active == True).\
+                            count()
 
 
     def OnPrintAll(self, event):
-        if self.session.query(Patient).filter(Patient.active == True).count() == 0:
-            dlg = wx.MessageDialog(None, 'Nothing to print. Add or tick patients.', 'Print All Prescriptions', 
-                                        wx.OK | wx.ICON_INFORMATION)
+        """ Print all active prescriptions """
+        if self._active_patient_count == 0:
+            dlg = wx.MessageDialog(None, 'Nothing to print. Add or tick patients.', 'Print All Prescriptions',
+                                   wx.OK | wx.ICON_INFORMATION)
             dlg.ShowModal()
             return
-        
-        tempFile = tempfile.mktemp(".pdf")
 
-        GenerateAllPrescriptions(self.session, tempFile)
+        temp_file = tempfile.mktemp(".pdf")
 
-        pdfV = PDFViewer(None, title="Print Preview")
-        pdfV.viewer.UsePrintDirect = ``False``
-        pdfV.viewer.LoadFile(tempFile)
-        pdfV.Show()
+        generate_all_prescriptions(self.session, temp_file)
+
+        pdf_view = PDFViewer(None, title="Print Preview")
+        pdf_view.viewer.UsePrintDirect = ``False``
+        pdf_view.viewer.LoadFile(temp_file)
+        pdf_view.Show()
 
 
     def OnPrintList(self, event):
-        if self.session.query(Patient).filter(Patient.active == True).count() == 0:
-            dlg = wx.MessageDialog(None, 'Nothing to print. Add or tick patients.', 'Print Prescription List', 
-                                        wx.OK | wx.ICON_INFORMATION)
+        """ Print prescriptions list"""
+        if self._active_patient_count == 0:
+            dlg = wx.MessageDialog(None, 'Nothing to print. Add or tick patients.', 'Print Prescription List',
+                                   wx.OK | wx.ICON_INFORMATION)
             dlg.ShowModal()
             return
 
-        tempFile = tempfile.mktemp(".pdf")
+        temp_file = tempfile.mktemp(".pdf")
 
-        GeneratePatientList(self.session, tempFile)
+        generate_patient_list(self.session, temp_file)
 
-        pdfV = PDFViewer(None, title="Print Preview")
-        pdfV.viewer.UsePrintDirect = ``False``
-        pdfV.viewer.LoadFile(tempFile)
-        pdfV.Show()
+        pdf_view = PDFViewer(None, title="Print Preview")
+        pdf_view.viewer.UsePrintDirect = ``False``
+        pdf_view.viewer.LoadFile(temp_file)
+        pdf_view.Show()
 
 
     def OnPrintCensusList(self, event):
-        if self.session.query(Patient).filter(Patient.active == True).count() == 0:
-            dlg = wx.MessageDialog(None, 'Nothing to print. Add or tick patients.', 'Print Census List', 
-                                        wx.OK | wx.ICON_INFORMATION)
+        """ Print census list """
+        if self._active_patient_count == 0:
+            dlg = wx.MessageDialog(None, 'Nothing to print. Add or tick patients.', 'Print Census List',
+                                   wx.OK | wx.ICON_INFORMATION)
             dlg.ShowModal()
             return
 
-        tempFile = tempfile.mktemp(".pdf")
+        temp_file = tempfile.mktemp(".pdf")
 
-        GeneratePatientCensusList(self.session, tempFile)
+        generate_patient_census_list(self.session, temp_file)
 
-        pdfV = PDFViewer(None, title="Print Preview")
-        pdfV.viewer.UsePrintDirect = ``False``
-        pdfV.viewer.LoadFile(tempFile)
-        pdfV.Show()
+        pdf_view = PDFViewer(None, title="Print Preview")
+        pdf_view.viewer.UsePrintDirect = ``False``
+        pdf_view.viewer.LoadFile(temp_file)
+        pdf_view.Show()
 
 
 
     def OnPatientSelected(self, event):
-        listSelected = self.patientList.GetSelectedObject()
+        """ Display the selected patient in the patient panel """
+        list_selected = self.patient_list.GetSelectedObject()
 
-        if listSelected == None:
-            self.selectedPatient = None
-            self.patientPanel.unSet()
+        if list_selected is None:
+            self.selected_patient = None
+            self.patient_panel.unset()
             return
 
-        self.selectedPatient = listSelected
-        
-        self.patientPanel.set(self.selectedPatient)
+        self.selected_patient = list_selected
+
+        self.patient_panel.set(self.selected_patient)
 
 
     def UpdateList(self):
-        self.patientList.DeleteAllItems ()
-        
-        for patient in self.session.query(Patient).order_by(Patient.bed_no):
-            self.patientList.AddObject(patient)
-            if patient.active:
-                self.patientList.SetCheckState(patient, True)
-            else:
-                self.patientList.SetCheckState(patient, False)
+        """ Update the patient list """
+        self.patient_list.DeleteAllItems()
 
-        self.patientList.RefreshObjects(self.patientList.GetObjects())
+        for patient in self.session.query(Patient).order_by(Patient.bed_no):
+            self.patient_list.AddObject(patient)
+            if patient.active:
+                self.patient_list.SetCheckState(patient, True)
+            else:
+                self.patient_list.SetCheckState(patient, False)
+
+        self.patient_list.RefreshObjects(self.patient_list.GetObjects())
 

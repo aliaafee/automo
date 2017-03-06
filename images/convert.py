@@ -4,12 +4,16 @@ import base64
 
 
 result = """
-import wx
+\"\"\"
+Images used in the app, all images encoded in base 64
+\"\"\"
 import cStringIO
 import base64
+import wx
 
 
-def BitmapFromBase64(str_base64):
+def bitmap_from_base64(str_base64):
+    \"\"\" Converts a base64 bitmap into a wx.Bitmap \"\"\"
     image = base64.b64decode(str_base64)
     stream = cStringIO.StringIO(image)
 

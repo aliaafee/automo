@@ -1,10 +1,12 @@
-from sqlalchemy.dialects.sqlite.base import dialect
+"""
+SQLalchemy database schema for auto mo.
+"""
 from sqlalchemy import Column
 from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy import Integer, String, ForeignKey, DateTime, Float, Text, Boolean
+from sqlalchemy import Integer, String, ForeignKey, Boolean
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship, backref
+from sqlalchemy.orm import sessionmaker, relationship
 
 
 Session = sessionmaker()

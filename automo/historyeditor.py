@@ -1,76 +1,83 @@
+"""
+HistoryEditor dialog, to edit drug history and diagnosis history
+"""
+
 import wx
-from wx.lib.wordwrap import wordwrap
 from ObjectListView import ObjectListView, ColumnDefn, OLVEvent
 
-from images import *
 from objectlistviewmod import ObjectListViewMod
 
 
 class HistoryEditor(wx.Dialog):
-    def __init__(self, parent, session, historyTable, **kwds):
+    """
+    Dialog to edit a history table with 'name' column.
+    """
+    def __init__(self, parent, session, history_table, **kwds):
         super(HistoryEditor, self).__init__(parent, **kwds)
 
         self.session = session
-        self.historyTable = historyTable
+        self.history_table = history_table
 
-        self.historyList = ObjectListViewMod( 
-                self, 
-                style=wx.LC_REPORT|wx.SUNKEN_BORDER, 
-                cellEditMode=ObjectListView.CELLEDIT_DOUBLECLICK 
+        self.history_list = ObjectListViewMod(
+            self,
+            style=wx.LC_REPORT|wx.SUNKEN_BORDER,
+            cellEditMode=ObjectListView.CELLEDIT_DOUBLECLICK
         )
 
-        self.historyList.SetColumns([
-            ColumnDefn("", "", 0, "id", isEditable = False),
-            ColumnDefn(self.GetTitle(), "left", 300, "name", isEditable = True)
+        self.history_list.SetColumns([
+            ColumnDefn("", "", 0, "id", isEditable=False),
+            ColumnDefn(self.GetTitle(), "left", 300, "name", isEditable=True)
         ])
-        
-        self.historyList.SetEmptyListMsg("")
-        self.historyList.useAlternateBackColors = False
-        self.historyList.Bind(OLVEvent.EVT_CELL_EDIT_FINISHED, self.OnCellEditFinished)
-        self.historyList.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.OnHistoryContextMenu)
 
-        self.historyMenu = wx.Menu()
-        id = 700
-        self.historyMenu.Append(id, "Remove", "Remove Item From History")
-        wx.EVT_MENU(self, id,  self.OnRemoveItem)
+        self.history_list.SetEmptyListMsg("")
+        self.history_list.useAlternateBackColors = False
+        self.history_list.Bind(OLVEvent.EVT_CELL_EDIT_FINISHED, self.on_cell_edit_finished)
+        self.history_list.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.on_history_context_menu)
 
-        self.UpdateList()
+        self.history_menu = wx.Menu()
+        menu_id = 700
+        self.history_menu.Append(menu_id, "Remove", "Remove Item From History")
+        wx.EVT_MENU(self, menu_id, self.on_remove_item)
 
-
-    def UpdateList(self):
-        self.historyList.DeleteAllItems ()
-        
-        for item in self.session.query(self.historyTable).order_by(self.historyTable.name):
-            self.historyList.AddObject(item)
-           
-        self.historyList.RefreshObjects(self.historyList.GetObjects())
+        self.update_list()
 
 
-    def OnRemoveItem(self, event):
-        selectedItems = self.historyList.GetSelectedObjects()
+    def update_list(self):
+        """ Updates the history list """
+        self.history_list.DeleteAllItems()
 
-        if len(selectedItems) < 1:
+        for item in self.session.query(self.history_table).order_by(self.history_table.name):
+            self.history_list.AddObject(item)
+
+        self.history_list.RefreshObjects(self.history_list.GetObjects())
+
+
+    def on_remove_item(self, event):
+        """ Remove history item """
+        selected_items = self.history_list.GetSelectedObjects()
+
+        if len(selected_items) < 1:
             return
 
-        dlg = wx.MessageDialog(None, 'Remove selected items from history?', 'Remove Items', 
-            wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+        dlg = wx.MessageDialog(None, 'Remove selected items from history?', 'Remove Items',
+                               wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 
         result = dlg.ShowModal()
 
-        if (result != wx.ID_YES):
+        if result != wx.ID_YES:
             return
 
-        for item in selectedItems:
+        for item in selected_items:
             self.session.delete(item)
 
         self.session.commit()
 
-        self.UpdateList()
+        self.update_list()
 
 
-    def OnHistoryContextMenu(self, event):
-        self.PopupMenu(self.historyMenu)
+    def on_history_context_menu(self, event):
+        self.PopupMenu(self.history_menu)
 
 
-    def OnCellEditFinished(self, event):
+    def on_cell_edit_finished(self, event):
         self.session.commit()
