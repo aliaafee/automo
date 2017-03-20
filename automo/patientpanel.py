@@ -11,7 +11,7 @@ from pdfviewer import PDFViewer
 from printing import generate_prescription
 from drugaddpanel import DrugAddPanel
 from actextcontroldb import ACTextControlDB, EVT_ACT_DONE_EDIT
-from database import Diagnosis
+from database import Diagnosis, Doctor
 
 
 class PatientPanel(wx.Panel):
@@ -30,9 +30,17 @@ class PatientPanel(wx.Panel):
 
         self.toolbar = wx.ToolBar(self, style=wx.TB_NODIVIDER)
 
-        tb_print = self.toolbar.AddLabelTool(
-                wx.ID_ANY, 'Print', bitmap_from_base64(toolbar_print_one_b64), shortHelp="Print Prescription")
-        self.Bind(wx.EVT_TOOL, self.OnPrint, tb_print)
+        self.tb_print = self.toolbar.AddLabelTool(
+            wx.ID_ANY, 'Print', bitmap_from_base64(toolbar_print_one_b64),
+            shortHelp="Print Prescription")
+        self.Bind(wx.EVT_TOOL, self.OnPrint, self.tb_print)
+
+        self.toolbar.AddStretchableSpace()
+
+        self.lbl_doctor = wx.StaticText(self.toolbar, label="Doctor's Name  ", size=wx.Size(-1, -1))
+        self.toolbar.AddControl(self.lbl_doctor)
+        self.txt_doctor = ACTextControlDB(self.toolbar, self.session, Doctor)
+        self.toolbar.AddControl(self.txt_doctor)
 
         self.toolbar.Realize()
 
@@ -49,13 +57,15 @@ class PatientPanel(wx.Panel):
         grid_sizer.Add(self.txt_bed, 1, wx.EXPAND)
         self.txt_bed.Bind(wx.EVT_TEXT, self.OnChange)
 
-        self.lbl_hospital_no = wx.StaticText(self, label='Hospital No', size=wx.Size(label_width, -1))
+        self.lbl_hospital_no = wx.StaticText(self, label='Hospital No',
+                                             size=wx.Size(label_width, -1))
         self.txt_hospital_no = wx.TextCtrl(self)
         grid_sizer.Add(self.lbl_hospital_no, 1, wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
         grid_sizer.Add(self.txt_hospital_no, 1, wx.EXPAND)
         self.txt_hospital_no.Bind(wx.EVT_TEXT, self.OnChange)
 
-        self.lbl_national_id_no = wx.StaticText(self, label='National Id No', size=wx.Size(label_width, -1))
+        self.lbl_national_id_no = wx.StaticText(self, label='National Id No',
+                                                size=wx.Size(label_width, -1))
         self.txt_national_id_no = wx.TextCtrl(self)
         grid_sizer.Add(self.lbl_national_id_no, 1, wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
         grid_sizer.Add(self.txt_national_id_no, 1, wx.EXPAND)
@@ -150,7 +160,16 @@ class PatientPanel(wx.Panel):
 
         self.update_rx()
 
-        self.Enable()
+        self.toolbar.EnableTool(self.tb_print.GetId(), True)
+        self.txt_hospital_no.Enable()
+        self.txt_national_id_no.Enable()
+        self.txt_bed.Enable()
+        self.txt_name.Enable()
+        self.txt_age.Enable()
+        self.txt_sex.Enable()
+        self.txt_diagnosis.Enable()
+        self.txt_drug_name.Enable()
+        self.prescription_list.Enable()
 
 
     def unset(self):
@@ -167,7 +186,16 @@ class PatientPanel(wx.Panel):
 
         self.prescription_list.DeleteAllItems()
 
-        self.Disable()
+        self.toolbar.EnableTool(self.tb_print.GetId(), False)
+        self.txt_hospital_no.Disable()
+        self.txt_national_id_no.Disable()
+        self.txt_bed.Disable()
+        self.txt_name.Disable()
+        self.txt_age.Disable()
+        self.txt_sex.Disable()
+        self.txt_diagnosis.Disable()
+        self.txt_drug_name.Disable()
+        self.prescription_list.Disable()
 
 
     def update_rx(self):
@@ -324,7 +352,7 @@ class PatientPanel(wx.Panel):
 
         temp_file = tempfile.mktemp(".pdf")
 
-        generate_prescription(self.session, self.patient, temp_file)
+        generate_prescription(self.session, self.patient, self.txt_doctor.GetValue(), temp_file)
 
         pdf_view = PDFViewer(None, title="Print Preview")
         pdf_view.viewer.UsePrintDirect = ``False``

@@ -4,7 +4,7 @@ Mainframe of App
 import wx
 import wx.aui
 
-from database import Session, Drug, Diagnosis
+from database import Session, Drug, Diagnosis, Doctor
 from images import bitmap_from_base64, icon_16_b64
 from patientlistpanel import PatientListPanel
 from patientpanel import PatientPanel
@@ -80,11 +80,15 @@ class MainFrame(wx.Frame):
         tool_menu.Append(menu_id, "Edit Diagnosis History", "Edit Diagnosis History")
         wx.EVT_MENU(self, menu_id, self.OnDiagnosisHistory)
 
+        menu_id = 406
+        tool_menu.Append(menu_id, "Edit Doctors", "Edit Doctors")
+        wx.EVT_MENU(self, menu_id, self.OnDoctorHistory)
+
         self.menu_bar.Append(tool_menu, "&Tools")
 
         help_menu = wx.Menu()
 
-        menu_id = 406
+        menu_id = 407
         help_menu.Append(menu_id, "&About", "About this software")
         wx.EVT_MENU(self, menu_id, self.OnAboutDlg)
 
@@ -127,8 +131,15 @@ class MainFrame(wx.Frame):
 
 
     def OnDiagnosisHistory(self, event):
-        """ Opend Diagnosis History Editor """
+        """ Open Diagnosis History Editor """
         editor_dlg = HistoryEditor(self, self.session, Diagnosis, title="Diagnosis History")
+
+        editor_dlg.ShowModal()
+
+
+    def OnDoctorHistory(self, event):
+        """ Open Doctor History Editor """
+        editor_dlg = HistoryEditor(self, self.session, Doctor, title="Doctors")
 
         editor_dlg.ShowModal()
 

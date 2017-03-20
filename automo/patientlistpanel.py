@@ -36,23 +36,28 @@ class PatientListPanel(wx.Panel):
         toolbar = wx.ToolBar(self, style=wx.TB_NODIVIDER)
 
         tb_add_patient = toolbar.AddLabelTool(
-            wx.ID_ANY, 'Add', bitmap_from_base64(toolbar_add_b64), shortHelp="Add Patient")
+            wx.ID_ANY, 'Add', bitmap_from_base64(toolbar_add_b64),
+            shortHelp="Add Patient")
         self.Bind(wx.EVT_TOOL, self.OnAddPatient, tb_add_patient)
 
         tb_remove_patient = toolbar.AddLabelTool(
-            wx.ID_ANY, 'Remove', bitmap_from_base64(toolbar_remove_b64), shortHelp="Remove Selected Patients")
+            wx.ID_ANY, 'Remove', bitmap_from_base64(toolbar_remove_b64),
+            shortHelp="Remove Selected Patients")
         self.Bind(wx.EVT_TOOL, self.OnRemovePatient, tb_remove_patient)
 
         tb_print_census_list = toolbar.AddLabelTool(
-            wx.ID_ANY, 'Census', bitmap_from_base64(toolbar_print_census_b64), shortHelp="Print Census List")
+            wx.ID_ANY, 'Census', bitmap_from_base64(toolbar_print_census_b64),
+            shortHelp="Print Census List")
         self.Bind(wx.EVT_TOOL, self.OnPrintCensusList, tb_print_census_list)
 
         tb_print_list = toolbar.AddLabelTool(
-            wx.ID_ANY, 'List', bitmap_from_base64(toolbar_print_list_b64), shortHelp="Print Prescriptions List")
+            wx.ID_ANY, 'List', bitmap_from_base64(toolbar_print_list_b64),
+            shortHelp="Print Prescriptions List")
         self.Bind(wx.EVT_TOOL, self.OnPrintList, tb_print_list)
 
         tb_print_all = toolbar.AddLabelTool(
-            wx.ID_ANY, 'All', bitmap_from_base64(toolbar_print_all_b64), shortHelp="Print All Prescriptions")
+            wx.ID_ANY, 'All', bitmap_from_base64(toolbar_print_all_b64),
+            shortHelp="Print All Prescriptions")
         self.Bind(wx.EVT_TOOL, self.OnPrintAll, tb_print_all)
 
         toolbar.Realize()
@@ -75,6 +80,15 @@ class PatientListPanel(wx.Panel):
         self.patient_list.Bind(EVT_OVL_CHECK_EVENT, self.OnPatientCheck)
         self.patient_list.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.OnPatientContextMenu)
         self.patient_list.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnPatientSelected)
+
+        """
+        def duplicate_beds(list_item, patient):
+            count = self.session.query(Patient).filter(Patient.bed_no == patient.bed_no).count()
+            if count > 1:
+                list_item.SetTextColour(wx.RED)
+
+        self.patient_list.rowFormatter = duplicate_beds
+        """
 
         sizer.Add(self.patient_list, 1, wx.ALL | wx. EXPAND, border=10)
 
@@ -145,8 +159,8 @@ class PatientListPanel(wx.Panel):
 
 
     def OnPatientCheck(self, event):
-        """ Save Tick patient """
-        if event.value == True:
+        """ Save Tick """
+        if event.value:
             event.object.active = True
         else:
             event.object.active = False
@@ -189,14 +203,16 @@ class PatientListPanel(wx.Panel):
     def OnPrintAll(self, event):
         """ Print all active prescriptions """
         if self._active_patient_count == 0:
-            dlg = wx.MessageDialog(None, 'Nothing to print. Add or tick patients.', 'Print All Prescriptions',
+            dlg = wx.MessageDialog(None, 'Nothing to print. Add or tick patients.',
+                                   'Print All Prescriptions',
                                    wx.OK | wx.ICON_INFORMATION)
             dlg.ShowModal()
             return
 
         temp_file = tempfile.mktemp(".pdf")
 
-        generate_all_prescriptions(self.session, temp_file)
+        generate_all_prescriptions(self.session, self.patient_panel.txt_doctor.GetValue(),
+                                   temp_file)
 
         pdf_view = PDFViewer(None, title="Print Preview")
         pdf_view.viewer.UsePrintDirect = ``False``
@@ -207,7 +223,8 @@ class PatientListPanel(wx.Panel):
     def OnPrintList(self, event):
         """ Print prescriptions list"""
         if self._active_patient_count == 0:
-            dlg = wx.MessageDialog(None, 'Nothing to print. Add or tick patients.', 'Print Prescription List',
+            dlg = wx.MessageDialog(None, 'Nothing to print. Add or tick patients.',
+                                   'Print Prescription List',
                                    wx.OK | wx.ICON_INFORMATION)
             dlg.ShowModal()
             return
@@ -225,7 +242,8 @@ class PatientListPanel(wx.Panel):
     def OnPrintCensusList(self, event):
         """ Print census list """
         if self._active_patient_count == 0:
-            dlg = wx.MessageDialog(None, 'Nothing to print. Add or tick patients.', 'Print Census List',
+            dlg = wx.MessageDialog(None, 'Nothing to print. Add or tick patients.',
+                                   'Print Census List',
                                    wx.OK | wx.ICON_INFORMATION)
             dlg.ShowModal()
             return

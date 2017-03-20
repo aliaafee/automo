@@ -52,6 +52,10 @@ class Diagnosis(Base):
     name = Column(String(250))
 
 
+class Doctor(Base):
+    name = Column(String(250))
+
+
 def StartEngine(uri):
     engine = create_engine(uri, echo=False)
 

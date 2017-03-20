@@ -169,7 +169,7 @@ def generate_patient_census_list(session, docfilename):
     doc.build(elements, canvasmaker=PageNumCanvas)
 
 
-def draw_prescription_header(patient, presc_canvas):
+def draw_prescription_header(patient, doctor_name, presc_canvas):
     """ Draw header of prescription """
     presc_canvas.drawString(15*mm, 181*mm, patient.name)
 
@@ -185,11 +185,14 @@ def draw_prescription_header(patient, presc_canvas):
 
     presc_canvas.drawString(15*mm, 106*mm, patient.diagnosis)
 
+    if doctor_name != "":
+        presc_canvas.drawString(29*mm, 10*mm, "DR. {0}".format(doctor_name))
 
-def draw_prescription(session, patient, presc_canvas):
+
+def draw_prescription(session, patient, doctor_name, presc_canvas):
     """ Draw the prescription, overflow into new page if too long """
     presc_canvas.setFont("Helvetica", 10)
-    draw_prescription_header(patient, presc_canvas)
+    draw_prescription_header(patient, doctor_name, presc_canvas)
 
     active_rx_count = session.query(Rx).\
                             filter(and_(Rx.patient_id == patient.id, Rx.active == True)).\
@@ -202,36 +205,37 @@ def draw_prescription(session, patient, presc_canvas):
     for row in patient.rxs:
         if row.active:
             if index > 14:
-                presc_canvas.drawString(318, 46, "page {0} of {1}".format(page, pages))
+                presc_canvas.drawString(130*mm, 10*mm, "page {0} of {1}".format(page, pages))
                 presc_canvas.showPage()
                 presc_canvas.setFont("Helvetica", 10)
-                draw_prescription_header(patient, presc_canvas)
+                draw_prescription_header(patient, doctor_name, presc_canvas)
                 position = 241
                 index = 1
                 page += 1
             total_index = ((page - 1)*14) + index
-            presc_canvas.drawString(14*mm, position, "{0}) {1} {2}".format(total_index, row.drug_name, row.drug_order))
+            presc_canvas.drawString(14*mm, position, "{0}) {1} {2}"\
+                        .format(total_index, row.drug_name, row.drug_order))
             position -= 5*mm
             index += 1
     if pages > 1:
-        presc_canvas.drawString(318, 46, "page {0} of {1}".format(page, pages))
+        presc_canvas.drawString(130*mm, 10*mm, "page {0} of {1}".format(page, pages))
     presc_canvas.showPage()
 
 
-def generate_prescription(session, patient, filename):
+def generate_prescription(session, patient, doctor_name, filename):
     """ Generate prescription """
     presc_canvas = canvas.Canvas(filename, pagesize=A5)
 
-    draw_prescription(session, patient, presc_canvas)
+    draw_prescription(session, patient, doctor_name, presc_canvas)
 
     presc_canvas.save()
 
 
-def generate_all_prescriptions(session, filename):
+def generate_all_prescriptions(session, doctor_name, filename):
     """ Generate all prescriptions """
     presc_canvas = canvas.Canvas(filename, pagesize=A5)
 
     for patient in session.query(Patient).filter(Patient.active == True).order_by(Patient.bed_no):
-        draw_prescription(session, patient, presc_canvas)
+        draw_prescription(session, patient, doctor_name, presc_canvas)
 
     presc_canvas.save()
