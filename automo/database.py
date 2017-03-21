@@ -36,7 +36,6 @@ class Patient(Base):
 
 
 class Rx(Base):
-    __tablename__ = 'rx'
     patient_id = Column(Integer, ForeignKey('patient.id'))
     patient = relationship("Patient", back_populates="rxs")
     drug_name = Column(String(250))
@@ -54,6 +53,19 @@ class Diagnosis(Base):
 
 class Doctor(Base):
     name = Column(String(250))
+
+
+class Preset(Base):
+    name = Column(String(250))
+    rxs = relationship("PresetRx", back_populates="preset", cascade="all, delete, delete-orphan")
+
+
+class PresetRx(Base):
+    preset_id = Column(Integer, ForeignKey('preset.id'))
+    preset = relationship("Preset", back_populates="rxs")
+    drug_name = Column(String(250))
+    drug_order = Column(String(250))
+    active = Column(Boolean)
 
 
 def StartEngine(uri):
