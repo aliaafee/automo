@@ -80,9 +80,9 @@ class ACTextControlDB(wx.TextCtrl):
                 return
 
         # select candidates from database
-        result = self.session.query(self.candidates_table).\
-                                filter(self.candidates_table.name.like("%{0}%".format(txt))).\
-                                order_by(self.candidates_table.name)
+        result = self.session.query(self.candidates_table)\
+                             .filter(self.candidates_table.name.like("%{0}%".format(txt)))\
+                             .order_by(self.candidates_table.name)
 
         self.select_candidates = []
         for candidate in result:
@@ -214,11 +214,11 @@ class ACTextControlDB(wx.TextCtrl):
                 self.SetValue(self.popup.add_text)
                 self.SetInsertionPointEnd()
 
-                candidates_count = self.session.query(self.candidates_table).\
-                                                filter(
+                candidates_count = self.session.query(self.candidates_table)\
+                                               .filter(
                                                     self.candidates_table.name == self.GetValue()
-                                                ).\
-                                                count()
+                                                )\
+                                               .count()
                 if candidates_count == 0:
                     new_name = self.candidates_table(name=self.popup.add_text)
                     self.session.add(new_name)

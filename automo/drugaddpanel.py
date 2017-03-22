@@ -6,6 +6,8 @@ import wx
 
 from actextcontroldb import ACTextControlDB
 from database import Rx, Drug, Preset, PresetRx
+from images import bitmap_from_base64,\
+                   toolbar_add_24_b64
 
 
 class DrugAddPanel(wx.Panel):
@@ -44,13 +46,17 @@ class DrugAddPanel(wx.Panel):
         self.txt_drug_order.Bind(wx.EVT_KEY_UP, self.OnDrugOrderKeyUp)
         sizer.Add(self.txt_drug_order, 1, wx.RIGHT | wx.BOTTOM | wx.EXPAND, border=5)
 
-        self.btn_add = wx.Button(self, label="Add", size=wx.Size(50, -1))
+        #self.btn_add = wx.Button(self, label="Add", size=wx.Size(50, -1))
+        self.btn_add = wx.BitmapButton(self, bitmap=bitmap_from_base64(toolbar_add_24_b64),
+                                       style=wx.BU_AUTODRAW, size=wx.Size(24, 24))
+        self.btn_add.SetToolTipString("Add Medication")
         self.btn_add.Bind(wx.EVT_BUTTON, self.OnAddDrug)
-        sizer.Add(self.btn_add, 0, wx.BOTTOM, border=5)
+        sizer.Add(self.btn_add, 0, wx.RIGHT | wx.BOTTOM | wx.ALIGN_CENTER_VERTICAL, border=5)
 
-        self.btn_add = wx.Button(self, label="Preset", size=wx.Size(50, -1))
-        self.btn_add.Bind(wx.EVT_BUTTON, self.OnPresetMenu)
-        sizer.Add(self.btn_add, 0, wx.BOTTOM, border=5)
+        self.btn_preset = wx.Button(self, label="...", size=wx.Size(24, 24))
+        self.btn_preset.SetToolTipString("Preset Prescriptions")
+        self.btn_preset.Bind(wx.EVT_BUTTON, self.OnPresetMenu)
+        sizer.Add(self.btn_preset, 0, wx.BOTTOM | wx.ALIGN_CENTER_VERTICAL, border=5)
 
         top_sizer.Add(sizer, 1, wx.EXPAND)
 
@@ -111,8 +117,8 @@ class DrugAddPanel(wx.Panel):
         """Add preset to prescription"""
         preset_name = event.GetEventObject().GetLabelText(event.GetId())
         preset = self.session.query(Preset)\
-                                    .filter(Preset.name == preset_name)\
-                                    .first()
+                             .filter(Preset.name == preset_name)\
+                             .first()
 
         for row in preset.rxs:
             new_presc = Rx(patient_id=self.patient_panel.patient.id,
@@ -130,8 +136,8 @@ class DrugAddPanel(wx.Panel):
         """Remove preset"""
         preset_name = event.GetEventObject().GetLabelText(event.GetId())
 
-        dlg = wx.MessageDialog(None,
-                               'Remove selected prescription preset "{0}"?'\
+        dlg = wx.MessageDialog(self,
+                               'Remove prescription preset "{0}"?'\
                                                         .format(preset_name),
                                'Remove Prescription Preset',
                                wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
@@ -142,15 +148,15 @@ class DrugAddPanel(wx.Panel):
             return
 
         preset = self.session.query(Preset)\
-                                    .filter(Preset.name == preset_name)\
-                                    .first()
+                             .filter(Preset.name == preset_name)\
+                             .first()
         self.session.delete(preset)
         self.session.commit()
 
 
     def OnAddPreset(self, event):
         """Add current presecription to a preset"""
-        dlg = wx.TextEntryDialog(self, "Name for preset", defaultValue="")
+        dlg = wx.TextEntryDialog(self, "Name", "Add Precscription Preset", defaultValue="")
         dlg.ShowModal()
         name = dlg.GetValue()
 
@@ -158,7 +164,7 @@ class DrugAddPanel(wx.Panel):
             return
 
         if self.session.query(Preset).filter(Preset.name == name).count() != 0:
-            dlg = wx.MessageDialog(None, 'The name "{0}" exists. Cannot add'.format(name),
+            dlg = wx.MessageDialog(self, 'The name "{0}" exists. Cannot add'.format(name),
                                    'Add Preset',
                                    wx.OK | wx.ICON_INFORMATION)
             dlg.ShowModal()

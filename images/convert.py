@@ -1,9 +1,13 @@
+"""
+Convert images to b64 and generates images.py module
+"""
 import os
 import os.path
-import base64 
+import base64
 
 
-result = """
+result = \
+"""
 \"\"\"
 Images used in the app, all images encoded in base 64
 \"\"\"

@@ -194,9 +194,9 @@ def draw_prescription(session, patient, doctor_name, presc_canvas):
     presc_canvas.setFont("Helvetica", 10)
     draw_prescription_header(patient, doctor_name, presc_canvas)
 
-    active_rx_count = session.query(Rx).\
-                            filter(and_(Rx.patient_id == patient.id, Rx.active == True)).\
-                            count()
+    active_rx_count = session.query(Rx)\
+                             .filter(and_(Rx.patient_id == patient.id, Rx.active == True))\
+                             .count()
     pages = int(math.floor(float(active_rx_count) / 14.0) + 1)
 
     position = 85*mm

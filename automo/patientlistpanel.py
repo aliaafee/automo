@@ -195,14 +195,17 @@ class PatientListPanel(wx.Panel):
 
 
     def _active_patient_count(self):
-        return self.session.query(Patient).\
-                            filter(Patient.active == True).\
-                            count()
+        return self.session.query(Patient)\
+                           .filter(Patient.active == True)\
+                           .count()
 
+    def _patient_count(self):
+        return self.session.query(Patient)\
+                           .count()
 
     def OnPrintAll(self, event):
         """ Print all active prescriptions """
-        if self._active_patient_count == 0:
+        if self._active_patient_count() == 0:
             dlg = wx.MessageDialog(None, 'Nothing to print. Add or tick patients.',
                                    'Print All Prescriptions',
                                    wx.OK | wx.ICON_INFORMATION)
@@ -222,7 +225,7 @@ class PatientListPanel(wx.Panel):
 
     def OnPrintList(self, event):
         """ Print prescriptions list"""
-        if self._active_patient_count == 0:
+        if self._active_patient_count() == 0:
             dlg = wx.MessageDialog(None, 'Nothing to print. Add or tick patients.',
                                    'Print Prescription List',
                                    wx.OK | wx.ICON_INFORMATION)
@@ -241,8 +244,8 @@ class PatientListPanel(wx.Panel):
 
     def OnPrintCensusList(self, event):
         """ Print census list """
-        if self._active_patient_count == 0:
-            dlg = wx.MessageDialog(None, 'Nothing to print. Add or tick patients.',
+        if self._patient_count() == 0:
+            dlg = wx.MessageDialog(None, 'Nothing to print. Add patients.',
                                    'Print Census List',
                                    wx.OK | wx.ICON_INFORMATION)
             dlg.ShowModal()

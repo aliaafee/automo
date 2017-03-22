@@ -26,8 +26,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.2446003"
-     inkscape:cx="614.76496"
-     inkscape:cy="749.2609"
+     inkscape:cx="359.59297"
+     inkscape:cy="950.92866"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -738,6 +738,29 @@
            x="464.11533"
            y="290.24084"
            id="tspan4292">3</tspan></text>
+    </g>
+    <g
+       transform="matrix(0.41088437,0,0,0.41088437,689.95902,75.350377)"
+       inkscape:export-ydpi="38.544666"
+       inkscape:export-xdpi="38.544666"
+       inkscape:export-filename="/Users/ali/Projects/automo/images/src/toolbar_add_24.png"
+       id="g4250">
+      <path
+         style="opacity:1;fill:#999999;fill-opacity:1;stroke:#000000;stroke-width:4.86754948;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m -480.50129,149.03299 c -2.81266,0 -5.07812,2.26351 -5.07812,5.07617 l 0,21.875 -21.875,0 c -2.81266,0 -5.07618,2.26547 -5.07618,5.07812 l 0,7.38086 c 0,2.81266 2.26352,5.07617 5.07618,5.07617 l 21.875,0 0,21.87696 c 0,2.81266 2.26546,5.07617 5.07812,5.07617 l 7.38086,0 c 2.81266,0 5.07617,-2.26351 5.07617,-5.07617 l 0,-21.87696 21.87696,0 c 2.81266,0 5.07617,-2.26351 5.07617,-5.07617 l 0,-7.38086 c 0,-2.81265 -2.26351,-5.07812 -5.07617,-5.07812 l -21.87696,0 0,-21.875 c 0,-2.81266 -2.26351,-5.07617 -5.07617,-5.07617 l -7.38086,0 z"
+         id="path4252"
+         inkscape:connector-curvature="0"
+         inkscape:export-xdpi="21.116549"
+         inkscape:export-ydpi="21.116549" />
+      <rect
+         style="opacity:1;fill:none;fill-opacity:1;stroke:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="rect4254"
+         width="136.38593"
+         height="136.38593"
+         x="-545.00385"
+         y="116.55975"
+         inkscape:export-xdpi="21.116549"
+         inkscape:export-ydpi="21.116549" />
     </g>
   </g>
 </svg>
