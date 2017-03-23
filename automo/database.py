@@ -68,8 +68,8 @@ class PresetRx(Base):
     active = Column(Boolean)
 
 
-def StartEngine(uri):
-    engine = create_engine(uri, echo=False)
+def StartEngine(uri, echo):
+    engine = create_engine(uri, echo=echo)
 
     Base.metadata.create_all(engine)
 

@@ -45,11 +45,13 @@ def usage():
     print "Usage:"
     print "    -h, --help"
     print "       Displays this help"
+    print "    -d, --debug"
+    print "       Output database debug data"
 
 
-def start(uri):
+def start(uri, debug):
     """ starts db session at the given db uri """
-    database.StartEngine(uri)
+    database.StartEngine(uri, debug)
 
     app = MoPresc()
 
@@ -58,8 +60,10 @@ def start(uri):
 
 def main(argv):
     """ starts the app, also reads command line arguments """
+    debug = False
+
     try:
-        opts, args = getopt.getopt(argv, "h", ["help"])
+        opts, args = getopt.getopt(argv, "hd", ["help", "debug"])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -68,8 +72,10 @@ def main(argv):
         if opt in ("-h", "--help"):
             usage()
             sys.exit()
+        if opt in ("-d", "--debug"):
+            debug = True
 
-    start("sqlite:///wardpresc-data.db")
+    start("sqlite:///wardpresc-data.db", debug)
 
 
 if __name__ == '__main__':

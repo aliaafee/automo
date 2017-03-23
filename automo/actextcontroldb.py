@@ -49,8 +49,8 @@ class ACTextControlDB(wx.TextCtrl):
         # loss of focus should hide the popup
         self.Bind(wx.EVT_KILL_FOCUS, self._on_focus_loss)
         self.Bind(wx.EVT_SET_FOCUS, self._on_focus)
-        
-    
+
+
     def SetValue(self, value):
         """
         Directly calling setvalue triggers textevent
@@ -80,7 +80,7 @@ class ACTextControlDB(wx.TextCtrl):
                 return
 
         # select candidates from database
-        result = self.session.query(self.candidates_table)\
+        result = self.session.query(self.candidates_table.name)\
                              .filter(self.candidates_table.name.like("%{0}%".format(txt)))\
                              .order_by(self.candidates_table.name)
 
@@ -214,7 +214,7 @@ class ACTextControlDB(wx.TextCtrl):
                 self.SetValue(self.popup.add_text)
                 self.SetInsertionPointEnd()
 
-                candidates_count = self.session.query(self.candidates_table)\
+                candidates_count = self.session.query(self.candidates_table.name)\
                                                .filter(
                                                     self.candidates_table.name == self.GetValue()
                                                 )\
