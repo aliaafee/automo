@@ -10,7 +10,8 @@ from objectlistviewmod import ObjectListViewMod, EVT_OVL_CHECK_EVENT
 from pdfviewer import PDFViewer
 from printing import generate_prescription
 from drugaddpanel import DrugAddPanel
-from actextcontroldb import ACTextControlDB, EVT_ACT_DONE_EDIT
+from acdbtextctrl import AcDbTextCtrl
+from dbtextctrl import DbTextCtrl
 from database import Diagnosis, Doctor
 
 
@@ -39,7 +40,7 @@ class PatientPanel(wx.Panel):
 
         self.lbl_doctor = wx.StaticText(self.toolbar, label="Doctor's Name  ", size=wx.Size(-1, -1))
         self.toolbar.AddControl(self.lbl_doctor)
-        self.txt_doctor = ACTextControlDB(self.toolbar, self.session, Doctor)
+        self.txt_doctor = AcDbTextCtrl(self.toolbar, self.session, Doctor)
         self.toolbar.AddControl(self.txt_doctor)
 
         self.toolbar.Realize()
@@ -52,48 +53,41 @@ class PatientPanel(wx.Panel):
         label_width = 100
 
         self.lbl_bed = wx.StaticText(self, label='Bed', size=wx.Size(label_width, -1))
-        self.txt_bed = wx.TextCtrl(self)
+        self.txt_bed = DbTextCtrl(self, self.session, self.OnChangeList)
         grid_sizer.Add(self.lbl_bed, 1, wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
         grid_sizer.Add(self.txt_bed, 1, wx.EXPAND)
-        self.txt_bed.Bind(wx.EVT_TEXT, self.OnChange)
 
         self.lbl_hospital_no = wx.StaticText(self, label='Hospital No',
                                              size=wx.Size(label_width, -1))
-        self.txt_hospital_no = wx.TextCtrl(self)
+        self.txt_hospital_no = DbTextCtrl(self, self.session, self.OnChangeList)
         grid_sizer.Add(self.lbl_hospital_no, 1, wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
         grid_sizer.Add(self.txt_hospital_no, 1, wx.EXPAND)
-        self.txt_hospital_no.Bind(wx.EVT_TEXT, self.OnChange)
 
         self.lbl_national_id_no = wx.StaticText(self, label='National Id No',
                                                 size=wx.Size(label_width, -1))
-        self.txt_national_id_no = wx.TextCtrl(self)
+        self.txt_national_id_no = DbTextCtrl(self, self.session)
         grid_sizer.Add(self.lbl_national_id_no, 1, wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
         grid_sizer.Add(self.txt_national_id_no, 1, wx.EXPAND)
-        self.txt_national_id_no.Bind(wx.EVT_TEXT, self.OnChange)
 
         self.lbl_name = wx.StaticText(self, label='Name', size=wx.Size(label_width, -1))
-        self.txt_name = wx.TextCtrl(self)
+        self.txt_name = DbTextCtrl(self, self.session, self.OnChangeList)
         grid_sizer.Add(self.lbl_name, 1, wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
         grid_sizer.Add(self.txt_name, 1, wx.EXPAND)
-        self.txt_name.Bind(wx.EVT_TEXT, self.OnChange)
 
         self.lbl_age = wx.StaticText(self, label='Age', size=wx.Size(label_width, -1))
-        self.txt_age = wx.TextCtrl(self)
+        self.txt_age = DbTextCtrl(self, self.session)
         grid_sizer.Add(self.lbl_age, 1, wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
         grid_sizer.Add(self.txt_age, 1, wx.EXPAND)
-        self.txt_age.Bind(wx.EVT_TEXT, self.OnChange)
 
         self.lbl_sex = wx.StaticText(self, label='Sex', size=wx.Size(label_width, -1))
-        self.txt_sex = wx.TextCtrl(self)
+        self.txt_sex = DbTextCtrl(self, self.session)
         grid_sizer.Add(self.lbl_sex, 1, wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
         grid_sizer.Add(self.txt_sex, 1, wx.EXPAND)
-        self.txt_sex.Bind(wx.EVT_TEXT, self.OnChange)
 
         self.lbl_diagnosis = wx.StaticText(self, label='Diagnosis', size=wx.Size(label_width, -1))
-        self.txt_diagnosis = ACTextControlDB(self, self.session, Diagnosis)
+        self.txt_diagnosis = AcDbTextCtrl(self, self.session, Diagnosis)
         grid_sizer.Add(self.lbl_diagnosis, 1, wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
         grid_sizer.Add(self.txt_diagnosis, 1, wx.EXPAND)
-        self.txt_diagnosis.Bind(EVT_ACT_DONE_EDIT, self.OnChangeDiagnosis)
 
         sizer.Add(grid_sizer, 0, wx.ALL | wx.EXPAND, border=10)
 
@@ -150,13 +144,14 @@ class PatientPanel(wx.Panel):
         """ Set Patient """
         self.patient = patient
 
-        self.txt_hospital_no.ChangeValue(str(patient.hospital_no))
-        self.txt_national_id_no.ChangeValue(str(patient.national_id_no))
-        self.txt_bed.ChangeValue(str(patient.bed_no))
-        self.txt_name.ChangeValue(str(patient.name))
-        self.txt_age.ChangeValue(str(patient.age))
-        self.txt_sex.ChangeValue(str(patient.sex))
-        self.txt_diagnosis.ChangeValue(str(patient.diagnosis))
+        self.txt_hospital_no.SetDbObjectAttr(patient, "hospital_no")
+        self.txt_national_id_no.SetDbObjectAttr(patient, "national_id_no")
+        self.txt_bed.SetDbObjectAttr(patient, "bed_no")
+        self.txt_name.SetDbObjectAttr(patient, "name")
+        self.txt_age.SetDbObjectAttr(patient, "age")
+        self.txt_sex.SetDbObjectAttr(patient, "sex")
+
+        self.txt_diagnosis.SetDbObjectAttr(patient, "diagnosis")#.ChangeValue(str(patient.diagnosis))
 
         self.update_rx()
 
@@ -176,13 +171,14 @@ class PatientPanel(wx.Panel):
         """ Clear the panel """
         self.patient = None
 
-        self.txt_hospital_no.ChangeValue("")
-        self.txt_national_id_no.ChangeValue("")
-        self.txt_bed.ChangeValue("")
-        self.txt_name.ChangeValue("")
-        self.txt_age.ChangeValue("")
-        self.txt_sex.ChangeValue("")
-        self.txt_diagnosis.ChangeValue("")
+        self.txt_hospital_no.SetDbObjectAttr(None, "")
+        self.txt_national_id_no.SetDbObjectAttr(None, "")
+        self.txt_bed.SetDbObjectAttr(None, "")
+        self.txt_name.SetDbObjectAttr(None, "")
+        self.txt_age.SetDbObjectAttr(None, "")
+        self.txt_sex.SetDbObjectAttr(None, "")
+
+        self.txt_diagnosis.SetDbObjectAttr(None, "")#.ChangeValue("")
 
         self.prescription_list.DeleteAllItems()
 
@@ -212,26 +208,8 @@ class PatientPanel(wx.Panel):
         self.prescription_list.RefreshObjects(self.prescription_list.GetObjects())
 
 
-    def OnChange(self, event):
-        """ Save all changes to data immediately """
-        self.patient.hospital_no = str(self.txt_hospital_no.GetValue())
-        self.patient.national_id_no = str(self.txt_national_id_no.GetValue())
-        self.patient.bed_no = str(self.txt_bed.GetValue())
-        self.patient.name = str(self.txt_name.GetValue())
-        self.patient.age = str(self.txt_age.GetValue())
-        self.patient.sex = str(self.txt_sex.GetValue())
-        self.patient.diagnosis = str(self.txt_diagnosis.GetValue())
-
-        self.patient_list_panel.patient_list.RefreshObjects([self.patient])
-
-        self.session.commit()
-
-
-    def OnChangeDiagnosis(self, event):
-        """ Save changes to diagnosis """
-        self.patient.diagnosis = str(event.value)
-        self.session.commit()
-
+    def OnChangeList(self, event):
+        """ Update patient list to reflect changes """
         self.patient_list_panel.patient_list.RefreshObjects([self.patient])
 
 

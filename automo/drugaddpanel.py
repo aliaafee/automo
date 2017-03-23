@@ -4,7 +4,7 @@ and a text control to enter the drug order
 """
 import wx
 
-from actextcontroldb import ACTextControlDB
+from acdbtextctrl import AcDbTextCtrl
 from database import Rx, Drug, Preset, PresetRx
 from images import bitmap_from_base64,\
                    toolbar_add_24_b64
@@ -38,7 +38,7 @@ class DrugAddPanel(wx.Panel):
 
         sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.txt_drug_name = ACTextControlDB(self, self.session, Drug)
+        self.txt_drug_name = AcDbTextCtrl(self, self.session, Drug)
         self.txt_drug_name.Bind(wx.EVT_KEY_UP, self.OnDrugNameKeyUp)
         sizer.Add(self.txt_drug_name, 1, wx.RIGHT | wx.BOTTOM | wx.EXPAND, border=5)
 
@@ -46,7 +46,6 @@ class DrugAddPanel(wx.Panel):
         self.txt_drug_order.Bind(wx.EVT_KEY_UP, self.OnDrugOrderKeyUp)
         sizer.Add(self.txt_drug_order, 1, wx.RIGHT | wx.BOTTOM | wx.EXPAND, border=5)
 
-        #self.btn_add = wx.Button(self, label="Add", size=wx.Size(50, -1))
         self.btn_add = wx.BitmapButton(self, bitmap=bitmap_from_base64(toolbar_add_24_b64),
                                        style=wx.BU_AUTODRAW, size=wx.Size(24, 24))
         self.btn_add.SetToolTipString("Add Medication")
@@ -62,8 +61,6 @@ class DrugAddPanel(wx.Panel):
 
         self.SetSizer(top_sizer)
 
-        self.update_drug_list()
-
 
     def OnDrugNameKeyUp(self, event):
         """Move to next text box when enter pressed"""
@@ -75,16 +72,6 @@ class DrugAddPanel(wx.Panel):
         """Move to next text box when enter pressed"""
         if event.GetKeyCode() == wx.WXK_RETURN:
             self.OnAddDrug(event)
-
-
-    def update_drug_list(self):
-        """Update drug list"""
-        drugs = []
-
-        for drug in self.session.query(Drug).order_by(Drug.name):
-            drugs.append(drug.name)
-
-        self.txt_drug_name.SetCandidates(drugs)
 
 
     def OnAddDrug(self, event):
