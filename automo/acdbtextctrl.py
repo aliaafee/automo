@@ -24,14 +24,12 @@ class AcDbTextCtrl(DbTextCtrl):
         super(AcDbTextCtrl, self).__init__(parent, session, on_change_callback,
                                            style=wx.TE_PROCESS_ENTER, **kwds)
 
-        self.session = session
+        if wx.Platform == "__WXMAC__":
+            #Popups dont work on mac, so act like a simple DbTextCtrl
+            return
+
         self.candidates_table = candidates_table
 
-        self.all_candidates = []
-        self.match_at_start = False
-        self.add_option = True
-        self.case_sensitive = False
-        self.max_candidates = 5   # maximum no. of candidates to show
         self.select_candidates = []
         self.popup = ACPopup(self)
         self.popupsize = wx.Size(-1, -1)
@@ -39,7 +37,7 @@ class AcDbTextCtrl(DbTextCtrl):
         self._set_bindings()
 
         self._screenheight = wx.SystemSettings.GetMetric(wx.SYS_SCREEN_Y)
-        self._popdown = True # Does the popup go down from the textctrl ?
+        self._popdown = True
 
 
     def _set_bindings(self):
@@ -52,7 +50,6 @@ class AcDbTextCtrl(DbTextCtrl):
 
         # loss of focus should hide the popup
         self.Bind(wx.EVT_KILL_FOCUS, self._on_focus_loss)
-        self.Bind(wx.EVT_SET_FOCUS, self._on_focus)
 
 
     def SetValue(self, value):
@@ -80,7 +77,6 @@ class AcDbTextCtrl(DbTextCtrl):
                 self.popup.Show(False)
                 return
 
-
         # select candidates from database
         result = self.session.query(self.candidates_table.name)\
                              .filter(self.candidates_table.name.like("%{0}%".format(txt)))\
@@ -90,29 +86,8 @@ class AcDbTextCtrl(DbTextCtrl):
         for candidate in result:
             self.select_candidates.append(candidate.name)
 
-        self._show_popup(self.select_candidates, txt)
-
-
-    def _show_popup(self, candidates, txt):
-        """
-        set up the popup and bring it on
-        """
-        self._resize_popup(candidates, txt)
-        self._position_popup()
-
-        candidates.sort()
-
-        if self._popdown:
-            self.popup._set_candidates(candidates, txt)
-            self.popup.candidatebox.SetSelection(0)
-
-        else:
-            candidates.reverse()
-            self.popup._set_candidates(candidates, txt)
-            self.popup.candidatebox.SetSelection(len(candidates)-1)
-
-        if not self.popup.IsShown():
-            self.popup.Show()
+        self.popup.show_candidates(self.select_candidates, txt,
+                                   self.GetScreenPositionTuple(), self.GetSizeTuple())
 
 
     def _on_focus_loss(self, event):
@@ -120,65 +95,13 @@ class AcDbTextCtrl(DbTextCtrl):
         Close the popup when focus is lost
         """
         if self.db_object is not None and self.db_str_attr != "":
-            super(AcDbTextCtrl, self).ChangeValue(getattr(self.db_object, self.db_str_attr))
+            self.SetValue(getattr(self.db_object, self.db_str_attr))
+            self.SetInsertionPointEnd()
 
         if self.popup.IsShown():
             self.popup.Show(False)
 
         event.Skip()
-
-
-    def _on_focus(self, event):
-        """
-        When focus is gained,
-        if empty, show all candidates,
-        else, show matches
-        """
-        txt = self.GetValue()
-        if txt == '':
-            self.select_candidates = self.all_candidates
-            #self._show_popup(self.all_candidates, '')
-        else:
-            self._on_text(event)
-
-        event.Skip()
-
-
-    def _position_popup(self):
-        """Calculate position for popup and
-        display it"""
-        left_x, upper_y = self.GetScreenPositionTuple()
-        _, height = self.GetSizeTuple()
-        popup_width, popup_height = self.popupsize
-
-        if upper_y + height + popup_height > self._screenheight:
-            self._popdown = False
-            self.popup.SetPosition((left_x, upper_y - popup_height))
-        else:
-            self._popdown = True
-            self.popup.SetPosition((left_x, upper_y + height))
-
-
-    def _resize_popup(self, candidates, entered_txt):
-        """Calculate the size for the popup to
-        accomodate the selected candidates"""
-        # Handle empty list (no matching candidates)
-        if len(candidates) == 0:
-            candidate_count = 3.5 # one line
-            #longest = len(entered_txt) + 4 + 4 #4 for 'Add '
-        else:
-            # additional 3 lines needed to show all candidates without scrollbar
-            candidate_count = min(self.max_candidates, len(candidates)) + 2.5
-            longest = max([len(candidate) for candidate in candidates]) + 4
-
-        charheight = self.popup.candidatebox.GetCharHeight()
-        #charwidth = self.popup.candidatebox.GetCharWidth()
-
-        #self.popupsize = wx.Size( charwidth*longest, charheight*candidate_count )
-        self.popupsize = wx.Size(self.Size[0], charheight*candidate_count)
-
-        self.popup.candidatebox.SetSize(self.popupsize)
-        self.popup.SetClientSize(self.popupsize)
 
 
     def _save_changes(self, event):
@@ -191,10 +114,12 @@ class AcDbTextCtrl(DbTextCtrl):
 
 
     def _on_key_down(self, event):
-        """Handle key presses.
+        """
+        Handle key presses.
         Special keys are handled appropriately.
         For other keys, the event is skipped and allowed
-        to be caught by ontext event"""
+        to be caught by ontext event
+        """
         skip = True
         visible = self.popup.IsShown()
         sel = self.popup.candidatebox.GetSelection()
@@ -204,24 +129,25 @@ class AcDbTextCtrl(DbTextCtrl):
             if visible:
                 self.popup.Show(False)
             if self.db_object is not None and self.db_str_attr != "":
-                super(AcDbTextCtrl, self).ChangeValue(getattr(self.db_object, self.db_str_attr))
+                self.SetValue(getattr(self.db_object, self.db_str_attr))
+                self.SetInsertionPointEnd()
 
         # Down key for navigation in list of candidates
         elif event.GetKeyCode() == wx.WXK_DOWN:
             if not visible:
-                skip = False
-            if sel + 1 < self.popup.candidatebox.GetItemCount():
-                self.popup.candidatebox.SetSelection(sel + 1)
+                skip = True
             else:
+                if sel + 1 < self.popup.candidatebox.GetItemCount():
+                    self.popup.candidatebox.SetSelection(sel + 1)
                 skip = False
 
         # Up key for navigation in list of candidates
         elif event.GetKeyCode() == wx.WXK_UP:
             if not visible:
-                skip = False
-            if sel > -1:
-                self.popup.candidatebox.SetSelection(sel - 1)
+                skip = True
             else:
+                if sel > 0:
+                    self.popup.candidatebox.SetSelection(sel - 1)
                 skip = False
 
         # Enter - use current selection for text
@@ -232,7 +158,7 @@ class AcDbTextCtrl(DbTextCtrl):
             elif self.popup.candidatebox.GetSelection() == -1:
                 self.popup.Show(False)
                 if self.db_object is not None and self.db_str_attr != "":
-                    super(AcDbTextCtrl, self).ChangeValue(getattr(self.db_object, self.db_str_attr))
+                    self.SetValue(getattr(self.db_object, self.db_str_attr))
             elif self.popup.candidatebox.GetSelection() == self.popup.add_index:
                 self.SetValue(self.popup.add_text)
                 self.SetInsertionPointEnd()
@@ -250,7 +176,7 @@ class AcDbTextCtrl(DbTextCtrl):
                 self.popup.Show(False)
                 self._save_changes(event)
             else:
-                self.SetValue(self.select_candidates[self.popup.candidatebox.GetSelection()])
+                self.SetValue(self.popup.get_selected())
                 self.SetInsertionPointEnd()
                 self.popup.Show(False)
                 self._save_changes(event)
@@ -262,20 +188,12 @@ class AcDbTextCtrl(DbTextCtrl):
                     self.SetValue(self.popup.add_text)
                     self.SetInsertionPointEnd()
                 else:
-                    self.SetValue(self.select_candidates[self.popup.candidatebox.GetSelection()])
-                    # set cursor at end of text
+                    self.SetValue(self.popup.get_selected())
                     self.SetInsertionPointEnd()
                 skip = False
 
         if skip:
             event.Skip()
-
-
-    def get_choices(self):
-        """Return the current choices.
-        Useful if choices have been added by the user"""
-        return self.all_candidates
-
 
 
 
@@ -286,40 +204,113 @@ class ACPopup(wx.PopupWindow):
     """
     def __init__(self, parent):
         wx.PopupWindow.__init__(self, parent)
-        self.candidatebox = wx.SimpleHtmlListBox(self, -1, choices=[])
+        self.candidatebox = wx.SimpleHtmlListBox(self, -1, choices=[], style=wx.BORDER_THEME)
         self.SetSize((100, 100))
         self.displayed_candidates = []
         self.add_index = -1
         self.add_text = ""
+        self._popdown = True
+
+        self._screenheight = wx.SystemSettings.GetMetric(wx.SYS_SCREEN_Y)
 
 
-    def _set_candidates(self, candidates, txt):
-        """
-        Clear existing candidates and use the supplied candidates
-        Candidates is a list of strings.
-        """
-        # if there is no change, do not update
+    def get_selected(self):
+        """returns the text of item that is selected"""
+        if self._popdown:
+            return self.displayed_candidates[self.candidatebox.GetSelection()]
+        return self.displayed_candidates[self.candidatebox.GetSelection() - 1]
+
+
+    def show_candidates(self, candidates, txt, parent_screen_position, parent_size):
+        """show tha candidate box"""
         if candidates == sorted(self.displayed_candidates):
             pass
 
-        # Remove the current candidates
+        self.displayed_candidates = candidates
+
         self.candidatebox.Clear()
 
         exact_match = False
-        for candidate in candidates:
+        for candidate in self.displayed_candidates:
             if candidate.lower() == txt.lower():
                 exact_match = True
+
+        candidates_size = len(self.displayed_candidates)
+        if not exact_match:
+            candidates_size += 1
+
+        self._resize_popup(candidates_size, parent_size)
+        self._position_popup(parent_screen_position, parent_size)
+
+        def append_add_item():
+            """item that lets you insert new candidates"""
+            if not exact_match:
+                self.candidatebox.Append("<b>Add</b> {0}".format(txt))
+                self.add_index = self.candidatebox.GetItemCount() - 1
+                self.add_text = txt
+            else:
+                self.add_index = -1
+                self.add_text = ""
+
+        if not self._popdown:
+            self.displayed_candidates.reverse()
+            append_add_item()
+
+        for candidate in self.displayed_candidates:
             self.candidatebox.Append(self._htmlformat(candidate, txt))
 
-        self.displayed_candidates = candidates
-
-        if not exact_match:
-            self.candidatebox.Append("<b>Add</b> {0}".format(txt))
-            self.add_index = self.candidatebox.GetItemCount() - 1
-            self.add_text = txt
+        if self._popdown:
+            append_add_item()
+            self.candidatebox.SetSelection(0)
         else:
-            self.add_index = -1
-            self.add_text = ""
+            self.candidatebox.SetSelection(len(candidates)-1)
+
+        if not self.IsShown():
+            self.Show()
+
+
+    def _resize_popup(self, candidate_count, parent_size):
+        """
+        Calculate the size for the popup to
+        accomodate the candidates
+        """
+        #candidate_count = self.candidatebox.GetItemCount()
+        if candidate_count == 0:
+            candidate_count = 2.25
+        else:
+            candidate_count = min(5, candidate_count)
+            candidate_count = max(2, candidate_count)
+            candidate_count += 0.25
+
+        charheight = self.candidatebox.GetCharHeight() + 7
+
+        popup_height = int(float(charheight) * float(candidate_count))
+
+        popupsize = wx.Size(parent_size[0], popup_height)
+
+        self.candidatebox.SetSize(popupsize)
+        self.SetClientSize(popupsize)
+
+
+    def _position_popup(self, parent_screen_position, parent_size):
+        """
+        Calculate position of popup
+        """
+        left_x, upper_y = parent_screen_position
+
+        _, height = parent_size
+        _, popup_height = self.GetSizeTuple()
+
+        if wx.Platform == "__WXMSW__":
+            left_x -= 2
+            height -= 2
+
+        if upper_y + height + popup_height > self._screenheight:
+            self._popdown = False
+            self.SetPosition((left_x, upper_y - popup_height))
+        else:
+            self._popdown = True
+            self.SetPosition((left_x, upper_y + height))
 
 
     def _htmlformat(self, text, substring):
