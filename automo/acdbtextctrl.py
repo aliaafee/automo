@@ -167,9 +167,8 @@ class AcDbTextCtrl(DbTextCtrl):
                 self.SetInsertionPointEnd()
 
                 candidates_count = self.session.query(self.candidates_table.name)\
-                                               .filter(
-                                                    self.candidates_table.name == self.GetValue())\
-                                               .count()
+                                    .filter(self.candidates_table.name == self.GetValue())\
+                                    .count()
                 if candidates_count == 0:
                     new_name = self.candidates_table(name=self.popup.add_text)
                     self.session.add(new_name)
