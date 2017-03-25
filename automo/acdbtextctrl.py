@@ -20,7 +20,8 @@ class AcDbTextCtrl(DbTextCtrl):
     """
     AcDbTextCtrl
     """
-    def __init__(self, parent, session, candidates_table, on_change_callback=None, **kwds):
+    def __init__(self, parent, session, candidates_table,
+                 max_results=20, on_change_callback=None, **kwds):
         super(AcDbTextCtrl, self).__init__(parent, session, on_change_callback,
                                            style=wx.TE_PROCESS_ENTER, **kwds)
 
@@ -30,6 +31,7 @@ class AcDbTextCtrl(DbTextCtrl):
 
         self.candidates_table = candidates_table
 
+        self.max_results = max_results
         self.select_candidates = []
         self.popup = ACPopup(self)
         self.popupsize = wx.Size(-1, -1)
@@ -80,7 +82,8 @@ class AcDbTextCtrl(DbTextCtrl):
         # select candidates from database
         result = self.session.query(self.candidates_table.name)\
                              .filter(self.candidates_table.name.like("%{0}%".format(txt)))\
-                             .order_by(self.candidates_table.name)
+                             .order_by(self.candidates_table.name)\
+                             .limit(self.max_results)
 
         self.select_candidates = []
         for candidate in result:

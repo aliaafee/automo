@@ -25,11 +25,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.2446003"
-     inkscape:cx="359.59297"
-     inkscape:cy="950.92866"
+     inkscape:zoom="2.9861663"
+     inkscape:cx="597.06329"
+     inkscape:cy="908.45543"
      inkscape:document-units="px"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="g4253"
      showgrid="false"
      showguides="true"
      inkscape:window-width="1280"
@@ -761,6 +761,36 @@
          y="116.55975"
          inkscape:export-xdpi="21.116549"
          inkscape:export-ydpi="21.116549" />
+    </g>
+    <g
+       id="g4253"
+       inkscape:export-filename="/Users/ali/Projects/automo/images/src/toolbar_add_24.png"
+       inkscape:export-xdpi="38.544666"
+       inkscape:export-ydpi="38.544666"
+       transform="matrix(0.41088437,0,0,0.41088437,794.19935,75.879516)">
+      <g
+         id="g4267"
+         inkscape:export-filename="/Users/ali/Projects/automo/images/src/toolbar_filter_24.png"
+         inkscape:export-xdpi="38.544708"
+         inkscape:export-ydpi="38.544708">
+        <path
+           sodipodi:nodetypes="sssscsssscs"
+           style="opacity:1;fill:#999999;fill-opacity:1;stroke:#000000;stroke-width:4.86754942;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="m -485.57941,205.81983 c 0,2.81266 1.04862,5.55965 3.24433,7.31746 l 7.38086,5.90887 c 3.38825,2.71252 6.90996,-0.83723 6.90996,-3.64989 l 0,-30.64453 20.20291,-28.70692 c 1.61876,-2.30014 -0.83723,-7.01183 -3.64989,-7.01183 l -54.42434,0 c -2.81266,0 -4.92314,4.83462 -3.14246,7.01183 l 23.47863,28.70692 z"
+           id="path4255"
+           inkscape:connector-curvature="0"
+           inkscape:export-xdpi="21.116549"
+           inkscape:export-ydpi="21.116549" />
+        <rect
+           style="opacity:1;fill:none;fill-opacity:1;stroke:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           id="rect4257"
+           width="136.38593"
+           height="136.38593"
+           x="-545.00385"
+           y="116.55975"
+           inkscape:export-xdpi="21.116549"
+           inkscape:export-ydpi="21.116549" />
+      </g>
     </g>
   </g>
 </svg>
