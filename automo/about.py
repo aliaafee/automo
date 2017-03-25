@@ -5,6 +5,7 @@ import wx
 from wx.lib.wordwrap import wordwrap
 import wx.lib.agw.hyperlink as hl
 
+from _version import __version__
 from images import bitmap_from_base64, icon_robot_b64
 
 class AboutDlg(wx.Dialog):
@@ -21,7 +22,7 @@ class AboutDlg(wx.Dialog):
             "Program to automate the tedious job of hand writing prescriptions everyday."
             "",
             250, wx.ClientDC(self))
-        version = "0.1"
+        version = __version__
         website = "https://github.com/aliaafee/automo"
         copyrights = "(C) 2017 Ali Aafee"
 

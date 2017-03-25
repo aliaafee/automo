@@ -10,6 +10,7 @@ import sys
 import getopt
 import wx
 
+from _version import __version__
 from mainframe import MainFrame
 
 import database
@@ -20,7 +21,7 @@ class MoPresc(wx.App):
     The Main wx App Object
     """
     def __init__(self, parent=None):
-        self.main_frame = None;
+        self.main_frame = None
         wx.App.__init__(self, parent)
 
 
@@ -33,7 +34,7 @@ class MoPresc(wx.App):
 
 def app_license():
     """ App license """
-    print "Auto MO"
+    print "Auto MO {0}".format(__version__)
     print "--------------------------------"
     print "Copyright (C) 2017 Ali Aafee"
     print ""
