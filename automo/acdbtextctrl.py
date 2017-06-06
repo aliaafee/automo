@@ -33,7 +33,7 @@ class AcDbTextCtrl(DbTextCtrl):
 
         self.max_results = max_results
         self.select_candidates = []
-        self.popup = ACPopup(self)
+        self.popup = ACPopup(self, self._on_click_choice)
         self.popupsize = wx.Size(-1, -1)
 
         self._set_bindings()
@@ -198,13 +198,23 @@ class AcDbTextCtrl(DbTextCtrl):
             event.Skip()
 
 
+    def _on_click_choice(self, event):
+        if self.popup.candidatebox.GetSelection() == self.popup.add_index:
+            self.SetValue(self.popup.add_text)
+            self.SetInsertionPointEnd()
+        else:
+            self.SetValue(self.popup.get_selected())
+            self.SetInsertionPointEnd()
+
+
+
 
 class ACPopup(wx.PopupWindow):
     """
     The popup that displays the candidates for
     autocompleting the current text in the textctrl
     """
-    def __init__(self, parent):
+    def __init__(self, parent, on_click_choice):
         wx.PopupWindow.__init__(self, parent)
         self.candidatebox = wx.SimpleHtmlListBox(self, -1, choices=[], style=wx.BORDER_THEME)
         self.SetSize((100, 100))
@@ -214,6 +224,8 @@ class ACPopup(wx.PopupWindow):
         self._popdown = True
 
         self._screenheight = wx.SystemSettings.GetMetric(wx.SYS_SCREEN_Y)
+
+        self.candidatebox.Bind(wx.EVT_LISTBOX, on_click_choice)
 
 
     def get_selected(self):
