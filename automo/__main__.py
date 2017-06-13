@@ -48,6 +48,8 @@ def usage():
     print "       Displays this help"
     print "    -d, --debug"
     print "       Output database debug data"
+    print "    -i, --icd10claml [filename]"
+    print "       Import ICD10 Classification from ClaML xml file"
 
 
 def start(uri, debug):
@@ -61,15 +63,41 @@ def start(uri, debug):
     app.MainLoop()
 
 
+def import_icd10claml(filename, uri, debug):
+    """Import Icd 10 ClaML file to database"""
+    database.StartEngine(uri, debug, __version__)
+
+    session = database.Session()
+
+    import icd10claml
+
+    print "Importing ClaML from {0}...".format(filename)
+
+    icd10claml.import_to_database(filename, session)
+
+    print "Done import"
+
+
 def db_test():
     """ test code to check database functionality """
+    from database import *
+
     print "Testing Database"
     session = database.Session()
+
+    print "Add Ward"
+    sw_ward = database.Ward(
+        name="Surgical Ward",
+        bed_prefix="SW"
+    )
+    session.add(sw_ward)
+    session.commit()
 
     print "Add beds"
     for x in range(10):
         new_bed = database.Bed(
-            name="SW {0}".format(x)
+            ward_id=sw_ward.id,
+            number=x + 1
         )
         session.add(new_bed)
     session.commit()
@@ -91,11 +119,12 @@ def db_test():
     session.commit()
 
     print "Add dxs"
-    new_dx = database.Diagnosis(icd_code="10.1", name="Acute Appendicitis")
+    """
+    new_dx = database.Icd10Category(id="A00.0", name="Cholera")
     session.add(new_dx)
-    new_dx = database.Diagnosis(icd_code="10.5", name="Acute Pancreatitis")
+    new_dx = database.Icd10Category(id="A02.1", name="Salmonella sepsis")
     session.add(new_dx)
-    session.commit()
+    """
 
     print "Add Patient"
     new_pt = database.Patient(
@@ -118,9 +147,9 @@ def db_test():
     )
     session.add(pre_admission)
     session.commit()
-    pre_admission_diagnosis = database.AdmissionDiagnosis(
+    pre_admission_diagnosis = database.Diagnosis(
         admission_id=pre_admission.id,
-        diagnosis_id=2,
+        icd10class_code="A00.0",
         date=datetime.date(2017, 6, 8)
     )
     session.add(pre_admission_diagnosis)
@@ -152,9 +181,9 @@ def db_test():
     )
     session.add(new_admission)
     session.commit()
-    new_admission_diagnosis = database.AdmissionDiagnosis(
+    new_admission_diagnosis = database.Diagnosis(
         admission_id=new_admission.id,
-        diagnosis_id=1,
+        icd10class_code="A02.1",
         date=datetime.date(2017, 6, 8)
     )
     session.add(new_admission_diagnosis)
@@ -178,18 +207,18 @@ def db_test():
 
     p = new_pt
 
-    import code
-    code.interact(local=dict(globals(), **locals()))
+    import code; code.interact(local=dict(globals(), **locals()))
 
     exit()
 
 
 def main(argv):
     """ starts the app, also reads command line arguments """
+    database_uri = "sqlite:///wardpresc-data.db"
     debug = False
 
     try:
-        opts, args = getopt.getopt(argv, "hd", ["help", "debug"])
+        opts, args = getopt.getopt(argv, "hdi:", ["help", "debug", "icd10claml="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -198,10 +227,13 @@ def main(argv):
         if opt in ("-h", "--help"):
             usage()
             sys.exit()
+        if opt in ("-i", "--icd10claml"):
+            import_icd10claml(arg, database_uri, debug)
+            sys.exit()
         if opt in ("-d", "--debug"):
             debug = True
 
-    start("sqlite:///wardpresc-data.db", debug)
+    start(database_uri, debug)
 
 
 if __name__ == '__main__':
