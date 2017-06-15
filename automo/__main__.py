@@ -56,6 +56,7 @@ def start(uri, debug):
     """ starts db session at the given db uri """
     database.StartEngine(uri, debug, __version__)
 
+    #this will be removed
     db_test()
 
     app = MoPresc()
@@ -80,13 +81,28 @@ def import_icd10claml(filename, uri, debug):
 
 def db_test():
     """ test code to check database functionality """
+    """ this will be removed eventually"""
     from database import *
 
     print "Testing Database"
-    session = database.Session()
+    session = Session()
+
+    print "Deleting All Data"
+    count = session.query(Ward).delete()
+    print count
+    count = session.query(Bed).delete()
+    print count
+    count = session.query(Doctor).delete()
+    print count
+    count = session.query(Drug).delete()
+    print count
+    count = session.query(Patient).delete()
+    print count
+    count = session.query(Admission).delete()
+    print count
 
     print "Add Ward"
-    sw_ward = database.Ward(
+    sw_ward = Ward(
         name="Surgical Ward",
         bed_prefix="SW"
     )
@@ -95,7 +111,7 @@ def db_test():
 
     print "Add beds"
     for x in range(10):
-        new_bed = database.Bed(
+        new_bed = Bed(
             ward_id=sw_ward.id,
             number=x + 1
         )
@@ -103,7 +119,7 @@ def db_test():
     session.commit()
 
     print "Add doctor"
-    doc = database.Doctor(
+    doc = Doctor(
         name="Dr. Ali Aafee",
         pmr_no="PMR-001"
     )
@@ -111,23 +127,15 @@ def db_test():
     session.commit()
 
     print "Add drugs"
-    drg = database.Drug(name="Ceftriaxone 1g")
+    drg = Drug(name="Ceftriaxone 1g")
     session.add(drg)
     session.commit()
-    drg = database.Drug(name="Metronidazole 500mg")
+    drg = Drug(name="Metronidazole 500mg")
     session.add(drg)
     session.commit()
-
-    print "Add dxs"
-    """
-    new_dx = database.Icd10Category(id="A00.0", name="Cholera")
-    session.add(new_dx)
-    new_dx = database.Icd10Category(id="A02.1", name="Salmonella sepsis")
-    session.add(new_dx)
-    """
 
     print "Add Patient"
-    new_pt = database.Patient(
+    new_pt = Patient(
         name="Ali Aafee",
         age="30",
         sex="M"
@@ -137,7 +145,7 @@ def db_test():
     print new_pt.id
 
     import datetime
-    pre_admission = database.Admission(
+    pre_admission = Admission(
         patient_id=new_pt.id,
         discharged_bed_id=2,
         admitted_date=datetime.date(2017, 5, 8),
@@ -147,9 +155,9 @@ def db_test():
     )
     session.add(pre_admission)
     session.commit()
-    pre_admission_diagnosis = database.Diagnosis(
+    pre_admission_diagnosis = database.MainCondition(
         admission_id=pre_admission.id,
-        icd10class_code="A00.0",
+        icd10class_code="K35",
         date=datetime.date(2017, 6, 8)
     )
     session.add(pre_admission_diagnosis)
@@ -181,9 +189,9 @@ def db_test():
     )
     session.add(new_admission)
     session.commit()
-    new_admission_diagnosis = database.Diagnosis(
+    new_admission_diagnosis = database.MainCondition(
         admission_id=new_admission.id,
-        icd10class_code="A02.1",
+        icd10class_code="K85.1",
         date=datetime.date(2017, 6, 8)
     )
     session.add(new_admission_diagnosis)

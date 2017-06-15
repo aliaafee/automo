@@ -27,17 +27,19 @@ Base = declarative_base(cls=Base)
 class Icd10Modifier(Base):
     code = Column(String(10), primary_key=True)
 
+    name = Column(String(250))
+
     text = Column(Text())
     note = Column(Text())
     classes = relationship("Icd10ModifierClass")
 
 
 class Icd10ModifierClass(Base):
-    code = Column(String(10), primary_key=True)
+    code = Column(String(20), primary_key=True)
 
     code_short = Column(String(10))
 
-    preferred = Column(String(25))
+    preferred = Column(String(250))
     definition = Column(Text())
     inclusion = Column(Text())
     exclusion = Column(Text())
@@ -59,10 +61,13 @@ class Icd10Class(Base):
     note = Column(Text())
     coding_hint = Column(Text())
 
-    usage = Column(Enum("dagger", "aster"), name="icd10_category_usage")
+    usage = Column(Enum("dagger", "aster"), name="usage")
 
     modifier_code = Column(String(10), ForeignKey('icd10modifier.code'))
-    modifier = relationship("Icd10Modifier")
+    modifier = relationship("Icd10Modifier", foreign_keys=[modifier_code])
+
+    modifier_extra_code = Column(String(10), ForeignKey('icd10modifier.code'))
+    modifier_extra = relationship("Icd10Modifier", foreign_keys=[modifier_extra_code])
 
     #exclude_modifer_codes = Column(String(250))
 
@@ -72,7 +77,8 @@ class Icd10Class(Base):
 
     chapter_code = Column(String(10))
 
-    diagnoses = relationship("Diagnosis", back_populates="icd10class")
+    main_conditions = relationship("MainCondition", back_populates="icd10class")
+    other_conditions = relationship("OtherCondition", back_populates="icd10class")
 
 
 class Patient(Base):
@@ -109,7 +115,9 @@ class Admission(Base):
     admitting_doctor_id = Column(Integer, ForeignKey('doctor.id'))
     admitting_doctor = relationship("Doctor", back_populates="admissions")
 
-    diagnoses = relationship("Diagnosis")
+    #diagnoses = relationship("Diagnosis")
+    main_conditions = relationship("MainCondition")
+    other_conditions = relationship("OtherCondition")
 
     admission_notes = Column(Text())
     progress_notes = Column(Text())
@@ -143,17 +151,44 @@ class Ward(Base):
     beds = relationship("Bed", back_populates="ward")
 
 
-class Diagnosis(Base):
+class MainCondition(Base):
     id = Column(Integer, primary_key=True)
 
     admission_id = Column(Integer, ForeignKey('admission.id'))
-    admission = relationship("Admission", back_populates="diagnoses")
+    admission = relationship("Admission", back_populates="main_conditions")
 
     icd10class_code = Column(Integer, ForeignKey('icd10class.code'))
     icd10class = relationship("Icd10Class")
 
     icd10modifier_class_code = Column(Integer, ForeignKey('icd10modifierclass.code'))
-    icd10modifier_class = relationship("Icd10ModifierClass")
+    icd10modifier_class = relationship("Icd10ModifierClass",
+                                       foreign_keys=[icd10modifier_class_code])
+
+    icd10modifier_extra_class_code = Column(Integer, ForeignKey('icd10modifierclass.code'))
+    icd10modifier_extra_class = relationship("Icd10ModifierClass",
+                                             foreign_keys=[icd10modifier_extra_class_code])
+
+    date = Column(Date())
+
+    comment = Column(Text())
+
+
+class OtherCondition(Base):
+    id = Column(Integer, primary_key=True)
+
+    admission_id = Column(Integer, ForeignKey('admission.id'))
+    admission = relationship("Admission", back_populates="other_conditions")
+
+    icd10class_code = Column(Integer, ForeignKey('icd10class.code'))
+    icd10class = relationship("Icd10Class")
+
+    icd10modifier_class_code = Column(Integer, ForeignKey('icd10modifierclass.code'))
+    icd10modifier_class = relationship("Icd10ModifierClass",
+                                       foreign_keys=[icd10modifier_class_code])
+
+    icd10modifier_extra_class_code = Column(Integer, ForeignKey('icd10modifierclass.code'))
+    icd10modifier_extra_class = relationship("Icd10ModifierClass",
+                                             foreign_keys=[icd10modifier_extra_class_code])
 
     date = Column(Date())
 
