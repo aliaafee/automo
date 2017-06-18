@@ -3,28 +3,42 @@ Import Icd10 Classification ClaMl xml file into database
 """
 import os.path
 import re
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from sqlalchemy import and_
 
 
+from icd10rubrictohtml import icd10rubric_to_html
 from database import Session,\
                      Icd10ModifierClass,\
                      Icd10Modifier,\
                      Icd10Class
 
+def get_rubrics(tag):
+    rubrics_str_dict = {}
+    rubrics = tag.find_all("Rubric")
+    for rubric in rubrics:
+        if 'kind' in rubric.attrs.keys():
+            kind = rubric['kind']
+            rubric_str = u"".join(unicode(x) for x in rubric.contents).strip()
+            if kind not in rubrics_str_dict.keys():
+                rubrics_str_dict[kind] = rubric_str
+            else:
+                rubrics_str_dict[kind] += rubric_str
 
-def get_rubriks(tag):
-    rubriks_dict = {}
-    rubriks = tag.find_all("Rubric")
-    for rubrik in rubriks:
-        if 'kind' in rubrik.attrs.keys():
-            kind = rubrik['kind']
-            #rubriks_dict[kind] = ("".join(str(x) for x in rubrik.contents)).strip()
-            #TODO: Need to convert to html for display, not just stripping tags only
-            rubriks_dict[kind] = (u" ".join(unicode(x) for x in rubrik.stripped_strings)).strip()
+    rubrics_converted_dict = {}
+    for kind, rubric_str in rubrics_str_dict.items():
+        rubric = BeautifulSoup(u'<Rubric kind="{1}">{0}</Rubric>'.format(rubric_str, kind),
+                               "lxml-xml")
 
-    return rubriks_dict
+        icd10rubric_to_html(rubric)
 
+        converted = u"".join(unicode(x) for x in rubric.contents).strip()
+        converted_plain = u" ".join(unicode(x) for x in rubric.stripped_strings).strip()
+
+        rubrics_converted_dict[kind] = converted
+        rubrics_converted_dict["{0}_plain".format(kind)] = converted_plain
+
+    return rubrics_converted_dict
 
 
 def import_to_database(filename, session):
@@ -41,13 +55,13 @@ def import_to_database(filename, session):
                 if 'code' in modifier.attrs.keys():
                     new_modifier = Icd10Modifier(code=modifier['code'])
 
-                    rubriks = get_rubriks(modifier)
+                    rubrics = get_rubrics(modifier)
 
-                    if 'text' in rubriks.keys():
-                        new_modifier.text = rubriks['text']
+                    if 'text' in rubrics.keys():
+                        new_modifier.text = rubrics['text']
 
-                    if 'note' in rubriks.keys():
-                        new_modifier.note = rubriks['note']
+                    if 'note' in rubrics.keys():
+                        new_modifier.note = rubrics['note']
 
                     session.add(new_modifier)
             #session.commit()
@@ -65,22 +79,24 @@ def import_to_database(filename, session):
                     new_modifier_class.modifier_code = modifier_class['modifier']
                     new_modifier_class.code_short = modifier_class['code']
 
-                    rubriks = get_rubriks(modifier_class)
+                    rubrics = get_rubrics(modifier_class)
+                    
 
-                    if 'preferred' in rubriks.keys():
-                        new_modifier_class.preferred = rubriks['preferred']
+                    if 'preferred' in rubrics.keys():
+                        new_modifier_class.preferred = rubrics['preferred']
+                        new_modifier_class.preferred_plain = rubrics['preferred_plain']
 
-                    if 'definition' in rubriks.keys():
-                        new_modifier_class.definition = rubriks['definition']
+                    if 'definition' in rubrics.keys():
+                        new_modifier_class.definition = rubrics['definition']
 
-                    if 'inclusion' in rubriks.keys():
-                        new_modifier_class.inclusion = rubriks['inclusion']
+                    if 'inclusion' in rubrics.keys():
+                        new_modifier_class.inclusion = rubrics['inclusion']
 
-                    if 'exclusion' in rubriks.keys():
-                        new_modifier_class.exclusion = rubriks['exclusion']
+                    if 'exclusion' in rubrics.keys():
+                        new_modifier_class.exclusion = rubrics['exclusion']
 
                     session.add(new_modifier_class)
-            #session.commit()
+            session.commit()
 
             print "Importing Chapters Blocks and Categories"
 
@@ -99,52 +115,61 @@ def import_to_database(filename, session):
                         if 'code' in super_iclass.attrs.keys():
                             new_iclass.parent_code = super_iclass['code']
 
-                    rubriks = get_rubriks(iclass)
+                    rubrics = get_rubrics(iclass)
 
-                    if 'preferred' in rubriks.keys():
-                        new_iclass.preferred = rubriks['preferred']
+                    if 'preferred' in rubrics.keys():
+                        new_iclass.preferred = rubrics['preferred']
+                        new_iclass.preferred_plain = rubrics['preferred_plain']
 
-                    if 'preferredLong' in rubriks.keys():
-                        new_iclass.preferred_long = rubriks['preferredLong']
+                    if 'preferredLong' in rubrics.keys():
+                        new_iclass.preferred_long = rubrics['preferredLong']
 
-                    if 'inclusion' in rubriks.keys():
-                        new_iclass.inclusion = rubriks['inclusion']
+                    if 'inclusion' in rubrics.keys():
+                        new_iclass.inclusion = rubrics['inclusion']
 
-                    if 'exclusion' in rubriks.keys():
-                        new_iclass.exclusion = rubriks['exclusion']
+                    if 'exclusion' in rubrics.keys():
+                        new_iclass.exclusion = rubrics['exclusion']
 
-                    if 'text' in rubriks.keys():
-                        new_iclass.text = rubriks['text']
+                    if 'text' in rubrics.keys():
+                        new_iclass.text = rubrics['text']
 
-                    if 'note' in rubriks.keys():
-                        new_iclass.note = rubriks['note']
+                    if 'note' in rubrics.keys():
+                        new_iclass.note = rubrics['note']
 
-                    if 'coding-hint' in rubriks.keys():
-                        new_iclass.coding_hint = rubriks['coding-hint']
+                    if 'coding-hint' in rubrics.keys():
+                        new_iclass.coding_hint = rubrics['coding-hint']
 
                     session.add(new_iclass)
-            #session.commit()
 
             print "Getting chapter codes for categories and blocks"
 
-            categories = session.query(Icd10Class).filter(Icd10Class.kind != 'chapter')
-
             def get_top_parent_code(iclass):
-                #Recursively goes to the top parent, ie chapter
+                """Recursively goes to the top parent, ie chapter"""
                 if iclass.parent is None:
                     return iclass.code
                 return get_top_parent_code(iclass.parent)
 
+            categories = session.query(Icd10Class).filter(Icd10Class.kind != 'chapter')
             for category in categories:
                 top_parent_code = get_top_parent_code(category)
-
                 category.chapter_code = top_parent_code
 
-            #session.commit()
+            print "Getting block codes for categories"
+
+            def get_parent_block_code(iclass):
+                """Recursively goes to the parent block"""
+                if iclass.kind == "block":
+                    return iclass.code
+                return get_parent_block_code(iclass.parent)
+
+            categories = session.query(Icd10Class).filter(Icd10Class.kind == 'category')
+            for category in categories:
+                parent_block_code = get_parent_block_code(category)
+                category.parent_block_code = parent_block_code
 
         print "Assigning Modifer Codes to Categories"
         print "This looks for a file named icd2016ens-category-modifiers.csv "\
-              "in the same directory as the xml file."
+                "in the same directory as the xml file."
 
         mod_filename = os.path.join(os.path.dirname(filename),
                                     "icd2016ens-category-modifiers.csv")
@@ -175,6 +200,6 @@ def import_to_database(filename, session):
                                 print "No space for mod {0} in cat {1}".format(mod_code, m_cat.code)
 
         session.commit()
-    except:
-        print "Error occured while importing icd10codes."
+    except IOError as e:
+        print "Error {0}: {1}".format(e.errno, e.strerror)
         session.rollback()

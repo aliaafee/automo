@@ -53,6 +53,8 @@ class Icd10Class(Base):
 
     kind = Column(Enum("chapter", "block", "category"))
 
+    preferred_plain = Column(String(250))
+
     preferred = Column(String(250))
     preferred_long = Column(Text())
     inclusion = Column(Text())
@@ -76,6 +78,7 @@ class Icd10Class(Base):
                             backref=backref("parent", remote_side='Icd10Class.code'))
 
     chapter_code = Column(String(10))
+    parent_block_code = Column(String(10))
 
     main_conditions = relationship("MainCondition", back_populates="icd10class")
     other_conditions = relationship("OtherCondition", back_populates="icd10class")
