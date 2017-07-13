@@ -75,7 +75,7 @@ class AcDbTextCtrl(DbTextCtrl):
         # and save changes(ie: set data to "")
         if not txt:
             self._save_changes(event)
-            if self.popup.IsShown:
+            if self.popup.IsShown():
                 self.popup.Show(False)
                 return
 

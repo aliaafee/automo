@@ -136,8 +136,10 @@ def db_test():
 
     print "Add Patient"
     new_pt = Patient(
+        hospital_no="1231",
+        national_id_no="A046974",
         name="Ali Aafee",
-        age="30",
+        date_of_birth=datetime.date(1985, 10, 17),
         sex="M"
     )
     session.add(new_pt)
@@ -155,14 +157,16 @@ def db_test():
     )
     session.add(pre_admission)
     session.commit()
-    pre_admission_diagnosis = database.MainCondition(
+    pre_admission_diagnosis = database.Condition(
         admission_id=pre_admission.id,
         icd10class_code="K35",
         date=datetime.date(2017, 6, 8)
     )
     session.add(pre_admission_diagnosis)
     session.commit()
-    med = database.DailyRx(
+    med = database.Prescription(
+        date_from=datetime.date(2017, 6, 8),
+        date_to=datetime.date(2017, 6, 15),
         admission_id=pre_admission.id,
         drug_id=1,
         drug_order="IV BD x 10 days",
@@ -170,7 +174,9 @@ def db_test():
     )
     session.add(med)
     session.commit()
-    med = database.DailyRx(
+    med = database.Prescription(
+        date_from=datetime.date(2017, 6, 8),
+        date_to=datetime.date(2017, 6, 20),
         admission_id=pre_admission.id,
         drug_id=2,
         drug_order="IV TDS x 10 days",
@@ -189,9 +195,10 @@ def db_test():
     )
     session.add(new_admission)
     session.commit()
-    new_admission_diagnosis = database.MainCondition(
+    new_admission_diagnosis = database.Condition(
         admission_id=new_admission.id,
-        icd10class_code="K85.1",
+        icd10class_code="M72.6",
+        icd10modifier_class_code="S13M00_57",
         date=datetime.date(2017, 6, 8)
     )
     session.add(new_admission_diagnosis)
@@ -214,6 +221,8 @@ def db_test():
     session.commit()
 
     p = new_pt
+    app = wx.PySimpleApp(0)
+    from icd10coder import Icd10Coder
 
     import code; code.interact(local=dict(globals(), **locals()))
 

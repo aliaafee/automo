@@ -4,7 +4,7 @@ Import Icd10 Classification ClaMl xml file into database
 import os.path
 import re
 from bs4 import BeautifulSoup, Tag
-from sqlalchemy import and_
+from sqlalchemy import and_, update
 
 
 from icd10rubrictohtml import icd10rubric_to_html
@@ -80,7 +80,7 @@ def import_to_database(filename, session):
                     new_modifier_class.code_short = modifier_class['code']
 
                     rubrics = get_rubrics(modifier_class)
-                    
+
 
                     if 'preferred' in rubrics.keys():
                         new_modifier_class.preferred = rubrics['preferred']
@@ -178,6 +178,13 @@ def import_to_database(filename, session):
             for line in modfile:
                 line_lst = re.split(",", line, 1)
                 mod_code = (line_lst[0]).strip()
+
+                line_lst = re.split(",", line_lst[1], 1)
+                name_str = (line_lst[0]).strip()
+
+                modifier = session.query(Icd10Modifier).filter(Icd10Modifier.code == mod_code).one()
+                modifier.name = name_str
+
                 cats_str = line_lst[1]
 
                 cats = re.split(",", cats_str)

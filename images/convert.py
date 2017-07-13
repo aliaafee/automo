@@ -16,13 +16,15 @@ import base64
 import wx
 
 
-def bitmap_from_base64(str_base64):
+def get(image_name):
     \"\"\" Converts a base64 bitmap into a wx.Bitmap \"\"\"
-    image = base64.b64decode(str_base64)
+    image = base64.b64decode(_IMAGE[image_name])
     stream = cStringIO.StringIO(image)
 
     return wx.BitmapFromImage(wx.ImageFromStream(stream))
 
+
+_IMAGE = {}
 
 """
 
@@ -31,8 +33,8 @@ files = os.listdir("src")
 for filename in files:
     with open(os.path.join("src",filename), "rb") as image_file:
         b64 = base64.b64encode(image_file.read())
-        var_name = "{0}_b64".format(os.path.splitext(filename)[0])
-        result += "{0} = \"{1}\"\n\n".format(var_name, b64)
+        var_name = "{0}".format(os.path.splitext(filename)[0])
+        result += "_IMAGE['{0}'] = \"{1}\"\n\n".format(var_name, b64)
 
 print result
 

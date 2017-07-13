@@ -1,115 +1,23 @@
 """
 ICD-10 Coder
 """
+import string
+import datetime
+import re
 import wx
 import wx.html
 from sqlalchemy import or_, and_
+from sqlalchemy import text
+from sqlalchemy.orm.exc import NoResultFound
 from urlparse import urlparse, parse_qs
 from ObjectListView import ObjectListView, ColumnDefn, OLVEvent
 
 from objectlistviewmod import ObjectListViewMod
-from database import Icd10Class
-
-
-class SearchResultList(wx.HtmlListBox):
-    """
-    Display results of sqlalchemy query
-    """
-    def __init__(self, parent, session, style=wx.SUNKEN_BORDER, **kwds):
-        super(SearchResultList, self).__init__(
-            parent, style=style, **kwds
-        )
-        self.parent = parent
-        self.session = session
-        self.query_string = ""
-        self.query_result = None
-        self.SetItemCount(0)
-
-        self.visible_begin = -1
-        self.visible_end = -1
-        self.visible_items = []
-
-        if wx.Platform == "__WXMSW__":
-            self.SetSelectionBackground(wx.SystemSettings_GetColour(wx.SYS_COLOUR_MENUHILIGHT))
-        else:
-            self.SetSelectionBackground(wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHT))
-
-
-    def clear(self):
-        """Remove all items from list"""
-        self.SetItemCount(0)
-        self.query_string = ""
-        self.query_result = None
-        self.Refresh()
-
-
-    def set_result(self, query_result, query_string):
-        """
-        Set the sqlalchemy query result, and highlight the 
-        query string in the results.
-        """
-        self.query_string = query_string
-        self.query_result = query_result
-
-        self.visible_begin = -1
-        self.visible_end = -1
-        self.visible_items = []
-
-        self.ScrollToRow(0)
-        self.SetItemCount(self.query_result.count())
-
-        self.RefreshRows(self.GetVisibleRowsBegin(), self.GetVisibleRowsEnd())
-        self.Refresh()
-
-
-    def GetSelectedObject(self):
-        """Return the selected Object"""
-        index = self.GetSelection() - self.GetVisibleRowsBegin()
-        try:
-            return self.visible_items[index]
-        except IndexError:
-            return None
-
-
-    def _fetch_visible(self):
-        self.visible_begin = self.GetVisibleRowsBegin()
-        self.visible_end = self.GetVisibleRowsEnd()
-        row_limit = self.visible_end - self.visible_begin
-        if row_limit < 50:
-            row_limit = 50
-        self.visible_items = self.query_result\
-                                .offset(self.visible_begin)\
-                                .limit(row_limit).all()
-
-
-    def _htmlformat(self, text, substring):
-        """
-        Format the text
-        to highlight the substring in html
-        """
-        # empty substring
-        if len(substring) == 0:
-            return text
-        else:
-            return text.replace(substring, '<b>' + substring + '</b>', 1)
-
-
-    def OnGetItem(self, n):
-        if self.query_result is None:
-            return ""
-        start = self.GetVisibleRowsBegin()
-        end = self.GetVisibleRowsEnd()
-        if not(start == self.visible_begin and end == self.visible_end):
-            self._fetch_visible()
-
-        try:
-            item = self.visible_items[n - self.visible_begin]
-            return self._htmlformat(
-                u"{0} {1}".format(item.code, item.preferred_plain), self.query_string)
-        except IndexError:
-            return "Click to load..."
-
-
+from database import Icd10Class,\
+                     Icd10ModifierClass,\
+                     Condition
+from dbqueryresultbox import DbQueryResultBox
+from dbcombobox import DbComboBox
 
 
 class Icd10ChapterTree(wx.TreeCtrl):
@@ -118,7 +26,7 @@ class Icd10ChapterTree(wx.TreeCtrl):
     """
     def __init__(self, parent, session, **kwds):
         super(Icd10ChapterTree, self).__init__(
-            parent, style=wx.TR_HAS_BUTTONS|wx.wx.TR_HAS_VARIABLE_ROW_HEIGHT|wx.SUNKEN_BORDER,
+            parent, style=wx.TR_HAS_BUTTONS,
             **kwds
         )
 
@@ -139,7 +47,6 @@ class Icd10ChapterTree(wx.TreeCtrl):
             return result
 
         crumbs = get_class_crumbs(icd10_class)
-        print crumbs
 
         current_parent_id = self.root_id
         current_item_id, cookie = self.GetFirstChild(current_parent_id)
@@ -163,8 +70,8 @@ class Icd10ChapterTree(wx.TreeCtrl):
                     current_item_id, cookie = self.GetNextChild(current_parent_id, cookie)
 
 
-    def GetSelectedObject(self):
-        """Return the selected object"""
+    def get_selected_class(self):
+        """Return the selected Icd10Class object"""
         item_id = self.GetSelection()
         if not item_id.IsOk():
             return None
@@ -219,8 +126,9 @@ class Icd10CategoryList(wx.SimpleHtmlListBox):
     """
     List of Icd10 Categories in a block
     """
-    def __init__(self, parent, session, **kwds):
-        super(Icd10CategoryList, self).__init__(parent, **kwds)
+    def __init__(self, parent, session, style=wx.SUNKEN_BORDER, **kwds):
+        super(Icd10CategoryList, self).__init__(
+            parent, style=style, **kwds)
 
         self.session = session
 
@@ -231,6 +139,15 @@ class Icd10CategoryList(wx.SimpleHtmlListBox):
             self.SetSelectionBackground(wx.SystemSettings_GetColour(wx.SYS_COLOUR_MENUHILIGHT))
         else:
             self.SetSelectionBackground(wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHT))
+
+
+    def get_selected_category(self):
+        """Return selected Icd10Category object"""
+        try:
+            self.selected_category = self.categories[self.GetSelection()]
+        except IndexError:
+            self.selected_category = None
+        return self.selected_category
 
 
     def _goto_selected(self):
@@ -246,12 +163,23 @@ class Icd10CategoryList(wx.SimpleHtmlListBox):
         self.selected_category = self.session.query(Icd10Class)\
                                     .filter(Icd10Class.code == code)\
                                     .one()
+        if self.selected_category is None:
+            return
+
         self.set_block(self.selected_category.parent_block_code)
         self._goto_selected()
 
 
     def set_category(self, category):
         """Set the category that is selected"""
+        if category is None:
+            self.categories = []
+            self.Clear()
+            self.selected_category = None
+            return
+
+        self.get_selected_category()
+
         if self.selected_category is not None:
             if category.code == self.selected_category.code:
                 return
@@ -281,11 +209,36 @@ class Icd10CategoryList(wx.SimpleHtmlListBox):
         htmls = []
         for category in categories:
             self.categories.append(category)
-            html = u'<table width="100%" cellspacing="0" border="0"><tr><td width="50"><b>{0}</b></td>'\
-                    u'<td><b>{1}</b></td></tr><tr><td></td><td>{2}</td></tr></table>'
+            main_cat = u'<table width="100%" cellspacing="0" border="0">'\
+                        '<tr height="2" bgcolor="black">'\
+                            '<td cellpadding="0" colspan="2"></td>'\
+                        '</tr>'\
+                        '<tr>'\
+                            '<td width="50" bgcolor="black">'\
+                                '<font color="white"><b>{0}</b></font>'\
+                            '</td>'\
+                            '<td><b>{1}</b></td>'\
+                        '</tr>'\
+                        '<tr>'\
+                            '<td></td>'\
+                            '<td>{2}</td>'\
+                        '</tr>'\
+                    '</table>'
+
+            sub_cat = u'<table width="100%" cellspacing="0" border="0">'\
+                        '<tr>'\
+                            '<td width="50"><b>{0}</b></td>'\
+                            '<td><b>{1}</b></td>'\
+                        '</tr>'\
+                        '<tr>'\
+                            '<td></td>'\
+                            '<td>{2}</td>'\
+                        '</tr>'\
+                    '</table>'
+
+            html = sub_cat
             if len(category.code) <= 3:
-                html = u'<table width="100%" cellspacing="0" border="0"><tr height="2" bgcolor="black"><td cellpadding="0" colspan="2"></td></tr><tr><td width="50" bgcolor="black"><font color="white"><b>{0}</b></font></td>'\
-                    u'<td><b>{1}</b></td></tr><tr><td></td><td>{2}</td></tr></table>'
+                html = main_cat
 
             content = ""
 
@@ -296,13 +249,28 @@ class Icd10CategoryList(wx.SimpleHtmlListBox):
                 content += u"{0}".format(category.text)
 
             if category.inclusion is not None:
-                content += u'<table width="100%"><tr><td valign="top" width="40"><b><i>Incl.:</i></b></td><td>{0}</td><tr></table>'.format(category.inclusion)
+                content += u'<table width="100%">'\
+                            '<tr>'\
+                                '<td valign="top" width="40"><b><i>Incl.:</i></b></td>'\
+                                '<td>{0}</td>'\
+                            '<tr>'\
+                        '</table>'.format(category.inclusion)
 
             if category.exclusion is not None:
-                content += u'<table width="100%"><tr><td valign="top" width="40"><b><i>Excl.:</i></b></td><td>{0}</td><tr></table>'.format(category.exclusion)
+                content += u'<table width="100%">'\
+                            '<tr>'\
+                                '<td valign="top" width="40"><b><i>Excl.:</i></b></td>'\
+                                '<td>{0}</td>'\
+                            '<tr>'\
+                        '</table>'.format(category.exclusion)
 
             if category.note is not None:
-                content += u'<table width="100%"><tr><td valign="top" width="40"><b><i>Note:</i></b></td><td>{0}</td><tr></table>'.format(category.note)
+                content += u'<table width="100%">'\
+                            '<tr>'\
+                                '<td valign="top" width="40"><b><i>Note:</i></b></td>'\
+                                '<td>{0}</td>'\
+                            '<tr>'\
+                        '</table>'.format(category.note)
 
             if category.coding_hint is not None:
                 content += u'<div><b><i>Coding Hint:</i></b> {0}</div>'.format(category.coding_hint)
@@ -325,39 +293,330 @@ class Icd10Coder(wx.Dialog):
 
         self.session = session
 
-        grid_sizer = wx.GridBagSizer(0, 0)
+        self.condition = None
+        self.selected_category = None
 
-        #Search terms entered here
-        self.txt_search = wx.TextCtrl(self)
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        splitter = wx.SplitterWindow(self, style=wx.SP_LIVE_UPDATE)
+
+        #right panel with tabs
+        self.left_panel = wx.Notebook(splitter)
+        self.left_panel.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self._on_change_left_panel)
+
+        #search panel
+        search_panel = wx.Panel(self.left_panel)
+        search_panel_sizer = wx.BoxSizer(wx.VERTICAL)
+
+        self.txt_search = wx.TextCtrl(search_panel)
         self.txt_search.Bind(wx.EVT_TEXT, self._on_change_filter)
-        grid_sizer.Add(self.txt_search, wx.GBPosition(0, 0),
-                       flag=wx.EXPAND | wx.ALL, border=5)
+        search_panel_sizer.Add(self.txt_search, 0,
+                               flag=wx.EXPAND | wx.ALL, border=5)
 
-        #Displays search results
-        self.result_list = SearchResultList(self, self.session, size=(200, -1))
+        self.result_list = DbQueryResultBox(search_panel, self.session,
+                                            self._search_result_decorator,
+                                            size=(200, -1))
         self.result_list.Bind(wx.EVT_LISTBOX, self._on_result_selected)
-        grid_sizer.Add(self.result_list, wx.GBPosition(1, 0),
-                       flag=wx.EXPAND | wx.ALL, border=5)
+        search_panel_sizer.Add(self.result_list, 1,
+                               flag=wx.EXPAND | wx.ALL, border=5)
 
-        #Tree view of icd-10 chapters and blocks
-        self.chapter_tree = Icd10ChapterTree(self, self.session, size=wx.Size(200, 0))
+        search_panel.SetSizer(search_panel_sizer)
+        self.left_panel.AddPage(search_panel, "Search")
+
+        #browse panel
+        browse_panel = wx.Panel(self.left_panel)
+        browse_panel_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.chapter_tree = Icd10ChapterTree(browse_panel, self.session, size=wx.Size(200, 0))
         self.chapter_tree.Bind(wx.EVT_TREE_SEL_CHANGED, self._on_tree_selected)
-        grid_sizer.Add(self.chapter_tree, wx.GBPosition(0, 1), wx.GBSpan(2, 1),
-                       flag=wx.EXPAND | wx.ALL, border=5)
+        browse_panel_sizer.Add(self.chapter_tree, 1,
+                               flag=wx.EXPAND | wx.ALL, border=5)
+        browse_panel.SetSizer(browse_panel_sizer)
+        self.left_panel.AddPage(browse_panel, "Browse")
 
         #List of selected categories
-        self.category_list = Icd10CategoryList(self, session)
+        self.right_panel = wx.Panel(splitter)
+        right_panel_sizer = wx.BoxSizer(wx.VERTICAL)
+
+        self.browser_title = wx.html.HtmlWindow(
+            self.right_panel, style=wx.html.HW_SCROLLBAR_AUTO | wx.html.HW_NO_SELECTION | wx.SUNKEN_BORDER,
+            size=(-1, 75))
+        right_panel_sizer.Add(self.browser_title, 0,
+                              flag=wx.EXPAND | wx.TOP | wx.RIGHT | wx.LEFT, border=5)
+        self.browser_title.SetPage(
+            "<table><tr><td><b>Internation Classification of Disease - 10</b></td></tr></table>")
+
+        self.category_list = Icd10CategoryList(self.right_panel, session)
+        self.category_list.Bind(wx.EVT_LISTBOX, self._on_change_category)
         self.category_list.Bind(wx.html.EVT_HTML_LINK_CLICKED, self._on_link_category_list)
-        grid_sizer.Add(self.category_list, wx.GBPosition(0, 2), wx.GBSpan(2, 1),
-                       flag=wx.EXPAND | wx.ALL, border=5)
+        right_panel_sizer.Add(self.category_list, 1,
+                              flag=wx.EXPAND | wx.RIGHT | wx.LEFT | wx.BOTTOM, border=5)
 
-        self.status = wx.StatusBar(self)
-        grid_sizer.Add(self.status, wx.GBPosition(2, 0), wx.GBSpan(1, 3),
-                       flag=wx.EXPAND, border=0)
+        self.right_panel.SetSizer(right_panel_sizer)
 
-        grid_sizer.AddGrowableCol(2)
-        grid_sizer.AddGrowableRow(1)
-        self.SetSizer(grid_sizer)
+        splitter.SplitVertically(self.left_panel, self.right_panel)
+        splitter.SetSashPosition(250)
+        sizer.Add(splitter, 1, wx.EXPAND)
+
+        foot_sizer = wx.BoxSizer(wx.VERTICAL)
+        foot_sizer.AddSpacer((-1, 75))
+
+        self.lbl_modifier = wx.StaticText(self, label="Modifier")
+        self.lbl_modifier.Hide()
+        foot_sizer.Add(self.lbl_modifier, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx. LEFT, border=5)
+        self.cmb_modifier = DbComboBox(self, self.session,
+                                       self._modifier_decorator, size=(200, -1))
+        self.cmb_modifier.Bind(wx.EVT_COMBOBOX, self._on_change_modifier)
+        self.cmb_modifier.Hide()
+        foot_sizer.Add(self.cmb_modifier, 0,
+                       wx.EXPAND | wx.BOTTOM | wx.RIGHT | wx. LEFT, border=5)
+
+        self.lbl_extra_modifier = wx.StaticText(self, label="Additional Modifier")
+        self.lbl_extra_modifier.Hide()
+        foot_sizer.Add(self.lbl_extra_modifier, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx. LEFT,
+                       border=5)
+        self.cmb_extra_modifier = DbComboBox(self, self.session,
+                                             self._modifier_decorator, size=(200, -1))
+        self.cmb_extra_modifier.Bind(wx.EVT_COMBOBOX, self._on_change_extra_modifier)
+        self.cmb_extra_modifier.Hide()
+        foot_sizer.Add(self.cmb_extra_modifier, 0,
+                       wx.EXPAND | wx.BOTTOM | wx.RIGHT | wx. LEFT, border=5)
+
+        self.lbl_date = wx.StaticText(self, label="Date")
+        foot_sizer.Add(self.lbl_date, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx. LEFT,
+                       border=5)
+        self.date_picker = wx.DatePickerCtrl(self,
+                                             style=wx.DP_DROPDOWN)
+        self.date_picker.Bind(wx.EVT_DATE_CHANGED, self._on_change_date)
+        foot_sizer.Add(self.date_picker, 0,
+                       wx.EXPAND | wx.BOTTOM | wx.RIGHT | wx. LEFT, border=5)
+
+        self.lbl_comment = wx.StaticText(self, label="Comment")
+        foot_sizer.Add(self.lbl_comment, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx. LEFT,
+                       border=5)
+        self.txt_comment = wx.TextCtrl(self, size=(200, 60),
+                                       style=wx.TE_MULTILINE)
+        self.txt_comment.Bind(wx.EVT_TEXT, self._on_change_comment)
+        foot_sizer.Add(self.txt_comment, 0,
+                       wx.EXPAND | wx.BOTTOM | wx.RIGHT | wx. LEFT, border=5)
+
+        self.chk_main_condition = wx.CheckBox(self, label="Main Condition")
+        foot_sizer.Add(self.chk_main_condition, 0, wx.EXPAND | wx.ALL, border=5)
+        self.chk_main_condition.Bind(wx.EVT_CHECKBOX, self._on_change_main_condition)
+
+        foot_sizer.AddStretchSpacer()
+
+        button_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.chk_favourites = wx.CheckBox(self, label="Add to Favourites")
+        button_sizer.Add(self.chk_favourites, 0, wx.EXPAND | wx.ALL, border=5)
+        self.btn_ok = wx.Button(self, label="OK")
+        self.btn_ok.Bind(wx.EVT_BUTTON, self._on_ok)
+        button_sizer.Add(self.btn_ok, 0, wx.EXPAND | wx.ALL, border=5)
+        self.btn_cancel = wx.Button(self, label="Cancel")
+        self.btn_cancel.Bind(wx.EVT_BUTTON, self._on_cancel)
+        button_sizer.Add(self.btn_cancel, 0, wx.EXPAND | wx.ALL, border=5)
+        foot_sizer.Add(button_sizer, 0, wx.EXPAND | wx.ALL, border=5)
+
+        sizer.Add(foot_sizer, 0, wx.EXPAND | wx.ALL, border=5)
+
+        self.SetSizer(sizer)
+
+        self.Layout()
+
+
+    def ShowModal(self, condition=None):
+        self.condition = condition
+
+        update_tree = False
+        if self.condition is None:
+            self.condition = Condition()
+            self.left_panel.SetSelection(0)
+        else:
+            update_tree = True
+            self.left_panel.SetSelection(1)
+
+        self.set_category(self.condition.icd10class, update_tree=update_tree)
+
+        if self.condition.date is None:
+            self.condition.date = datetime.date.today()
+
+        wxdatetime = wx.DateTime()
+        wxdatetime.Set(
+            self.condition.date.day,
+            self.condition.date.month - 1,
+            self.condition.date.year
+        )
+        self.date_picker.SetValue(wxdatetime)
+
+        if self.condition.comment is not None:
+            self.txt_comment.ChangeValue(self.condition.comment)
+
+        if self.condition.main_condition is None:
+            self.condition.main_condition = False
+
+        self.chk_main_condition.SetValue(self.condition.main_condition)
+
+        return super(Icd10Coder, self).ShowModal()
+
+
+    def get_condition(self):
+        """Get the condition"""
+        return self.condition
+
+
+    def set_category(self, icd10class, update_tree=False):
+        """Set currently displayed Icd10Class"""
+        self.condition.icd10class = icd10class
+
+        if self.condition.icd10class is None:
+            return
+
+        self.condition.icd10class_code = self.condition.icd10class.code
+
+        self.category_list.set_category(icd10class)
+        self._update_browser_title()
+
+        if update_tree:
+            active_page_text = self.left_panel.GetPageText(self.left_panel.GetSelection())
+            if active_page_text == "Browse":
+                self.chapter_tree.set_class(icd10class)
+
+        if self.condition.icd10class.modifier is not None:
+            self.lbl_modifier.Show()
+            self.lbl_modifier.SetLabel(
+                self.condition.icd10class.modifier.name)
+            self.cmb_modifier.Show()
+            self.cmb_modifier.set_items(
+                self.condition.icd10class.modifier.classes)
+            self.Layout()
+            if self.condition.icd10modifier_class is not None:
+                if self.condition.icd10modifier_class.modifier.code == self.condition.icd10class.modifier_code:
+                    self.cmb_modifier.set_selected_item(self.condition.icd10modifier_class)
+                else:
+                    self.condition.icd10modifier_class_code = None
+                    self.condition.icd10modifier_class = None
+        else:
+            self.lbl_modifier.Hide()
+            self.cmb_modifier.Hide()
+            self.condition.icd10modifier_class_code = None
+            self.condition.icd10modifier_class = None
+            self.Layout()
+
+        if self.condition.icd10class.modifier_extra is not None:
+            self.lbl_extra_modifier.Show()
+            self.lbl_extra_modifier.SetLabel(
+                self.condition.icd10class.modifier_extra.name)
+            self.cmb_extra_modifier.Show()
+            self.cmb_extra_modifier.set_items(
+                self.condition.icd10class.modifier_extra.classes)
+            self.Layout()
+            if self.condition.icd10modifier_extra_class is not None:
+                if self.condition.icd10modifier_extra_class.modifier.code == self.condition.icd10class.modifier_extra_code:
+                    self.cmb_modifier.set_selected_item(self.condition.icd10modifier_extra_class)
+                else:
+                    self.condition.icd10modifier_extra_class_code = None
+                    self.condition.icd10modifier_extra_class = None
+        else:
+            self.lbl_extra_modifier.Hide()
+            self.cmb_extra_modifier.Hide()
+            self.condition.icd10modifier_extra_class_code = None
+            self.condition.icd10modifier_extra_class = None
+            self.Layout()
+
+
+    def _on_ok(self, event):
+        if self.condition.icd10class is None:
+            print "TODO: Error message nothing selected"
+            return
+
+        if self.chk_favourites.GetValue() is True:
+            print "TODO: Add this condition to favorites"
+
+        self.EndModal(wx.ID_OK)
+
+
+    def _on_cancel(self, event):
+        self.EndModal(wx.ID_CANCEL)
+
+
+    def _on_change_modifier(self, event):
+        self.condition.icd10modifier_class = self.cmb_modifier.get_selected_item()
+        if self.condition.icd10modifier_class is not None:
+            self.condition.icd10modifier_class_code = self.condition.icd10modifier_class.code
+        else:
+            self.condition.icd10modifier_class_code = None
+
+
+    def _on_change_extra_modifier(self, event):
+        self.condition.icd10modifier_extra_class = self.cmb_extra_modifier.get_selected_item()
+        if self.condition.icd10modifier_extra_class is not None:
+            self.condition.icd10modifier_extra_class_code = self.condition.icd10modifier_extra_class.code
+        else:
+            self.condition.icd10modifier_extra_class_code = None
+
+
+    def _on_change_date(self, event):
+        new_wxdate = self.date_picker.GetValue()
+        new_date = datetime.date(
+            new_wxdate.GetYear(),
+            new_wxdate.GetMonth() + 1,
+            new_wxdate.GetDay()
+        )
+        if self.condition is not None:
+            self.condition.date = new_date
+
+
+    def _on_change_comment(self, event):
+        new_comment = self.txt_comment.GetValue()
+        if self.condition is not None:
+            self.condition.comment = new_comment
+
+
+    def _on_change_main_condition(self, event):
+        if self.condition is not None:
+            self.condition.main_condition = self.chk_main_condition.GetValue()
+
+
+    def _modifier_decorator(self, modifier_item):
+        return "{0} - {1}".format(modifier_item.code_short,
+                                  modifier_item.preferred)
+
+
+    def _search_result_decorator(self, result_object, query_string):
+        code_str = unicode(result_object.code)
+        title_str = unicode(result_object.preferred_plain)
+
+        if len(query_string) != 0:
+            result = re.search(re.escape(query_string), code_str, re.IGNORECASE)
+            if result is not None:
+                group = unicode(result.group())
+                code_str = string.replace(code_str, group, u'<b>' + group + u'</b>', 1)
+
+        if len(query_string) != 0:
+            result = re.search(re.escape(query_string), title_str, re.IGNORECASE)
+            if result is not None:
+                group = unicode(result.group())
+                title_str = string.replace(title_str, group, u'<b>' + group + u'</b>', 1)
+
+        return u'<table><tr><td width="45" valign="top">{0}</td><td>{1}</td></tr></table>'.format(
+            code_str, title_str
+        )
+
+
+    def _on_change_left_panel(self, event):
+        if wx.Platform == "__WXMSW__":
+            active_page_text = self.left_panel.GetPageText(self.left_panel.GetSelection())
+            if active_page_text == "Browse":
+                current_class = self.category_list.get_selected_category()
+                if current_class is not None:
+                    self.chapter_tree.set_class(current_class)
+            event.Skip()
+        else:
+            active_page_text = self.left_panel.GetPageText(self.left_panel.GetSelection())
+            if active_page_text != "Browse":
+                current_class = self.category_list.get_selected_category()
+                if current_class is not None:
+                    self.chapter_tree.set_class(current_class)
+            event.Skip()
 
 
     def _on_change_filter(self, event):
@@ -379,16 +638,34 @@ class Icd10Coder(wx.Dialog):
 
 
     def _on_result_selected(self, event):
-        result_selected = self.result_list.GetSelectedObject()
-        #self.category_list.set_category(result_selected)
-        self.chapter_tree.set_class(result_selected)
-        print "Search result selected..."
+        result_selected = self.result_list.get_selected_object()
+
+        if result_selected is None:
+            return
+
+        self.set_category(result_selected)
 
 
     def _on_tree_selected(self, event):
-        print "Tree Selected"
-        tree_selected = self.chapter_tree.GetSelectedObject()
-        self.category_list.set_category(tree_selected)
+        tree_selected = self.chapter_tree.get_selected_class()
+
+        if tree_selected is None:
+            return
+
+        if tree_selected.kind is not "category":
+            return
+
+        self.set_category(tree_selected)
+
+
+    def _get_class_from_code(self, code):
+        try:
+            icd10_class = self.session.query(Icd10Class)\
+                            .filter(Icd10Class.code == code)\
+                            .one()
+            return icd10_class
+        except NoResultFound:
+            return None
 
 
     def _on_link_category_list(self, event):
@@ -397,8 +674,65 @@ class Icd10Coder(wx.Dialog):
         if href_p.path == "category":
             query_p = parse_qs(href_p.query)
             if "code" in query_p.keys():
-                self.category_list.set_code(query_p['code'][0])
+                link_class = self._get_class_from_code(query_p['code'][0])
+                if link_class is not None:
+                    self.set_category(link_class, update_tree=True)
+
         print "Clicked a link href={0}".format(link_info.GetHref())
+
+
+    def _update_browser_title(self):
+        if self.condition is None:
+            self.browser_title.SetPage(
+                "<table><tr><td><b>Internation Classification of Disease - 10</b></td></tr></table>")
+            return
+
+        if self.condition.icd10class is None:
+            self.browser_title.SetPage(
+                "<table><tr><td><b>Internation Classification of Disease - 10</b></td></tr></table>")
+            return
+
+        if self.condition.icd10class.kind == "chapter":
+            chapter_html = "<b>Chapter {0} {1}</b>".format(
+                self.condition.icd10class.code, self.condition.icd10class.preferred_plain)
+        else:
+            try:
+                chapter_code, chapter_title = \
+                    self.session.query(Icd10Class.code, Icd10Class.preferred_plain)\
+                        .filter(Icd10Class.code == self.condition.icd10class.chapter_code)\
+                        .one()
+                chapter_html = "<b>Chapter {0} {1}</b>".format(chapter_code, chapter_title)
+            except NoResultFound:
+                chapter_html = ""
+
+
+        if self.condition.icd10class.kind == "block":
+            block_html = "<b>{0} </b> {1}".format(
+                self.condition.icd10class.code, self.condition.icd10class.preferred_plain)
+        else:
+            try:
+                block_code, block_title = \
+                    self.session.query(Icd10Class.code, Icd10Class.preferred_plain)\
+                        .filter(Icd10Class.code == self.condition.icd10class.parent_block_code)\
+                        .one()
+
+                block_html = "<b>{0} </b> {1}".format(block_code, block_title)
+            except NoResultFound:
+                block_html = ""
+
+        self.browser_title.SetPage(
+            "<table><tr><td>{0}</td></tr><tr><td>{1}</td></tr></table>".format(
+                chapter_html, block_html)
+        )
+
+
+    def _on_change_category(self, event):
+        current_class = self.category_list.get_selected_category()
+
+        if current_class is None:
+            return
+
+        self.set_category(current_class, update_tree=True)
 
 
 def main():
@@ -408,9 +742,27 @@ def main():
 
     app = wx.PySimpleApp(0)
 
-    dlg = Icd10Coder(None, session)
-    app.SetTopWindow(dlg)
-    dlg.Show()
+    with Icd10Coder(None, session) as dlg:
+        if dlg.ShowModal() == wx.ID_OK:
+            new_condition = dlg.get_condition()
+            output = "admission id \t {0}\n"\
+                     "icd10class_code \t {1}\n"\
+                     "icd10modifier_class_code \t {2}\n"\
+                     "icd10modifier_extra_class_code \t {3}\n"\
+                     "date \t {4}\n"\
+                     "comment \t {5}\n"\
+                     "main_condition \t {6}\n"
+            print output.format(
+                new_condition.admission_id,
+                new_condition.icd10class_code,
+                new_condition.icd10modifier_class_code,
+                new_condition.icd10modifier_extra_class_code,
+                new_condition.date,
+                new_condition.comment,
+                new_condition.main_condition
+            )
+        else:
+            print "Cancelled"
     app.MainLoop()
 
 

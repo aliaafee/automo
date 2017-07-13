@@ -1,6 +1,9 @@
 """
 SQLalchemy database schema for auto mo.
 """
+import datetime
+import dateutil.relativedelta
+
 from sqlalchemy import Column
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy import Integer, String, ForeignKey, Boolean, Date, Text
@@ -8,6 +11,20 @@ from sqlalchemy.types import Enum
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, backref
+
+
+def format_duration(from_date, to_date):
+    """Format duration to human readable form."""
+    duration = dateutil.relativedelta.relativedelta(
+        to_date, from_date
+    )
+    if duration.years < 1:
+        if duration.months < 1:
+            return "{0} days".format(duration.days)
+        return "{0} months {1} days".format(duration.months, duration.days)
+    if duration.years < 5:
+        return "{0} years {1} months".format(duration.years, duration.months)
+    return "{0} years".format(duration.years)
 
 
 Session = sessionmaker()
@@ -80,8 +97,8 @@ class Icd10Class(Base):
     chapter_code = Column(String(10))
     parent_block_code = Column(String(10))
 
-    main_conditions = relationship("MainCondition", back_populates="icd10class")
-    other_conditions = relationship("OtherCondition", back_populates="icd10class")
+    conditions = relationship("Condition", back_populates="icd10class")
+    #other_conditions = relationship("OtherCondition", back_populates="icd10class")
 
 
 class Patient(Base):
@@ -90,13 +107,27 @@ class Patient(Base):
     hospital_no = Column(String(10))
     national_id_no = Column(String(10))
     name = Column(String(250))
-    age = Column(String(250))
+    #age = Column(String(250))
     date_of_birth = Column(Date())
     date_of_death = Column(Date())
     sex = Column(String(1))
     admissions = relationship("Admission", back_populates="patient",
                               cascade="all, delete, delete-orphan")
     active = Column(Boolean)
+
+    def age(self):
+        """Calculate and return age of patient, as string"""
+        if self.date_of_birth is not None:
+            if self.date_of_death is None:
+                return format_duration(
+                    self.date_of_birth, datetime.date.today()
+                )
+            else:
+                return "died at {0}".format(
+                    format_duration(self.date_of_birth, self.date_of_death)
+                )
+        else:
+            return "unknown"
 
 
 class Admission(Base):
@@ -119,14 +150,14 @@ class Admission(Base):
     admitting_doctor = relationship("Doctor", back_populates="admissions")
 
     #diagnoses = relationship("Diagnosis")
-    main_conditions = relationship("MainCondition")
-    other_conditions = relationship("OtherCondition")
+    conditions = relationship("Condition")
+    #other_conditions = relationship("OtherCondition")
 
     admission_notes = Column(Text())
     progress_notes = Column(Text())
     discharge_advice = Column(Text())
 
-    daily_rxs = relationship("DailyRx")
+    prescription = relationship("Prescription")
 
     discharge_rxs = relationship("DischargeRx")
 
@@ -144,6 +175,11 @@ class Bed(Base):
     previous_admissions = relationship("Admission", back_populates="discharged_bed",
                                        foreign_keys="Admission.discharged_bed_id")
 
+    def __repr__(self):
+        if self.ward is None:
+            return self.number
+        return "{0} {1}".format(self.ward.bed_prefix, self.number)
+
 
 class Ward(Base):
     id = Column(Integer, primary_key=True)
@@ -154,11 +190,11 @@ class Ward(Base):
     beds = relationship("Bed", back_populates="ward")
 
 
-class MainCondition(Base):
+class Condition(Base):
     id = Column(Integer, primary_key=True)
 
     admission_id = Column(Integer, ForeignKey('admission.id'))
-    admission = relationship("Admission", back_populates="main_conditions")
+    admission = relationship("Admission", back_populates="conditions")
 
     icd10class_code = Column(Integer, ForeignKey('icd10class.code'))
     icd10class = relationship("Icd10Class")
@@ -175,27 +211,7 @@ class MainCondition(Base):
 
     comment = Column(Text())
 
-
-class OtherCondition(Base):
-    id = Column(Integer, primary_key=True)
-
-    admission_id = Column(Integer, ForeignKey('admission.id'))
-    admission = relationship("Admission", back_populates="other_conditions")
-
-    icd10class_code = Column(Integer, ForeignKey('icd10class.code'))
-    icd10class = relationship("Icd10Class")
-
-    icd10modifier_class_code = Column(Integer, ForeignKey('icd10modifierclass.code'))
-    icd10modifier_class = relationship("Icd10ModifierClass",
-                                       foreign_keys=[icd10modifier_class_code])
-
-    icd10modifier_extra_class_code = Column(Integer, ForeignKey('icd10modifierclass.code'))
-    icd10modifier_extra_class = relationship("Icd10ModifierClass",
-                                             foreign_keys=[icd10modifier_extra_class_code])
-
-    date = Column(Date())
-
-    comment = Column(Text())
+    main_condition = Column(Boolean())
 
 
 class DischargeRx(Base):
@@ -209,11 +225,12 @@ class DischargeRx(Base):
     active = Column(Boolean)
 
 
-class DailyRx(Base):
+class Prescription(Base):
     id = Column(Integer, primary_key=True)
 
     admission_id = Column(Integer, ForeignKey('admission.id'))
-    #admission = relationship("Admission", back_populates="daily_rxs")
+    date_from = Column(Date())
+    date_to = Column(Date())
     drug_id = Column(Integer, ForeignKey('drug.id'))
     drug = relationship("Drug")
     drug_order = Column(String(250))
@@ -225,6 +242,9 @@ class Drug(Base):
 
     name = Column(String(250))
 
+    def __repr__(self):
+        return self.name
+
 
 class Doctor(Base):
     id = Column(Integer, primary_key=True)
@@ -232,6 +252,11 @@ class Doctor(Base):
     name = Column(String(250))
     pmr_no = Column(String(250))
     admissions = relationship("Admission", back_populates="admitting_doctor")
+
+    def __repr__(self):
+        return "{0} ({1})".format(self.name, self.pmr_no)
+
+
 
 
 class Preset(Base):
