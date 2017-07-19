@@ -1,29 +1,21 @@
-"""
-ICD-10 Coder
-"""
+"""ICD-10 Coder"""
 import string
 import datetime
 import re
+from urlparse import urlparse, parse_qs
 import wx
 import wx.html
 from sqlalchemy import or_, and_
-from sqlalchemy import text
 from sqlalchemy.orm.exc import NoResultFound
-from urlparse import urlparse, parse_qs
-from ObjectListView import ObjectListView, ColumnDefn, OLVEvent
 
-from objectlistviewmod import ObjectListViewMod
 from database import Icd10Class,\
-                     Icd10ModifierClass,\
                      Condition
 from dbqueryresultbox import DbQueryResultBox
 from dbcombobox import DbComboBox
 
 
 class Icd10ChapterTree(wx.TreeCtrl):
-    """
-    Tree of Icd10 Chapters and blocks. Nodes expand lazily only when they are clicked.
-    """
+    """Tree of Icd10 Chapters and blocks. Nodes expand lazily only when they are clicked."""
     def __init__(self, parent, session, **kwds):
         super(Icd10ChapterTree, self).__init__(
             parent, style=wx.TR_HAS_BUTTONS,
@@ -34,7 +26,13 @@ class Icd10ChapterTree(wx.TreeCtrl):
 
         wx.EVT_TREE_ITEM_EXPANDING(self, self.GetId(), self._on_expand)
 
-        self._build_tree()
+        self._initialized = False
+
+
+    def initialize(self):
+        if not self._initialized:
+            self._build_tree()
+            self._initialized = True
 
 
     def set_class(self, icd10_class):
@@ -123,9 +121,7 @@ class Icd10ChapterTree(wx.TreeCtrl):
 
 
 class Icd10CategoryList(wx.SimpleHtmlListBox):
-    """
-    List of Icd10 Categories in a block
-    """
+    """List of Icd10 Categories in a block"""
     def __init__(self, parent, session, style=wx.SUNKEN_BORDER, **kwds):
         super(Icd10CategoryList, self).__init__(
             parent, style=style, **kwds)
@@ -283,9 +279,7 @@ class Icd10CategoryList(wx.SimpleHtmlListBox):
 
 
 class Icd10Coder(wx.Dialog):
-    """
-    Dialog to search for and select ICD-10 Category codes
-    """
+    """Dialog to search for and select ICD-10 Category codes"""
     def __init__(self, parent, session, size=wx.Size(1000, 600), **kwds):
         super(Icd10Coder, self).__init__(
             parent, style=wx.CLOSE_BOX | wx.RESIZE_BORDER | wx.SYSTEM_MENU | wx.CAPTION,
@@ -313,7 +307,7 @@ class Icd10Coder(wx.Dialog):
         search_panel_sizer.Add(self.txt_search, 0,
                                flag=wx.EXPAND | wx.ALL, border=5)
 
-        self.result_list = DbQueryResultBox(search_panel, self.session,
+        self.result_list = DbQueryResultBox(search_panel,
                                             self._search_result_decorator,
                                             size=(200, -1))
         self.result_list.Bind(wx.EVT_LISTBOX, self._on_result_selected)
@@ -426,12 +420,19 @@ class Icd10Coder(wx.Dialog):
     def ShowModal(self, condition=None):
         self.condition = condition
 
+        self.txt_search.SetValue("")
+
         update_tree = False
         if self.condition is None:
+            selection = self.chapter_tree.GetSelection()
+            if selection.IsOk():
+                self.chapter_tree.SelectItem(selection, False)
+            self.category_list.set_category(None)
             self.condition = Condition()
             self.left_panel.SetSelection(0)
         else:
             update_tree = True
+            self.chapter_tree.initialize()
             self.left_panel.SetSelection(1)
 
         self.set_category(self.condition.icd10class, update_tree=update_tree)
@@ -468,6 +469,8 @@ class Icd10Coder(wx.Dialog):
         self.condition.icd10class = icd10class
 
         if self.condition.icd10class is None:
+            self.category_list.set_category(None)
+            self._update_browser_title()
             return
 
         self.condition.icd10class_code = self.condition.icd10class.code
@@ -607,6 +610,7 @@ class Icd10Coder(wx.Dialog):
             active_page_text = self.left_panel.GetPageText(self.left_panel.GetSelection())
             if active_page_text == "Browse":
                 current_class = self.category_list.get_selected_category()
+                self.chapter_tree.initialize()
                 if current_class is not None:
                     self.chapter_tree.set_class(current_class)
             event.Skip()
@@ -727,6 +731,7 @@ class Icd10Coder(wx.Dialog):
 
 
     def _on_change_category(self, event):
+        print "Category Changed"
         current_class = self.category_list.get_selected_category()
 
         if current_class is None:
@@ -736,6 +741,7 @@ class Icd10Coder(wx.Dialog):
 
 
 def main():
+    """Test code"""
     import database
     database.StartEngine("sqlite:///wardpresc-data.db", False, "")
     session = database. Session()

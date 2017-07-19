@@ -1,9 +1,10 @@
-from bs4 import BeautifulSoup, Tag
+"""Convert icd10 rubric xml to html"""
 import re
-import string
+from bs4 import BeautifulSoup, Tag
 
 
 def icd10rubric_to_html(soup):
+    """Convert icd10 rubric xml to html"""
     kind = ""
 
     rubric_tags = soup.find_all("Rubric")

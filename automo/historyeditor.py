@@ -1,6 +1,4 @@
-"""
-HistoryEditor dialog, to edit drug history and diagnosis history
-"""
+"""HistoryEditor dialog, to edit drug history and diagnosis history"""
 
 import wx
 from ObjectListView import ObjectListView, ColumnDefn, OLVEvent
@@ -11,9 +9,8 @@ from images import bitmap_from_base64,\
 
 
 class HistoryEditor(wx.Dialog):
-    """
-    Dialog to edit a history table with 'name' column.
-    """
+    """Dialog to edit a history table with 'name' column.
+      TODO: Repurpose for version 2, currently does nothing."""
     def __init__(self, parent, session, history_table, size=wx.Size(-1, 400), **kwds):
         super(HistoryEditor, self).__init__(
             parent, style=wx.CLOSE_BOX | wx.RESIZE_BORDER | wx.SYSTEM_MENU | wx.CAPTION,

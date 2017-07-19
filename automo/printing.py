@@ -1,6 +1,4 @@
-"""
-Print functions
-"""
+"""Print functions"""
 import time
 import math
 from reportlab.lib import colors

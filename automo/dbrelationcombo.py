@@ -1,14 +1,10 @@
-"""
-DbRelationCombo
-"""
+"""DbRelationCombo"""
 
 import wx
 
 
 class DbRelationCombo(wx.ComboBox):
-    """
-    Text ctrl that displays relation attributes. Choices obtained from query
-    """
+    """Combo ctrl that displays relation attributes. Choices obtained from query"""
     def __init__(self, parent, session, value_formatter=None, on_change_callback=None, **kwds):
         super(DbRelationCombo, self).__init__(parent, **kwds)
 

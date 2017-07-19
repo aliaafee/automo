@@ -1,6 +1,4 @@
-"""
-Admission Panel
-"""
+"""Admission Panel"""
 import wx
 
 from dbdatepicker import DbDatePicker
@@ -13,9 +11,7 @@ from admissionnotes import AdmissionNotesPanel,\
 
 
 class AdmissionPanel(wx.Panel):
-    """
-    Admission Panel
-    """
+    """Admission Panel"""
     def __init__(self, parent, session, **kwds):
         super(AdmissionPanel, self).__init__(parent, **kwds)
 
@@ -89,6 +85,8 @@ class AdmissionPanel(wx.Panel):
         self.notebook.AddPage(self.discharge_summary_panel, "Discharge Summary")
 
         self.SetSizer(sizer)
+
+        self.Layout()
 
         self.unset()
 

@@ -11,7 +11,7 @@ import getopt
 import wx
 
 from _version import __version__
-#from mainframe import MainFrame
+from mainframe import MainFrame
 
 import database
 
@@ -49,7 +49,7 @@ def usage():
     print "    -d, --debug"
     print "       Output database debug data"
     print "    -i, --icd10claml [filename]"
-    print "       Import ICD10 Classification from ClaML xml file"
+    print "       Import ICD10 2016 Classification from ClaML xml file"
 
 
 def start(uri, debug):
@@ -57,7 +57,7 @@ def start(uri, debug):
     database.StartEngine(uri, debug, __version__)
 
     #this will be removed
-    db_test()
+    #db_test()
 
     app = MoPresc()
 
@@ -78,10 +78,10 @@ def import_icd10claml(filename, uri, debug):
 
     print "Done import"
 
-
+"""
 def db_test():
-    """ test code to check database functionality """
-    """ this will be removed eventually"""
+    #test code to check database functionality
+    #this will be removed eventually
     from database import *
 
     print "Testing Database"
@@ -99,6 +99,10 @@ def db_test():
     count = session.query(Patient).delete()
     print count
     count = session.query(Admission).delete()
+    print count
+    count = session.query(Condition).delete()
+    print count
+    count = session.query(Prescription).delete()
     print count
 
     print "Add Ward"
@@ -120,17 +124,17 @@ def db_test():
 
     print "Add doctor"
     doc = Doctor(
-        name="Dr. Ali Aafee",
+        name="Dr. Adam West",
         pmr_no="PMR-001"
     )
     session.add(doc)
     session.commit()
 
     print "Add drugs"
-    drg = Drug(name="Ceftriaxone 1g")
+    drg = Drug(name="INJ CEFTRIAXONE 1G")
     session.add(drg)
     session.commit()
-    drg = Drug(name="Metronidazole 500mg")
+    drg = Drug(name="INJ METRONIDAZOLE 500MG")
     session.add(drg)
     session.commit()
 
@@ -138,8 +142,19 @@ def db_test():
     new_pt = Patient(
         hospital_no="1231",
         national_id_no="A046974",
-        name="Ali Aafee",
-        date_of_birth=datetime.date(1985, 10, 17),
+        name="John Adams",
+        date_of_birth=datetime.date(1854, 10, 17),
+        sex="F"
+    )
+    session.add(new_pt)
+    session.commit()
+
+    print "Add Patient"
+    new_pt = Patient(
+        hospital_no="1231",
+        national_id_no="A124212",
+        name="Adam West",
+        date_of_birth=datetime.date(1965, 5, 27),
         sex="M"
     )
     session.add(new_pt)
@@ -220,14 +235,14 @@ def db_test():
     session.add(med)
     session.commit()
 
-    p = new_pt
-    app = wx.PySimpleApp(0)
-    from icd10coder import Icd10Coder
+    #p = new_pt
+    #app = wx.PySimpleApp(0)
+    #from icd10coder import Icd10Coder
 
-    import code; code.interact(local=dict(globals(), **locals()))
+    #import code; code.interact(local=dict(globals(), **locals()))
 
-    exit()
-
+    #exit()
+"""
 
 def main(argv):
     """ starts the app, also reads command line arguments """

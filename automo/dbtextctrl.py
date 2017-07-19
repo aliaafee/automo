@@ -1,13 +1,9 @@
-"""
-DbTextCtrl
-"""
+"""DbTextCtrl"""
 import wx
 
 
 class DbTextCtrl(wx.TextCtrl):
-    """
-    Text ctrl that automatically updates database entry, on text change
-    """
+    """Text ctrl that automatically updates database entry, on text change"""
     def __init__(self, parent, session, on_change_callback=None, **kwds):
         super(DbTextCtrl, self).__init__(parent, **kwds)
 

@@ -1,6 +1,4 @@
-"""
-ObjectListView modded to fire event when checkbox changed
-"""
+"""ObjectListView modded to fire event when checkbox changed"""
 import  wx.lib.newevent
 
 from ObjectListView import ObjectListView
@@ -9,9 +7,7 @@ from ObjectListView import ObjectListView
 OvlCheckEvent, EVT_OVL_CHECK_EVENT = wx.lib.newevent.NewEvent()
 
 class ObjectListViewMod(ObjectListView):
-    """
-    ObjectListView modded to fire event when checkbox changed
-    """
+    """ObjectListView modded to fire event when checkbox changed"""
     def _HandleLeftDownOnImage(self, rowIndex, subItemIndex):
         column = self.columns[subItemIndex]
         if not column.HasCheckState():

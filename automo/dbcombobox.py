@@ -1,12 +1,11 @@
-"""
-DB Combo Result
-"""
+"""DB Combo Result"""
 import wx
 import wx.html
 
 from dbqueryresultbox import DbQueryResultBox
 
 class DbComboBox(wx.ComboBox):
+    """DB Combo Result"""
     def __init__(self, parent, session, html_decorator=None, minimum_fetch=50,
                  style=wx.SUNKEN_BORDER, **kwds):
         super(DbComboBox, self).__init__(

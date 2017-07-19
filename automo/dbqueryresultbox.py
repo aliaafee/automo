@@ -1,6 +1,6 @@
-"""
-DB Query Result
-"""
+"""DB Query Result"""
+import re
+import string
 import wx
 
 
@@ -9,26 +9,43 @@ class DbQueryResultBox(wx.HtmlListBox):
       Results are displayed in a virtual list so very large
       query results are supported without slowdown or excessive
       memory usage"""
-    def __init__(self, parent, session, html_decorator, minimum_fetch=50, **kwds):
+    def __init__(self, parent, html_decorator=None, minimum_fetch=50, **kwds):
         super(DbQueryResultBox, self).__init__(
             parent, **kwds
         )
         self.parent = parent
-        self.session = session
+        #self.session = session
         self.html_decorator = html_decorator
         self.minimum_fetch = minimum_fetch
 
+        self.extra_row_value = None
+
         self.query_string = ""
         self.query_result = None
+        self.query_result_count = 0
         self.SetItemCount(0)
         self.visible_begin = -1
         self.visible_end = -1
         self.visible_items = []
 
+        if self.html_decorator is None:
+            self.html_decorator = self._html_decorator
+
         if wx.Platform == "__WXMSW__":
             self.SetSelectionBackground(wx.SystemSettings_GetColour(wx.SYS_COLOUR_MENUHILIGHT))
         else:
             self.SetSelectionBackground(wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHT))
+
+
+    def _html_decorator(self, item, query_string):
+        item_str = unicode(item)
+
+        result = re.search(re.escape(query_string), item_str, re.IGNORECASE)
+        if result is not None:
+            group = unicode(result.group())
+            item_str = string.replace(item_str, group, u'<b>' + group + u'</b>', 1)
+
+        return item_str
 
 
     def clear(self):
@@ -38,17 +55,22 @@ class DbQueryResultBox(wx.HtmlListBox):
         self.Refresh()
 
 
-    def set_result(self, query_result, query_string=""):
+    def set_result(self, query_result, query_string="", extra_row_value=None):
         """Set the sqlalchemy query result."""
         self.query_string = query_string
         self.query_result = query_result
+        self.query_result_count = self.query_result.count()
+        self.extra_row_value = extra_row_value
 
         self.visible_begin = -1
         self.visible_end = -1
         self.visible_items = []
 
         self.ScrollToRow(0)
-        self.SetItemCount(self.query_result.count())
+        if extra_row_value is None:
+            self.SetItemCount(self.query_result_count)
+        else:
+            self.SetItemCount(self.query_result_count + 1)
         self.SetSelection(-1)
 
         self.Refresh()
@@ -79,6 +101,10 @@ class DbQueryResultBox(wx.HtmlListBox):
         """Return the nth row of the list for display"""
         if self.query_result is None:
             return ""
+
+        if n > self.query_result_count - 1:
+            if self.extra_row_value is not None:
+                return self.extra_row_value
 
         start = self.GetVisibleRowsBegin()
         end = self.GetVisibleRowsEnd()

@@ -1,14 +1,10 @@
-"""
-DbRelationCtrl
-"""
+"""DbRelationCtrl"""
 
 import wx
 
 
 class DbRelationCtrl(wx.TextCtrl):
-    """
-    Text ctrl that displays relation attributes. This is readonly
-    """
+    """Text ctrl that displays relation attributes. This is readonly"""
     def __init__(self, parent, session, value_formatter=None, on_change_callback=None, **kwds):
         super(DbRelationCtrl, self).__init__(parent, **kwds)
 

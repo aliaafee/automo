@@ -1,6 +1,4 @@
-"""
-Condition Panel
-"""
+"""Condition Panel"""
 import wx
 
 import images
@@ -10,9 +8,7 @@ from dbqueryresultbox import DbQueryResultBox
 
 
 class ConditionPanel(wx.Panel):
-    """
-    Condition Panel
-    """
+    """Condition Panel"""
     def __init__(self, parent, session, **kwds):
         super(ConditionPanel, self).__init__(parent, **kwds)
 
@@ -53,8 +49,7 @@ class ConditionPanel(wx.Panel):
         sizer.Add(self.toolbar, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx.LEFT,
                   border=5)
 
-        self.conditions_list = DbQueryResultBox(self, self.session,
-                                                self._conditions_decorator)
+        self.conditions_list = DbQueryResultBox(self, self._conditions_decorator)
         sizer.Add(self.conditions_list, 1, wx.EXPAND | wx.ALL, border=5)
 
         self.SetSizer(sizer)
@@ -100,6 +95,7 @@ class ConditionPanel(wx.Panel):
     def on_add_condition(self, event):
         """Add Condition with Full Icd10 Coder"""
         #with Icd10Coder(self, self.session) as dlg:
+        self.icd10_coder.CenterOnScreen()
         if self.icd10_coder.ShowModal() == wx.ID_OK:
             new_condition = self.icd10_coder.get_condition()
             new_condition.admission_id = self.admission.id

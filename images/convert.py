@@ -1,6 +1,4 @@
-"""
-Convert images to b64 and generates images.py module
-"""
+"""Convert images to b64 and generates images.py module"""
 import os
 import os.path
 import base64
@@ -8,16 +6,14 @@ import base64
 
 result = \
 """
-\"\"\"
-Images used in the app, all images encoded in base 64
-\"\"\"
+\"\"\"Images used in the app, all images encoded in base 64\"\"\"
 import cStringIO
 import base64
 import wx
 
 
 def get(image_name):
-    \"\"\" Converts a base64 bitmap into a wx.Bitmap \"\"\"
+    \"\"\"Converts a base64 bitmap into a wx.Bitmap\"\"\"
     image = base64.b64decode(_IMAGE[image_name])
     stream = cStringIO.StringIO(image)
 

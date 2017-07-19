@@ -4,11 +4,11 @@ DbDatePicker
 import datetime
 import wx
 
+from pydatepickerctrl import PyDatePickerCtrl
 
-class DbDatePicker(wx.DatePickerCtrl):
-    """
-    Date picker ctrl that automatically updates database entry, on text change
-    """
+
+class DbDatePicker(PyDatePickerCtrl):
+    """Date picker ctrl that automatically updates database entry, on text change"""
     def __init__(self, parent, session, on_change_callback=None,
                  style=wx.DP_DROPDOWN, **kwds):
         super(DbDatePicker, self).__init__(parent, style=style, **kwds)
@@ -37,13 +37,8 @@ class DbDatePicker(wx.DatePickerCtrl):
             self.Hide()
             return
 
-        wxdatetime = wx.DateTime()
-        wxdatetime.Set(
-            value.day,
-            value.month - 1,
-            value.year
-        )
-        self.SetValue(wxdatetime)
+        self.set_pydatetime(value)
+
         self.Show()
 
 
@@ -52,12 +47,7 @@ class DbDatePicker(wx.DatePickerCtrl):
         if self.db_object is None or self.db_str_attr == "":
             return
 
-        wxdate = self.GetValue()
-        new_date = datetime.date(
-            wxdate.GetYear(),
-            wxdate.GetMonth() + 1,
-            wxdate.GetDay()
-        )
+        new_date = self.get_pydatetime()
 
         setattr(self.db_object, self.db_str_attr, new_date)
 

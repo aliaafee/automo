@@ -1,6 +1,4 @@
-"""
-Db Rich Text Ctrl
-"""
+"""Db Rich Text Ctrl"""
 from StringIO import StringIO
 
 import wx
@@ -10,9 +8,9 @@ import images
 
 
 class DbRichTextCtrl(wx.Panel):
-    """
-    Rich Text ctrl that automatically updates database entry, on text change
-    """
+    """Rich Text ctrl that automatically updates database entry, on text change
+      TODO: Save and retrive in html format, now only saves and retrieves in internal
+      xml format."""
     def __init__(self, parent, session, on_change_callback=None, **kwds):
         super(DbRichTextCtrl, self).__init__(parent, **kwds)
 

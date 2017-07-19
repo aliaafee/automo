@@ -1,25 +1,21 @@
-"""
-The About Dialog
-"""
+"""The About Dialog"""
 import wx
 from wx.lib.wordwrap import wordwrap
 import wx.lib.agw.hyperlink as hl
 
 from _version import __version__
-from images import bitmap_from_base64, icon_robot_b64
+import images
 
 class AboutDlg(wx.Dialog):
-    """
-    The About Dialog
-    """
+    """The About Dialog"""
     def __init__(self, parent):
         super(AboutDlg, self).__init__(parent, wx.ID_ANY, title="About", size=(300, 360))
 
-        image = bitmap_from_base64(icon_robot_b64)
+        image = images.get('icon_robot')
 
         name = 'Auto MO'
         description = wordwrap(
-            "Program to automate the tedious job of hand writing prescriptions everyday."
+            "Electronic Medical Record."
             "",
             250, wx.ClientDC(self))
         version = __version__

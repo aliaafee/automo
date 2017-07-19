@@ -1,19 +1,17 @@
-"""
-Import Icd10 Classification ClaMl xml file into database
-"""
+"""Import Icd10 2016 Classification ClaMl xml file into database"""
 import os.path
 import re
-from bs4 import BeautifulSoup, Tag
-from sqlalchemy import and_, update
+from bs4 import BeautifulSoup
+from sqlalchemy import and_
 
 
 from icd10rubrictohtml import icd10rubric_to_html
-from database import Session,\
-                     Icd10ModifierClass,\
+from database import Icd10ModifierClass,\
                      Icd10Modifier,\
                      Icd10Class
 
 def get_rubrics(tag):
+    """Convert xml rubrics to list of html"""
     rubrics_str_dict = {}
     rubrics = tag.find_all("Rubric")
     for rubric in rubrics:

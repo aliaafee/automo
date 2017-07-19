@@ -1,13 +1,9 @@
-"""
-Admission Notes Panel
-"""
+"""Admission Notes Panel"""
 from dbrichtextctrl import DbRichTextCtrl
 
 
 class AdmissionNotesPanel(DbRichTextCtrl):
-    """
-    Admission Notes Panel
-    """
+    """Admission Notes Panel"""
     def __init__(self, parent, session, **kwds):
         super(AdmissionNotesPanel, self).__init__(parent, session, **kwds)
 
@@ -18,9 +14,7 @@ class AdmissionNotesPanel(DbRichTextCtrl):
 
 
 class ProgressNotesPanel(DbRichTextCtrl):
-    """
-    Admission Notes Panel
-    """
+    """Progress Notes Panel"""
     def __init__(self, parent, session, **kwds):
         super(ProgressNotesPanel, self).__init__(parent, session, **kwds)
 
@@ -31,9 +25,7 @@ class ProgressNotesPanel(DbRichTextCtrl):
 
 
 class DischargeSummaryPanel(DbRichTextCtrl):
-    """
-    Admission Notes Panel
-    """
+    """Discharge Summary Panel"""
     def __init__(self, parent, session, **kwds):
         super(DischargeSummaryPanel, self).__init__(parent, session, **kwds)
 

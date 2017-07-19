@@ -14,12 +14,11 @@ Find the original at https://github.com/RajaS/ACTextCtrl
 import wx
 
 from dbtextctrl import DbTextCtrl
+from dbqueryresultbox import DbQueryResultBox
 
 
 class AcDbTextCtrl(DbTextCtrl):
-    """
-    AcDbTextCtrl
-    """
+    """AcDbTextCtrl"""
     def __init__(self, parent, session, candidates_table,
                  max_results=20, on_change_callback=None, **kwds):
         super(AcDbTextCtrl, self).__init__(parent, session, on_change_callback,
@@ -30,6 +29,8 @@ class AcDbTextCtrl(DbTextCtrl):
             return
 
         self.candidates_table = candidates_table
+
+        self.selected_object = None
 
         self.max_results = max_results
         self.select_candidates = []
@@ -54,6 +55,10 @@ class AcDbTextCtrl(DbTextCtrl):
         self.Bind(wx.EVT_KILL_FOCUS, self._on_focus_loss)
 
 
+    def get_selected_object(self):
+        return self.selected_object
+
+
     def SetValue(self, value):
         """
         Directly calling setvalue triggers textevent
@@ -61,6 +66,11 @@ class AcDbTextCtrl(DbTextCtrl):
         To avoid this, call changevalue
         """
         super(AcDbTextCtrl, self).ChangeValue(value)
+
+
+    def Clear(self):
+        super(AcDbTextCtrl, self).ChangeValue("")
+        self.selected_object = None
 
 
     def _on_text(self, event):
@@ -71,6 +81,8 @@ class AcDbTextCtrl(DbTextCtrl):
         """
         txt = self.GetValue()
 
+        self.selected_object = None
+
         # if txt is empty (after backspace), hide popup
         # and save changes(ie: set data to "")
         if not txt:
@@ -80,7 +92,7 @@ class AcDbTextCtrl(DbTextCtrl):
                 return
 
         # select candidates from database
-        result = self.session.query(self.candidates_table.name)\
+        result = self.session.query(self.candidates_table)\
                              .filter(self.candidates_table.name.like("%{0}%".format(txt)))\
                              .order_by(self.candidates_table.name)\
                              .limit(self.max_results)
@@ -89,8 +101,10 @@ class AcDbTextCtrl(DbTextCtrl):
         for candidate in result:
             self.select_candidates.append(candidate.name)
 
-        self.popup.show_candidates(self.select_candidates, txt,
+        self.popup.show_candidates(result, txt,
                                    self.GetScreenPositionTuple(), self.GetSizeTuple())
+        #self.popup.show_candidates(self.select_candidates, txt,
+        #                           self.GetScreenPositionTuple(), self.GetSizeTuple())
 
 
     def _on_focus_loss(self, event):
@@ -162,7 +176,9 @@ class AcDbTextCtrl(DbTextCtrl):
                 self.popup.Show(False)
                 if self.db_object is not None and self.db_str_attr != "":
                     self.SetValue(getattr(self.db_object, self.db_str_attr))
+                self.selected_object = None
             elif self.popup.candidatebox.GetSelection() == self.popup.add_index:
+                self.selected_object = None
                 self.SetValue(self.popup.add_text)
                 self.SetInsertionPointEnd()
 
@@ -178,7 +194,8 @@ class AcDbTextCtrl(DbTextCtrl):
                 self.popup.Show(False)
                 self._save_changes(event)
             else:
-                self.SetValue(self.popup.get_selected())
+                self.selected_object = self.popup.get_selected()
+                self.SetValue(unicode(self.selected_object))
                 self.SetInsertionPointEnd()
                 self.popup.Show(False)
                 self._save_changes(event)
@@ -187,10 +204,12 @@ class AcDbTextCtrl(DbTextCtrl):
         elif event.GetKeyCode() == wx.WXK_TAB:
             if visible:
                 if self.popup.candidatebox.GetSelection() == self.popup.add_index:
+                    self.selected_object = None
                     self.SetValue(self.popup.add_text)
                     self.SetInsertionPointEnd()
                 else:
-                    self.SetValue(self.popup.get_selected())
+                    self.selected_object = self.popup.get_selected()
+                    self.SetValue(unicode(self.selected_object))
                     self.SetInsertionPointEnd()
                 skip = False
 
@@ -200,10 +219,12 @@ class AcDbTextCtrl(DbTextCtrl):
 
     def _on_click_choice(self, event):
         if self.popup.candidatebox.GetSelection() == self.popup.add_index:
+            self.selected_object = None
             self.SetValue(self.popup.add_text)
             self.SetInsertionPointEnd()
         else:
-            self.SetValue(self.popup.get_selected())
+            self.selected_object = self.popup.get_selected()
+            self.SetValue(unicode(self.selected_object))
             self.SetInsertionPointEnd()
 
 
@@ -216,7 +237,8 @@ class ACPopup(wx.PopupWindow):
     """
     def __init__(self, parent, on_click_choice):
         wx.PopupWindow.__init__(self, parent)
-        self.candidatebox = wx.SimpleHtmlListBox(self, -1, choices=[], style=wx.BORDER_THEME)
+        #self.candidatebox = wx.SimpleHtmlListBox(self, -1, choices=[], style=wx.BORDER_THEME)
+        self.candidatebox = DbQueryResultBox(self)
         self.SetSize((100, 100))
         self.displayed_candidates = []
         self.add_index = -1
@@ -229,55 +251,32 @@ class ACPopup(wx.PopupWindow):
 
 
     def get_selected(self):
-        """returns the text of item that is selected"""
+        """returns the item that is selected"""
+        return self.candidatebox.get_selected_object()
+        """
+        TODO: Handle Pop Downs
         if self._popdown:
             return self.displayed_candidates[self.candidatebox.GetSelection()]
         return self.displayed_candidates[self.candidatebox.GetSelection() - 1]
+        """
 
+    def show_candidates(self, query_result, query_string, parent_screen_position, parent_size):
+        """show the candidates box"""
+        self.candidatebox.set_result(query_result, query_string, "Add: {0}".format(query_string))
 
-    def show_candidates(self, candidates, txt, parent_screen_position, parent_size):
-        """show tha candidate box"""
-        if candidates == sorted(self.displayed_candidates):
-            pass
+        self.add_text = query_string
+        self.add_index = self.candidatebox.GetItemCount() - 1
 
-        self.displayed_candidates = candidates
+        #TODO: Donot show add option if exact match exists
 
-        self.candidatebox.Clear()
-
-        exact_match = False
-        for candidate in self.displayed_candidates:
-            if candidate.lower() == txt.lower():
-                exact_match = True
-
-        candidates_size = len(self.displayed_candidates)
-        if not exact_match:
-            candidates_size += 1
+        candidates_size = query_result.count() + 1
 
         self._resize_popup(candidates_size, parent_size)
         self._position_popup(parent_screen_position, parent_size)
 
-        def append_add_item():
-            """item that lets you insert new candidates"""
-            if not exact_match:
-                self.candidatebox.Append("<b>Add</b> {0}".format(txt))
-                self.add_index = self.candidatebox.GetItemCount() - 1
-                self.add_text = txt
-            else:
-                self.add_index = -1
-                self.add_text = ""
+        #TODO: Handle popdown
 
-        if not self._popdown:
-            self.displayed_candidates.reverse()
-            append_add_item()
-
-        for candidate in self.displayed_candidates:
-            self.candidatebox.Append(self._htmlformat(candidate, txt))
-
-        if self._popdown:
-            append_add_item()
-            self.candidatebox.SetSelection(0)
-        else:
-            self.candidatebox.SetSelection(len(candidates)-1)
+        self.candidatebox.SetSelection(0)
 
         if not self.IsShown():
             self.Show()
@@ -326,15 +325,3 @@ class ACPopup(wx.PopupWindow):
             self._popdown = True
             self.SetPosition((left_x, upper_y + height))
 
-
-    def _htmlformat(self, text, substring):
-        """
-        For displaying in the popup, format the text
-        to highlight the substring in html
-        """
-        # empty substring
-        if len(substring) == 0:
-            return text
-
-        else:
-            return text.replace(substring, '<b>' + substring + '</b>', 1)

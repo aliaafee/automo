@@ -1,6 +1,4 @@
-"""
-PDF Viewer
-"""
+"""PDF Viewer"""
 import wx
 import wx.lib.sized_controls as sc
 from wx.lib.pdfviewer import pdfViewer, pdfButtonPanel
@@ -9,9 +7,7 @@ from images import bitmap_from_base64, icon_16_b64
 
 
 class PDFViewer(sc.SizedFrame):
-    """
-    PDF Viewer
-    """
+    """PDF Viewer"""
     def __init__(self, parent, **kwds):
         super(PDFViewer, self).__init__(parent, **kwds)
 

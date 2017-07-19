@@ -1,6 +1,4 @@
-"""
-SQLalchemy database schema for auto mo.
-"""
+"""SQLalchemy database schema for auto mo."""
 import datetime
 import dateutil.relativedelta
 

@@ -1,7 +1,4 @@
-"""
-Patient Information Panel
-Minimal one and a detailed one
-"""
+"""Patient Information Panel. Minimal one and a detailed one"""
 import wx
 import datetime
 
@@ -9,9 +6,7 @@ from dbtextctrl import DbTextCtrl
 
 
 class PatientInfoPanelSmall(wx.Panel):
-    """
-    Patient Panel Small, this is read-only
-    """
+    """Patient Panel Small, this is read-only"""
     def __init__(self, parent, session, **kwds):
         super(PatientInfoPanelSmall, self).__init__(parent, **kwds)
 
