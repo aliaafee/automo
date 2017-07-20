@@ -15,13 +15,14 @@ import wx
 
 from dbtextctrl import DbTextCtrl
 from dbqueryresultbox import DbQueryResultBox
+from events import DbCtrChangedEvent
 
 
 class AcDbTextCtrl(DbTextCtrl):
     """AcDbTextCtrl"""
     def __init__(self, parent, session, candidates_table,
-                 max_results=20, on_change_callback=None, **kwds):
-        super(AcDbTextCtrl, self).__init__(parent, session, on_change_callback,
+                 max_results=20, **kwds):
+        super(AcDbTextCtrl, self).__init__(parent, session,
                                            style=wx.TE_PROCESS_ENTER, **kwds)
 
         if wx.Platform == "__WXMAC__":
@@ -126,8 +127,8 @@ class AcDbTextCtrl(DbTextCtrl):
             setattr(self.db_object, self.db_str_attr, self.GetValue())
             self.session.commit()
 
-        if self.on_change_callback is not None:
-            self.on_change_callback(event)
+        event = DbCtrChangedEvent(object=self.db_object)
+        wx.PostEvent(self, event)
 
 
     def _on_key_down(self, event):

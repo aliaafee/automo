@@ -3,12 +3,13 @@ Patient panel
 """
 import wx
 
+from events import *
 from patientinfo import PatientInfoPanelSmall
 from dbqueryresultbox import DbQueryResultBox
 
 from database import Admission
 from database import format_duration
-from admissionpanel import AdmissionPanel
+from admissionpanel import AdmissionPanel, EVT_AM_ADMISSION_CHANGED_EVENT
 
 
 class PatientPanel(wx.Panel):
@@ -40,6 +41,7 @@ class PatientPanel(wx.Panel):
         self.right_panel.SetSizer(right_panel_sizer)
 
         self.admission_panel = AdmissionPanel(splitter, self.session)
+        self.admission_panel.Bind(EVT_AM_ADMISSION_CHANGED_EVENT, self._on_admission_changed)
 
         splitter.SplitVertically(self.right_panel, self.admission_panel)
         splitter.SetMinimumPaneSize(100)
@@ -79,6 +81,10 @@ class PatientPanel(wx.Panel):
                 '</table>'
 
         return html.format(date_str, diagnoses_str)
+
+
+    def _on_admission_changed(self, event):
+        self.admissions_list.RefreshAll()
 
 
     def _on_admission_selected(self, event):

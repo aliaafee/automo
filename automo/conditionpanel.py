@@ -1,6 +1,7 @@
 """Condition Panel"""
 import wx
 
+from events import *
 import images
 from icd10coder import Icd10Coder
 from database import Condition
@@ -24,7 +25,7 @@ class ConditionPanel(wx.Panel):
         tb_add = self.toolbar.AddLabelTool(
             wx.ID_ANY,
             label="Add",
-            bitmap=images.get("add"),
+            bitmap=images.get("add_condition"),
             shortHelp="Add Condition"
         )
         self.Bind(wx.EVT_TOOL, self.on_add_condition, tb_add)
@@ -32,7 +33,7 @@ class ConditionPanel(wx.Panel):
         tb_add_quick = self.toolbar.AddLabelTool(
             wx.ID_ANY,
             label="Add Quick Search",
-            bitmap=images.get("add_quick"),
+            bitmap=images.get("add_condition_quick"),
             shortHelp="Add Condition from Quick Search"
         )
         self.Bind(wx.EVT_TOOL, self.on_add_quick, tb_add_quick)
@@ -40,7 +41,7 @@ class ConditionPanel(wx.Panel):
         tb_add_favourite = self.toolbar.AddLabelTool(
             wx.ID_ANY,
             label="Add Favourite",
-            bitmap=images.get("add_favourite"),
+            bitmap=images.get("add_condition_favourite"),
             shortHelp="Add Condition from Favourites"
         )
         self.Bind(wx.EVT_TOOL, self.on_add_favourite, tb_add_favourite)
@@ -102,6 +103,8 @@ class ConditionPanel(wx.Panel):
             self.session.add(new_condition)
             self.session.commit()
             self.set_admission(self.admission)
+            event = ConditionChangedEvent(object=new_condition)
+            wx.PostEvent(self, event)
 
 
     def on_add_quick(self, event):

@@ -105,11 +105,18 @@ class DbQueryResultBox(wx.HtmlListBox):
         if n > self.query_result_count - 1:
             if self.extra_row_value is not None:
                 return self.extra_row_value
+            return ""
 
         start = self.GetVisibleRowsBegin()
         end = self.GetVisibleRowsEnd()
-        if not(start == self.visible_begin and end == self.visible_end):
-            self._fetch_visible()
+
+        if end != self.visible_end:
+            if end - start > self.minimum_fetch:
+                if end != self.visible_end:
+                    self._fetch_visible()
+            else:
+                if start != self.visible_begin:
+                    self._fetch_visible()
 
         try:
             item = self.visible_items[n - self.visible_begin]

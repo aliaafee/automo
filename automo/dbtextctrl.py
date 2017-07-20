@@ -1,15 +1,15 @@
 """DbTextCtrl"""
 import wx
 
+from events import DbCtrChangedEvent
+
 
 class DbTextCtrl(wx.TextCtrl):
     """Text ctrl that automatically updates database entry, on text change"""
-    def __init__(self, parent, session, on_change_callback=None, **kwds):
+    def __init__(self, parent, session, **kwds):
         super(DbTextCtrl, self).__init__(parent, **kwds)
 
         self.session = session
-
-        self.on_change_callback = on_change_callback
 
         self.db_object = None
         self.db_str_attr = None
@@ -41,5 +41,5 @@ class DbTextCtrl(wx.TextCtrl):
 
         self.session.commit()
 
-        if self.on_change_callback is not None:
-            self.on_change_callback(event)
+        event = DbCtrChangedEvent(object=self.db_object)
+        wx.PostEvent(self, event)

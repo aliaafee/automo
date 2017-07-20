@@ -1,13 +1,16 @@
 """Admission Panel"""
 import wx
 
+from events import *
 from dbdatepicker import DbDatePicker
 from dbrelationctrl import DbRelationCtrl
+from dbrelationcombo import DbRelationCombo
 from conditionpanel import ConditionPanel
 from prescriptionpanel import PrescriptionPanel
 from admissionnotes import AdmissionNotesPanel,\
                            ProgressNotesPanel,\
                            DischargeSummaryPanel
+from database import Doctor
 
 
 class AdmissionPanel(wx.Panel):
@@ -44,14 +47,15 @@ class AdmissionPanel(wx.Panel):
 
         self.lbl_admitting_doctor = wx.StaticText(self, label="Doctor",
                                                   size=wx.Size(label_width, -1))
-        self.txt_admitting_doctor = DbRelationCtrl(self, self.session)
+        self.txt_admitting_doctor = DbRelationCombo(self, self.session)
         grid_sizer.AddF(self.lbl_admitting_doctor, lbl_flags)
         grid_sizer.AddF(self.txt_admitting_doctor, txt_flags)
 
         self.lbl_admitted_date = wx.StaticText(self, label="Admitted",
                                                size=wx.Size(label_width, -1))
         self.txt_admitted_date = DbDatePicker(self, self.session)
-        self.txt_admitted_date.Disable()
+        self.txt_admitted_date.Bind(EVT_AM_DB_CTRL_CHANGED_EVENT, self._on_change_admission)
+        #self.txt_admitted_date.Disable()
         grid_sizer.AddF(self.lbl_admitted_date, lbl_flags)
         grid_sizer.AddF(self.txt_admitted_date, txt_flags)
 
@@ -70,6 +74,7 @@ class AdmissionPanel(wx.Panel):
         sizer.Add(self.notebook, 1, wx.EXPAND | wx.ALL, border=5)
 
         self.conditions_panel = ConditionPanel(self.notebook, self.session)
+        self.conditions_panel.Bind(EVT_AM_CONDITION_CHANGED_EVENT, self._on_change_admission)
         self.notebook.AddPage(self.conditions_panel, "Conditions")
 
         self.admission_notes_panel = AdmissionNotesPanel(self.notebook, self.session)
@@ -89,6 +94,11 @@ class AdmissionPanel(wx.Panel):
         self.Layout()
 
         self.unset()
+
+
+    def _on_change_admission(self, event):
+        event = AdmissionChangedEvent(object=event.object)
+        wx.PostEvent(self, event)
 
 
     def _on_change_notebook(self, event):
@@ -157,8 +167,10 @@ class AdmissionPanel(wx.Panel):
                                                   "discharged_bed")
         self.txt_admitted_date.set_dbobject_attr(admission, "admitted_date")
         self.txt_discharged_date.set_dbobject_attr(admission, "discharged_date")
+
+        doctors = self.session.query(Doctor)
         self.txt_admitting_doctor.set_dbobject_attr(admission, "admitting_doctor_id",
-                                                    "admitting_doctor")
+                                                    "admitting_doctor", doctors, "id")
 
         if self.admission.discharged_date is None:
             """This is the current admission"""
@@ -167,12 +179,18 @@ class AdmissionPanel(wx.Panel):
             self.lbl_discharged_bed.Hide()
             self.txt_discharged_date.Hide()
             self.txt_discharged_bed.Hide()
+            self.txt_admitted_date.Enable()
+            self.txt_admitting_doctor.Enable()
+            #self.txt_admitting_doctor.SetEditable(True)
         else:
             """This is one of the previous admissions
               These are not editable by default"""
             self.set_editable(False)
             self.lbl_bed.Hide()
             self.txt_bed.Hide()
+            self.txt_admitted_date.Disable()
+            self.txt_admitting_doctor.Disable()
+            #self.txt_admitting_doctor.SetEditable(False)
 
         active_page = self.notebook.GetPage(self.notebook.GetSelection())
         active_page.set_admission(self.admission, self.editable)
@@ -201,6 +219,6 @@ class AdmissionPanel(wx.Panel):
         self.txt_discharged_bed.set_dbobject_attr(None, "", "")
         self.txt_admitted_date.set_dbobject_attr(None, "")
         self.txt_discharged_date.set_dbobject_attr(None, "")
-        self.txt_admitting_doctor.set_dbobject_attr(None, "", "")
+        self.txt_admitting_doctor.set_dbobject_attr(None, "", "", None, "")
 
         self.notebook.Hide()

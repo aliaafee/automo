@@ -2,16 +2,18 @@
 
 import wx
 
+from events import DbCtrChangedEvent
+
 
 class DbRelationCombo(wx.ComboBox):
     """Combo ctrl that displays relation attributes. Choices obtained from query"""
     def __init__(self, parent, session, value_formatter=None, on_change_callback=None, **kwds):
-        super(DbRelationCombo, self).__init__(parent, **kwds)
+        super(DbRelationCombo, self).__init__(parent, style=wx.CB_READONLY, **kwds)
 
         self.session = session
         self.value_formatter = value_formatter
 
-        #self.on_change_callback = on_change_callback
+        self.on_change_callback = on_change_callback
 
         self.db_object = None
         self.db_str_attr_id = None
@@ -19,18 +21,25 @@ class DbRelationCombo(wx.ComboBox):
         self.db_choices_query = None
         self.db_choices_id_str = None
 
-        #self.choice_ids = []
+        self.choices = []
 
         if self.value_formatter is None:
             self.value_formatter = self._value_formatter
 
-        #self.SetEditable(False)
-
-        #self.Bind(wx.EVT_TEXT, self._on_change)
+        self.Bind(wx.EVT_COMBOBOX, self._on_change)
 
 
     def _value_formatter(self, rel_object):
         return unicode(rel_object)
+
+
+    def get_selected_object(self):
+        """Returns the selected database object"""
+        index = self.GetSelection()
+        try:
+            return self.choices[index]
+        except IndexError:
+            return None
 
 
     def set_dbobject_attr(self, db_object, str_attr_id, str_attr,
@@ -45,23 +54,26 @@ class DbRelationCombo(wx.ComboBox):
         if self.db_object is None\
                 or self.db_str_attr_id == ""\
                 or self.db_str_attr == "":
-            self.ChangeValue("")
+            #self.ChangeValue("")
+            self.Clear()
             return
 
         rel_object = getattr(self.db_object, self.db_str_attr)
 
         if rel_object is None:
-            self.ChangeValue("")
+            #self.ChangeValue("")
+            #self.Clear()
+            self.SetSelection(-1)
             return
 
-        self.ChangeValue(self.value_formatter(rel_object))
+        #self.ChangeValue(self.value_formatter(rel_object))
 
         self.Clear()
         #self.choice_ids = []
-        choices = self.db_choices_query.all()
+        self.choices = self.db_choices_query.all()
         selection_index = -1
         list_index = 0
-        for choice in choices:
+        for choice in self.choices:
             if choice == rel_object:
                 selection_index = list_index
             #choice_id = getattr(choice, self.db_choices_id_str)
@@ -75,4 +87,13 @@ class DbRelationCombo(wx.ComboBox):
 
     def _on_change(self, event):
         """Updates and commits changes. Does not do anything"""
-        pass
+        selected_object = self.get_selected_object()
+
+        new_value = getattr(selected_object, self.db_choices_id_str)
+
+        setattr(self.db_object, self.db_str_attr_id, new_value)
+
+        self.session.commit()
+
+        event = DbCtrChangedEvent(object=self.db_object)
+        wx.PostEvent(self, event)
