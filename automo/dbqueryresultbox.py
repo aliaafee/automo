@@ -45,7 +45,7 @@ class DbQueryResultBox(wx.HtmlListBox):
             group = unicode(result.group())
             item_str = string.replace(item_str, group, u'<b>' + group + u'</b>', 1)
 
-        return item_str
+        return '<font size="2">{0}</format>'.format(item_str)
 
 
     def clear(self):
@@ -76,13 +76,57 @@ class DbQueryResultBox(wx.HtmlListBox):
         self.Refresh()
 
 
-    def get_selected_object(self):
-        """Return the selected database object."""
-        index = self.GetSelection() - self.GetVisibleRowsBegin()
-        try:
-            return self.visible_items[index]
-        except IndexError:
+    def get_object(self, index, get_uncached=False):
+        """Return the object at the given index"""
+        if index < 0 or index > self.query_result_count - 1:
             return None
+
+        visible_index = index - self.visible_begin
+        try:
+            return self.visible_items[visible_index]
+        except IndexError:
+            start = self.GetVisibleRowsBegin()
+            end = self.GetVisibleRowsEnd()
+
+            if end != self.visible_end:
+                if end - start > self.minimum_fetch:
+                    if end != self.visible_end:
+                        self._fetch_visible()
+                else:
+                    if start != self.visible_begin:
+                        self._fetch_visible()
+            
+            visible_index = index - self.visible_begin
+            try:
+                return self.visible_items[visible_index]
+            except IndexError:
+                if not get_uncached:
+                    return None
+
+                item = self.query_result\
+                        .offset(index)\
+                        .limit(1).one()
+
+                return item
+
+
+    def get_selected_object(self):
+        """Return the selected database object, or the first one if multiple selected"""
+        return self.get_object(self.GetSelection(), True)
+
+
+    def get_all_selected_object(self):
+        """Return all selected database objects"""
+        if not self.HasMultipleSelection():
+            return self.get_selected_object()
+
+        selected_items = []
+        current_index, cookie = self.GetFirstSelected()
+        while current_index != wx.NOT_FOUND:
+            selected_items.append(self.get_object(current_index, True))
+            current_index, cookie = self.GetNextSelected(cookie)
+
+        return selected_items
 
 
     def _fetch_visible(self):
@@ -107,21 +151,12 @@ class DbQueryResultBox(wx.HtmlListBox):
                 return self.extra_row_value
             return ""
 
-        start = self.GetVisibleRowsBegin()
-        end = self.GetVisibleRowsEnd()
+        item = self.get_object(n)
 
-        if end != self.visible_end:
-            if end - start > self.minimum_fetch:
-                if end != self.visible_end:
-                    self._fetch_visible()
-            else:
-                if start != self.visible_begin:
-                    self._fetch_visible()
+        if item is None:
+            return "<broken>"
 
-        try:
-            item = self.visible_items[n - self.visible_begin]
-            if self.html_decorator is None:
-                return item
-            return self.html_decorator(item, self.query_string)
-        except IndexError:
-            return "Click to load..."
+        if self.html_decorator is None:
+            return unicode(item)
+
+        return self.html_decorator(item, self.query_string)

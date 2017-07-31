@@ -7,7 +7,6 @@ import images
 from patientlistpanel import PatientListPanel
 from patientpanel import PatientPanel
 from about import AboutDlg
-#from historyeditor import HistoryEditor
 
 
 class MainFrame(wx.Frame):
@@ -22,7 +21,7 @@ class MainFrame(wx.Frame):
             )
 
         _icon = wx.EmptyIcon()
-        _icon.CopyFromBitmap(images.get('icon_16'))#bitmap_from_base64(icon_16_b64))
+        _icon.CopyFromBitmap(images.get('icon_16'))
         self.SetIcon(_icon)
 
         self.session = Session()
@@ -58,7 +57,7 @@ class MainFrame(wx.Frame):
 
         self.menu_bar.Append(help_menu, "&Help")
 
-        self.status = self.CreateStatusBar()
+        #self.status = self.CreateStatusBar()
 
 
     def _init_ctrls(self):
@@ -68,7 +67,8 @@ class MainFrame(wx.Frame):
         splitter = wx.SplitterWindow(self, style=wx.SP_LIVE_UPDATE)
 
         #left Panel
-        self.patient_list_panel = PatientListPanel(splitter, self.session)#PatientListPanel(splitter, self.session, size=wx.Size(300, -1))
+        self.patient_list_panel = PatientListPanel(splitter, self.session,
+                                                   style=wx.BORDER_SUNKEN)
 
         #Right Panel
         self.patient_panel = PatientPanel(splitter, self.session, style=wx.BORDER_SUNKEN)

@@ -1,6 +1,5 @@
 """Patient Information Panel. Minimal one and a detailed one"""
 import wx
-import datetime
 
 from dbtextctrl import DbTextCtrl
 
@@ -45,16 +44,17 @@ class PatientInfoPanelSmall(wx.Panel):
         grid_sizer.Add(self.lbl_sex, 1, wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
         grid_sizer.Add(self.txt_sex, 1, wx.EXPAND)
 
-        self.txt_hospital_no.SetEditable(False)
-        self.txt_national_id_no.SetEditable(False)
-        self.txt_name.SetEditable(False)
+        #self.txt_hospital_no.SetEditable(False)
+        #self.txt_national_id_no.SetEditable(False)
+        #self.txt_name.SetEditable(False)
         self.txt_age.SetEditable(False)
-        self.txt_sex.SetEditable(False)
+        #self.txt_sex.SetEditable(False)
 
         self.SetSizer(grid_sizer)
 
 
     def set(self, patient):
+        """Set selected patient"""
         self.patient = patient
 
         self.txt_hospital_no.set_dbobject_attr(patient, "hospital_no")
@@ -65,7 +65,8 @@ class PatientInfoPanelSmall(wx.Panel):
         self.txt_age.ChangeValue(patient.age())
 
 
-    def clear(self):
+    def unset(self):
+        """Clear selected patient"""
         self.patient = None
 
         self.txt_hospital_no.set_dbobject_attr(None, "")

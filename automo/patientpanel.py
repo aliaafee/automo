@@ -1,28 +1,25 @@
-"""
-Patient panel
-"""
+"""Patient panel"""
 import wx
 
-from events import *
+import events
 from patientinfo import PatientInfoPanelSmall
 from dbqueryresultbox import DbQueryResultBox
 
+import config
+import images
 from database import Admission
-from database import format_duration
-from admissionpanel import AdmissionPanel, EVT_AM_ADMISSION_CHANGED_EVENT
+from admissionpanel import AdmissionPanel
 
 
 class PatientPanel(wx.Panel):
-    """
-    Patient Panel
-    """
+    """Patient Panel"""
     def __init__(self, parent, session, **kwds):
         super(PatientPanel, self).__init__(parent, **kwds)
 
         self.session = session
         self.patient = None
 
-        sizer = wx.BoxSizer()
+        self.toolbar = self._get_toolbar()
 
         splitter = wx.SplitterWindow(self, style=wx.SP_LIVE_UPDATE)
 
@@ -41,11 +38,14 @@ class PatientPanel(wx.Panel):
         self.right_panel.SetSizer(right_panel_sizer)
 
         self.admission_panel = AdmissionPanel(splitter, self.session)
-        self.admission_panel.Bind(EVT_AM_ADMISSION_CHANGED_EVENT, self._on_admission_changed)
+        self.admission_panel.Bind(events.EVT_AM_ADMISSION_CHANGED, self._on_admission_changed)
 
         splitter.SplitVertically(self.right_panel, self.admission_panel)
         splitter.SetMinimumPaneSize(100)
         splitter.SetSashPosition(250)
+        
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(self.toolbar, 0, wx.EXPAND | wx.TOP | wx.LEFT, border=5)
         sizer.Add(splitter, 1, wx.EXPAND)
 
         self.SetSizer(sizer)
@@ -53,32 +53,98 @@ class PatientPanel(wx.Panel):
         self.lbl_admissions.Hide()
         self.admissions_list.Hide()
 
+        self.Bind(wx.EVT_WINDOW_DESTROY, self._on_close)
+
+
+    def _get_toolbar(self):
+        self.locked_bmp = images.get("locked_24")
+        self.unlocked_bmp = images.get("unlocked_24")
+
+        toolbar = wx.ToolBar(self, style=wx.TB_FLAT | wx.TB_NODIVIDER)
+
+        toolbar.AddLabelTool(wx.ID_REFRESH, "Refresh", images.get("refresh_24"),
+                                  wx.NullBitmap, wx.ITEM_NORMAL, "Refresh", "")
+
+        toolbar.AddSeparator()
+
+        toolbar.AddLabelTool(wx.ID_PRINT, "Print", images.get("print_24"),
+                                  wx.NullBitmap, wx.ITEM_NORMAL, "Print", "")
+
+        toolbar.AddStretchableSpace()
+
+        toolbar.AddLabelTool(wx.ID_EDIT, "Lock/Unlock", self.locked_bmp,
+                                  wx.NullBitmap, wx.ITEM_NORMAL, "Lock/Unlock Admission for Editing", "")
+
+        toolbar.Bind(wx.EVT_TOOL, self._on_refresh, id=wx.ID_REFRESH)
+        toolbar.Bind(wx.EVT_TOOL, self._on_toggle_admission_editable, id=wx.ID_EDIT)
+
+        toolbar.Realize()
+
+        toolbar.Hide()
+
+        return toolbar
+
+
+    def _update_toolbar(self):
+        if self.admission_panel.admission is not None:
+            self.toolbar.EnableTool(wx.ID_EDIT, True)
+            if self.admission_panel.editable:
+                self.toolbar.SetToolNormalBitmap(wx.ID_EDIT, self.unlocked_bmp)
+            else:
+                self.toolbar.SetToolNormalBitmap(wx.ID_EDIT, self.locked_bmp)
+        else:
+            self.toolbar.EnableTool(wx.ID_EDIT, False)
+            self.toolbar.SetToolNormalBitmap(wx.ID_EDIT, self.locked_bmp)
+
+
+    def _on_close(self, event):
+        if self.is_unsaved():
+            self.save_changes()
+            print "Changes saved on window destroy"
+
+
+    def _on_refresh(self, event):
+        if self.is_unsaved():
+            self.save_changes()
+            print "Changes saved"
+
+        self.set(self.patient)
+
+
+    def _on_toggle_admission_editable(self, event):
+        if self.admission_panel.editable:
+            self.admission_panel.set_editable(False)
+        else:
+            self.admission_panel.set_editable(True)
+        self._update_toolbar()
 
 
     def _admissions_decorator(self, admission_object, query_string):
         date_str = ""
-        if admission_object.discharged_date is not None:
-            date_str += "{0} ({1})".format(
-                admission_object.admitted_date,
-                format_duration(admission_object.admitted_date,
-                                admission_object.discharged_date)
+        if admission_object.bed is not None:
+            date_str += "<b>{0}</b> (current)".format(
+                config.format_date(admission_object.admitted_date)
             )
         else:
-            date_str += "{0} (current)".format(admission_object.admitted_date)
+            date_str += "<b>{0}</b> ({1})".format(
+                config.format_date(admission_object.admitted_date),
+                config.format_duration(admission_object.admitted_date,
+                                admission_object.discharged_date)
+            )
 
         diagnoses = []
         for condition in admission_object.conditions:
             diagnoses.append(condition.icd10class.preferred)
         diagnoses_str = "</li><li>".join(diagnoses)
 
-        html = u'<table width="100%">'\
+        html = u'<font size="2"><table width="100%">'\
                     '<tr>'\
-                        '<td><b>{0}</b></td>'\
+                        '<td>{0}</td>'\
                     '</tr>'\
                     '<tr>'\
                         '<td><ul><li>{1}</li></ul></td>'\
                     '</tr>'\
-                '</table>'
+                '</table></font>'
 
         return html.format(date_str, diagnoses_str)
 
@@ -99,6 +165,7 @@ class PatientPanel(wx.Panel):
             return
 
         self.admission_panel.set(admission_selected)
+        self._update_toolbar()
 
 
     def is_unsaved(self):
@@ -115,10 +182,24 @@ class PatientPanel(wx.Panel):
         return False
 
 
-    def unset(self, patient):
-        self.patient = patient
+    def save_changes(self):
+        if self.patient is None:
+            return
 
-        self.patient_info.clear()
+        if self.patient_info.is_unsaved():
+            self.patient_info.save_changes()
+
+        if self.admission_panel.is_unsaved():
+            self.admission_panel.save_changes()
+
+
+    def unset(self):
+        """Unset selected patient"""
+        self.patient = None
+
+        self.toolbar.Hide()
+
+        self.patient_info.unset()
 
         self.admissions_list.clear()
 
@@ -131,7 +212,10 @@ class PatientPanel(wx.Panel):
 
 
     def set(self, patient):
+        """Set selected patient"""
         self.patient = patient
+
+        self.toolbar.Show()
 
         self.patient_info.set(self.patient)
 
@@ -148,11 +232,13 @@ class PatientPanel(wx.Panel):
         else:
             self.admission_panel.unset()
 
+        self._update_toolbar()    
+
         self.patient_info.Show()
         self.lbl_admissions.Show()
         self.admissions_list.Show()
         self.right_panel.Layout()
- 
+
 
 def main():
     #Testing

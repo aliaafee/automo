@@ -2,7 +2,7 @@
 AutoMO
 ------
 
-Program to automate the tedious paper work of MOs
+Electronic Medical Record.
 
 Copyright (C) 2017 Ali Aafee
 """

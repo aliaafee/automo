@@ -1,8 +1,10 @@
 """Patients list panel"""
 import wx
 
-import database as db
-from dbqueryresultbox import DbQueryResultBox
+import events
+import images
+from wardpanel import WardPanel
+from patientsearchpanel import PatientSearchPanel
 
 
 class PatientListPanel(wx.Panel):
@@ -14,29 +16,59 @@ class PatientListPanel(wx.Panel):
 
         self.patient_panel = None
 
-        self.all_patients_list = DbQueryResultBox(self, html_decorator=self._patient_list_decorator)
-        self.all_patients_list.Bind(wx.EVT_LISTBOX, self._on_patient_selected)
-        self.all_patients_list.set_result(
-            self.session.query(db.Patient)
-        )
+        self.toolbar = self._get_toolbar()
+
+        self.notebook = wx.Notebook(self)
+
+        self.ward_panel = WardPanel(self.notebook, self.session)
+        self.ward_panel.Bind(events.EVT_AM_PATIENT_CHANGED, self._on_patient_selected)
+        self.notebook.AddPage(self.ward_panel, "Ward")
+
+        self.search_panel = PatientSearchPanel(self.notebook, self.session)
+        self.search_panel.Bind(events.EVT_AM_PATIENT_CHANGED, self._on_patient_selected)
+        self.notebook.AddPage(self.search_panel, "Search")
 
         self.sizer = wx.BoxSizer(wx.VERTICAL)
-        self.sizer.Add(self.all_patients_list, 1 , wx.EXPAND | wx.ALL, border=0)
+        self.sizer.Add(self.toolbar, 0, wx.EXPAND | wx.TOP | wx.LEFT, border=5)
+        self.sizer.Add(self.notebook, 1 , wx.EXPAND | wx.ALL, border=5)
         self.SetSizer(self.sizer)
+
+
+    def _get_toolbar(self):
+        toolbar = wx.ToolBar(self, style=wx.TB_FLAT | wx.TB_NODIVIDER)
+
+        toolbar.AddLabelTool(wx.ID_REFRESH, "Refresh", images.get("refresh_24"),
+                                  wx.NullBitmap, wx.ITEM_NORMAL, "Refresh", "")
+
+        toolbar.AddSeparator()
+
+        toolbar.AddLabelTool(wx.ID_PRINT, "Print", images.get("print_24"),
+                                  wx.NullBitmap, wx.ITEM_NORMAL, "Print", "")
+
+        toolbar.Bind(wx.EVT_TOOL, self._on_refresh, id=wx.ID_REFRESH)
+
+        toolbar.Realize()
+
+        return toolbar
 
 
     def _patient_list_decorator(self, item, query_str):
         return item.name
 
 
+    def _on_refresh(self, event):
+        active_page = self.notebook.GetPage(self.notebook.GetSelection())
+        active_page.refresh()
+
+
     def _on_patient_selected(self, event):
+        selected_patient = event.object
+
+        if selected_patient is None:
+            return
+
         if self.patient_panel.is_unsaved():
             self.patient_panel.save_changes()
             print "Changes saved"
 
-        patient_selected = self.all_patients_list.get_selected_object()
-
-        if patient_selected is None:
-            return
-
-        self.patient_panel.set(patient_selected)
+        self.patient_panel.set(selected_patient)

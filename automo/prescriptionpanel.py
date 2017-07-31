@@ -21,11 +21,13 @@ class PrescriptionPanel(wx.Panel):
         self.changed = False
         self.editable = True
 
-        #self.toolbar = wx.ToolBar(self, style=wx.TB_NODIVIDER)
-        #self.toolbar.AddLabelTool(wx.ID_SAVE, "Print", images.get("print"),
-        #                          wx.NullBitmap, wx.ITEM_NORMAL, "Print Prescription", "")
-        #self.toolbar.Bind(wx.EVT_TOOL, self._on_save, id=wx.ID_SAVE)
-        #self.toolbar.Realize()
+        """
+        self.toolbar = wx.ToolBar(self, style=wx.TB_NODIVIDER | wx.TB_TEXT)
+        self.toolbar.AddLabelTool(wx.ID_SAVE, "Print", images.get("print"),
+                                  wx.NullBitmap, wx.ITEM_NORMAL, "Print Prescription", "")
+        self.toolbar.Bind(wx.EVT_TOOL, self._on_save, id=wx.ID_SAVE)
+        self.toolbar.Realize()
+        """
 
         self.drug_add_panel = wx.Panel(self)
 
@@ -124,12 +126,12 @@ class PrescriptionPanel(wx.Panel):
             self.txt_drug_order.SetFocus()
             self.txt_drug_order.SelectAll()
 
-        
+
     def _on_drug_order_keyup(self, event):
         if event.GetKeyCode() == wx.WXK_RETURN:
             self.txt_duration.SetFocus()
 
-        
+
     def _on_duration_keyup(self, event):
         if event.GetKeyCode() == wx.WXK_RETURN:
             self._on_add_drug(event)
@@ -163,7 +165,6 @@ class PrescriptionPanel(wx.Panel):
             if duration_int > 0:
                 duration = datetime.timedelta(days=duration_int - 1)
                 drug_to = drug_from + duration
-                print duration
         except ValueError:
             pass
 
@@ -203,8 +204,10 @@ class PrescriptionPanel(wx.Panel):
 
 
     def _on_prescription_context(self, event):
-        if self.editable:
-            self.PopupMenu(self.prescription_menu)
+        if not self.editable:
+            return
+
+        self.PopupMenu(self.prescription_menu)
 
 
     def _on_tick_all_medication(self, event):
@@ -239,7 +242,8 @@ class PrescriptionPanel(wx.Panel):
             date_to = stop_date - datetime.timedelta(days=1)
             cannot_stop = []
             for item in self.prescription_list.GetSelectedObjects():
-                if item.date_from <= stop_date:
+                delta = date_to - item.date_from
+                if delta.days < 0:
                     cannot_stop.append(item)
                 else:
                     item.date_to = date_to
@@ -269,8 +273,9 @@ class PrescriptionPanel(wx.Panel):
 
 
     def _on_remove_medication(self, event):
-        with wx.MessageDialog(None, 'Remove selected medications?', 'Remove Medication',
+        with wx.MessageDialog(self, 'Remove selected medications?', 'Remove Medication',
                               wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION) as dlg:
+            dlg.CenterOnParent()
             result = dlg.ShowModal()
 
             if result != wx.ID_YES:
@@ -324,6 +329,8 @@ class PrescriptionPanel(wx.Panel):
                 ColumnDefn("To", "left", 90, "date_to", isEditable=False)
             ])
 
+        self._refresh_prescription()
+
         self.Layout()
 
 
@@ -344,7 +351,7 @@ class PrescriptionPanel(wx.Panel):
 
         self.set_editable(editable)
 
-        self._refresh_prescription()
+        #self._refresh_prescription()
 
         self.changed = False
         #self.toolbar.EnableTool(wx.ID_SAVE, False)

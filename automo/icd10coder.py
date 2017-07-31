@@ -205,7 +205,7 @@ class Icd10CategoryList(wx.SimpleHtmlListBox):
         htmls = []
         for category in categories:
             self.categories.append(category)
-            main_cat = u'<table width="100%" cellspacing="0" border="0">'\
+            main_cat = u'<font size="2"><table width="100%" cellspacing="0" border="0">'\
                         '<tr height="2" bgcolor="black">'\
                             '<td cellpadding="0" colspan="2"></td>'\
                         '</tr>'\
@@ -219,9 +219,9 @@ class Icd10CategoryList(wx.SimpleHtmlListBox):
                             '<td></td>'\
                             '<td>{2}</td>'\
                         '</tr>'\
-                    '</table>'
+                    '</table></font>'
 
-            sub_cat = u'<table width="100%" cellspacing="0" border="0">'\
+            sub_cat = u'<font size="2"><table width="100%" cellspacing="0" border="0">'\
                         '<tr>'\
                             '<td width="50"><b>{0}</b></td>'\
                             '<td><b>{1}</b></td>'\
@@ -230,7 +230,7 @@ class Icd10CategoryList(wx.SimpleHtmlListBox):
                             '<td></td>'\
                             '<td>{2}</td>'\
                         '</tr>'\
-                    '</table>'
+                    '</table></font>'
 
             html = sub_cat
             if len(category.code) <= 3:
@@ -431,9 +431,17 @@ class Icd10Coder(wx.Dialog):
             self.condition = Condition()
             self.left_panel.SetSelection(0)
         else:
-            update_tree = True
-            self.chapter_tree.initialize()
-            self.left_panel.SetSelection(1)
+            if self.condition.icd10class is None:
+                selection = self.chapter_tree.GetSelection()
+                if selection.IsOk():
+                    self.chapter_tree.SelectItem(selection, False)
+                self.category_list.set_category(None)
+                self.condition = Condition()
+                self.left_panel.SetSelection(0)
+            else:
+                update_tree = True
+                self.chapter_tree.initialize()
+                self.left_panel.SetSelection(1)
 
         self.set_category(self.condition.icd10class, update_tree=update_tree)
 
@@ -600,7 +608,7 @@ class Icd10Coder(wx.Dialog):
                 group = unicode(result.group())
                 title_str = string.replace(title_str, group, u'<b>' + group + u'</b>', 1)
 
-        return u'<table><tr><td width="45" valign="top">{0}</td><td>{1}</td></tr></table>'.format(
+        return u'<font size="2"><table><tr><td width="45" valign="top">{0}</td><td>{1}</td></tr></table></font>'.format(
             code_str, title_str
         )
 
@@ -725,7 +733,7 @@ class Icd10Coder(wx.Dialog):
                 block_html = ""
 
         self.browser_title.SetPage(
-            "<table><tr><td>{0}</td></tr><tr><td>{1}</td></tr></table>".format(
+            '<font size="2"><table><tr><td>{0}</td></tr><tr><td>{1}</td></tr></table></font>'.format(
                 chapter_html, block_html)
         )
 

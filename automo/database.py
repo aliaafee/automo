@@ -1,6 +1,5 @@
 """SQLalchemy database schema for auto mo."""
 import datetime
-import dateutil.relativedelta
 
 from sqlalchemy import Column
 from sqlalchemy.ext.declarative import declared_attr
@@ -10,19 +9,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, backref
 
-
-def format_duration(from_date, to_date):
-    """Format duration to human readable form."""
-    duration = dateutil.relativedelta.relativedelta(
-        to_date, from_date
-    )
-    if duration.years < 1:
-        if duration.months < 1:
-            return "{0} days".format(duration.days)
-        return "{0} months {1} days".format(duration.months, duration.days)
-    if duration.years < 5:
-        return "{0} years {1} months".format(duration.years, duration.months)
-    return "{0} years".format(duration.years)
+import config
 
 
 Session = sessionmaker()
@@ -105,7 +92,6 @@ class Patient(Base):
     hospital_no = Column(String(10))
     national_id_no = Column(String(10))
     name = Column(String(250))
-    #age = Column(String(250))
     date_of_birth = Column(Date())
     date_of_death = Column(Date())
     sex = Column(String(1))
@@ -117,12 +103,12 @@ class Patient(Base):
         """Calculate and return age of patient, as string"""
         if self.date_of_birth is not None:
             if self.date_of_death is None:
-                return format_duration(
+                return config.format_duration(
                     self.date_of_birth, datetime.date.today()
                 )
             else:
                 return "died at {0}".format(
-                    format_duration(self.date_of_birth, self.date_of_death)
+                    config.format_duration(self.date_of_birth, self.date_of_death)
                 )
         else:
             return "unknown"
@@ -186,6 +172,9 @@ class Ward(Base):
     bed_prefix = Column(String(250))
 
     beds = relationship("Bed", back_populates="ward")
+
+    def __repr__(self):
+        return self.name
 
 
 class Condition(Base):
