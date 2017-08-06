@@ -8,8 +8,7 @@ import wx.html
 from sqlalchemy import or_, and_
 from sqlalchemy.orm.exc import NoResultFound
 
-from database import Icd10Class,\
-                     Condition
+from database import Icd10Class
 from dbqueryresultbox import DbQueryResultBox
 from dbcombobox import DbComboBox
 

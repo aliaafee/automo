@@ -7,7 +7,7 @@ from dbqueryresultbox import DbQueryResultBox
 
 import config
 import images
-from database import Admission
+from database import Encounter
 from admissionpanel import AdmissionPanel
 
 
@@ -29,7 +29,7 @@ class PatientPanel(wx.Panel):
         self.patient_info = PatientInfoPanelSmall(self.right_panel, session)
         right_panel_sizer.Add(self.patient_info, 0, wx.ALL | wx.EXPAND, border=5)
 
-        self.lbl_admissions = wx.StaticText(self.right_panel, label="Admissions")
+        self.lbl_admissions = wx.StaticText(self.right_panel, label="Encounters")
         right_panel_sizer.Add(self.lbl_admissions, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx.LEFT, border=5)
 
         self.admissions_list = DbQueryResultBox(self.right_panel, self._admissions_decorator)
@@ -121,20 +121,20 @@ class PatientPanel(wx.Panel):
 
     def _admissions_decorator(self, admission_object, query_string):
         date_str = ""
-        if admission_object.bed is not None:
+        if admission_object.date_end is None:
             date_str += "<b>{0}</b> (current)".format(
-                config.format_date(admission_object.admitted_date)
+                config.format_date(admission_object.date_start)
             )
         else:
             date_str += "<b>{0}</b> ({1})".format(
-                config.format_date(admission_object.admitted_date),
-                config.format_duration(admission_object.admitted_date,
-                                admission_object.discharged_date)
+                config.format_date(admission_object.date_start),
+                config.format_duration(admission_object.date_start,
+                                admission_object.date_end)
             )
 
         diagnoses = []
-        for condition in admission_object.conditions:
-            diagnoses.append(condition.icd10class.preferred)
+        for problem in admission_object.problems:
+            diagnoses.append(problem.icd10class.preferred)
         diagnoses_str = "</li><li>".join(diagnoses)
 
         html = u'<font size="2"><table width="100%">'\
@@ -219,18 +219,22 @@ class PatientPanel(wx.Panel):
 
         self.patient_info.set(self.patient)
 
-        admissions = self.session.query(Admission)\
-                        .filter(Admission.patient_id == self.patient.id)\
-                        .order_by(Admission.discharged_date)
+        #admissions = self.session.query(Admission)\
+        #                .filter(Admission.patient_id == self.patient.id)\
+        #                .order_by(Admission.discharged_date)
+
+        admissions = self.session.query(Encounter)\
+                        .filter(Encounter.patient == self.patient)\
+                        .order_by(Encounter.date_start)
 
         self.admissions_list.set_result(admissions)
 
-        admissions_count = self.admissions_list.GetItemCount()
-        if admissions_count > 0:
-            self.admissions_list.SetSelection(0)
-            self._on_admission_selected(None)
-        else:
-            self.admission_panel.unset()
+        #admissions_count = self.admissions_list.GetItemCount()
+        #if admissions_count > 0:
+        #    self.admissions_list.SetSelection(0)
+        #    self._on_admission_selected(None)
+        #else:
+        #    self.admission_panel.unset()
 
         self._update_toolbar()    
 

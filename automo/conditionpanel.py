@@ -5,7 +5,7 @@ import config
 import events
 import images
 from icd10coder import Icd10Coder
-from database import Condition
+#from database import Condition
 from dbqueryresultbox import DbQueryResultBox
 
 

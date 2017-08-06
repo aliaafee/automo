@@ -18,4 +18,7 @@ def format_duration(from_date, to_date):
 
 def format_date(date_object):
     """Format date"""
+    if date_object is None:
+        return ""
+
     return date_object.strftime("%d/%m/%Y")
