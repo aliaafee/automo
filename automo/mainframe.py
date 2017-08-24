@@ -2,11 +2,12 @@
 import wx
 import wx.aui
 
-from database import Session
+import database as db
 import images
 from patientlistpanel import PatientListPanel
 from patientpanel import PatientPanel
 from about import AboutDlg
+from shell import AutoMOShell
 
 
 class MainFrame(wx.Frame):
@@ -24,7 +25,7 @@ class MainFrame(wx.Frame):
         _icon.CopyFromBitmap(images.get('icon_16'))
         self.SetIcon(_icon)
 
-        self.session = Session()
+        self.session = db.Session()
 
         self._init_ctrls()
         self._init_menu()
@@ -46,9 +47,11 @@ class MainFrame(wx.Frame):
         self.menu_bar.Append(self.filemenu, "&File")
 
         tool_menu = wx.Menu()
+        tool_menu.Append(wx.ID_FILE1, "Python Shell", "AutoMO Python Shell")
+        wx.EVT_MENU(self, wx.ID_FILE1, self._on_python_shell)
 
-        #Tool Menu Items here
         self.menu_bar.Append(tool_menu, "&Tools")
+
 
         help_menu = wx.Menu()
 
@@ -61,8 +64,6 @@ class MainFrame(wx.Frame):
 
 
     def _init_ctrls(self):
-        sizer = wx.BoxSizer(wx.VERTICAL)
-
         #Splitter Window
         splitter = wx.SplitterWindow(self, style=wx.SP_LIVE_UPDATE)
 
@@ -82,10 +83,16 @@ class MainFrame(wx.Frame):
         splitter.SetMinimumPaneSize(100)
         splitter.SetSashPosition(250)
 
+        sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(splitter, 1, wx.ALL | wx.EXPAND)
         self.SetSizer(sizer)
 
         self.Layout()
+
+
+    def _on_python_shell(self, event):
+        with AutoMOShell(self, self.session) as dlg:
+            dlg.ShowModal()
 
 
     def  _on_about(self, event):

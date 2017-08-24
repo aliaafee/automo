@@ -2,15 +2,16 @@
 import wx
 
 import events
+import database as db
 from dbdatepicker import DbDatePicker
 from dbrelationctrl import DbRelationCtrl
 from dbrelationcombo import DbRelationCombo
-from conditionpanel import ConditionPanel
-from prescriptionpanel import PrescriptionPanel
-from admissionnotes import AdmissionNotesPanel,\
-                           ProgressNotesPanel,\
-                           DischargeSummaryPanel
-from database import Doctor
+#from conditionpanel import ConditionPanel
+#from prescriptionpanel import PrescriptionPanel
+#from admissionnotes import AdmissionNotesPanel,\
+#                           ProgressNotesPanel,\
+#                           DischargeSummaryPanel
+#import database as db
 
 
 class AdmissionPanel(wx.Panel):
@@ -47,20 +48,20 @@ class AdmissionPanel(wx.Panel):
         self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self._on_changing_notebook)
         self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self._on_change_notebook)
 
-        self.conditions_panel = ConditionPanel(self.notebook, self.session)
+        self.conditions_panel = wx.Panel(self.notebook)#ConditionPanel(self.notebook, self.session)
         self.conditions_panel.Bind(events.EVT_AM_CONDITION_CHANGED, self._on_change_admission)
         self.notebook.AddPage(self.conditions_panel, "Conditions")
 
-        self.admission_notes_panel = AdmissionNotesPanel(self.notebook, self.session)
+        self.admission_notes_panel = wx.Panel(self.notebook)#AdmissionNotesPanel(self.notebook, self.session)
         self.notebook.AddPage(self.admission_notes_panel, "Admission Notes")
 
-        self.progress_notes_panel = ProgressNotesPanel(self.notebook, self.session)
+        self.progress_notes_panel = wx.Panel(self.notebook)#ProgressNotesPanel(self.notebook, self.session)
         self.notebook.AddPage(self.progress_notes_panel, "Progress Notes")
 
-        self.prescription_panel = PrescriptionPanel(self.notebook, self.session)
+        self.prescription_panel = wx.Panel(self.notebook)#PrescriptionPanel(self.notebook, self.session)
         self.notebook.AddPage(self.prescription_panel, "Prescription")
 
-        self.discharge_summary_panel = DischargeSummaryPanel(self.notebook, self.session)
+        self.discharge_summary_panel = wx.Panel(self.notebook)#DischargeSummaryPanel(self.notebook, self.session)
         self.notebook.AddPage(self.discharge_summary_panel, "Discharge Summary")
 
         grid_sizer = wx.FlexGridSizer(2, 4, 2, 2)
@@ -103,6 +104,7 @@ class AdmissionPanel(wx.Panel):
 
 
     def _on_changing_notebook(self, event):
+        return #TODO
         active_page = self.notebook.GetPage(self.notebook.GetSelection())
         if active_page.is_unsaved():
             active_page.save_changes()
@@ -110,6 +112,7 @@ class AdmissionPanel(wx.Panel):
 
 
     def is_unsaved(self):
+        return #TODO
         """Check to see if any changes have been saved, must do before closing"""
         if self.admission is None:
             return False
@@ -161,27 +164,27 @@ class AdmissionPanel(wx.Panel):
         self.txt_bed.Show()
         self.txt_discharged_date.Show()
 
-        self.txt_admitted_date.set_dbobject_attr(admission, "admitted_date")
-        self.txt_discharged_date.set_dbobject_attr(admission, "discharged_date")
+        self.txt_admitted_date.set_dbobject_attr(admission, "start_time")
+        self.txt_discharged_date.set_dbobject_attr(admission, "end_time")
 
-        doctors = self.session.query(Doctor)
-        self.txt_admitting_doctor.set_dbobject_attr(admission, "admitting_doctor_id",
-                                                    "admitting_doctor", doctors, "id")
+        doctors = self.session.query(db.Doctor)
+        self.txt_admitting_doctor.set_dbobject_attr(admission, "personnel_id",
+                                                    "personnel", doctors, "id")
 
         active_page = self.notebook.GetPage(self.notebook.GetSelection())
-        active_page.set_admission(self.admission)
+        #active_page.set_admission(self.admission)
         self.notebook.Show()
 
         if self.admission.bed is not None:
             """This is the current admission"""
-            self.set_editable(True)
+            #self.set_editable(True)
             self.lbl_discharged_date.Hide()
             self.txt_discharged_date.Hide()
             self.txt_bed.set_dbobject_attr(admission, "bed_id", "bed")
         else:
             """This is one of the previous admissions
               These are not editable by default"""
-            self.set_editable(False)
+            #self.set_editable(False)
             self.txt_bed.set_dbobject_attr(admission, "discharged_bed_id", "discharged_bed")
 
         self.Layout()

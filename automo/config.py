@@ -1,12 +1,7 @@
 """Configuration"""
-import dateutil.relativedelta
 
-
-def format_duration(from_date, to_date):
-    """Format duration to human readable form."""
-    duration = dateutil.relativedelta.relativedelta(
-        to_date, from_date
-    )
+def format_duration(duration): #from_date, to_date):
+    """Format python relative delta duration to human readable form."""
     if duration.years < 1:
         if duration.months < 1:
             return "{0} d".format(duration.days)
