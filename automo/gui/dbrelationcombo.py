@@ -1,5 +1,4 @@
 """DbRelationCombo"""
-
 import wx
 
 from .events import DbCtrlChangedEvent
@@ -61,8 +60,8 @@ class DbRelationCombo(wx.ComboBox):
         rel_object = getattr(self.db_object, self.db_str_attr)
 
         if rel_object is None:
-            #self.ChangeValue("")
-            #self.Clear()
+            self.ChangeValue("")
+            self.Clear()
             self.SetSelection(-1)
             return
 

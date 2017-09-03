@@ -1,12 +1,12 @@
 mkdir src
+mkdir src\automo
 mkdir src\dist
-copy /Y ..\automo\*.py src\
+xcopy /Y /E ..\automo\*.py src\automo\
+copy /Y ..\automo.py src\
 copy /Y setup.py src\
 copy /Y ..\images\src\icon_pack.ico src\automo.ico
 cd src
 C:\Python27\python.exe setup.py py2exe
-del dist\automo.exe
-ren dist\__main__.exe automo.exe
 
 mkdir final
 mkdir final\bin

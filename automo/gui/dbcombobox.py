@@ -4,6 +4,7 @@ import wx.html
 
 from dbqueryresultbox import DbQueryResultBox
 
+
 class DbComboBox(wx.ComboBox):
     """DB Combo Result"""
     def __init__(self, parent, session, html_decorator=None, minimum_fetch=50,

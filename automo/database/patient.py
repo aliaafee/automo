@@ -2,7 +2,7 @@
 import datetime
 import dateutil.relativedelta
 
-from sqlalchemy import Column, Integer, String, Date, Boolean, not_
+from sqlalchemy import Column, Integer, String, Date, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 
 from . import dbexception
@@ -23,6 +23,14 @@ class Patient(Base):
     date_of_death = Column(Date())
     sex = Column(String(1))
 
+    permanent_address_id = Column(Integer, ForeignKey('address.id'))
+    permanent_address = relationship("Address", foreign_keys=[permanent_address_id],
+                                     back_populates="permanent_residents")
+
+    current_address_id = Column(Integer, ForeignKey('address.id'))
+    current_address = relationship("Address", foreign_keys=[current_address_id],
+                                   back_populates="current_residents")
+
     problems = relationship("Problem", back_populates="patient",
                             cascade="all, delete, delete-orphan")
 
@@ -39,13 +47,17 @@ class Patient(Base):
           date of birth is calculated and stored"""
         self.date_of_birth = today - age
 
-    def get_age(self):
+    def get_age(self, today=datetime.date.today()):
         """Calculate and return age of patient as a relativedelta object"""
         if self.date_of_birth is None:
             return None
-        return dateutil.relativedelta.relativedelta(datetime.date.today(), self.date_of_birth)
+        return dateutil.relativedelta.relativedelta(today, self.date_of_birth)
 
     age = property(get_age, set_age, None, "Age of the patient as relativedelta.")
+
+
+    def __repr__(self):
+        return "<Patient {0}>".format(self.name)
 
 
     def get_current_encounter(self, session):
@@ -54,6 +66,7 @@ class Patient(Base):
           found raises AutoMODatabaseError"""
         active_encounters = session.query(Encounter)\
                                 .filter(Encounter.patient == self)\
+                                .filter(Encounter.parent == None)\
                                 .filter(Encounter.end_time == None)
 
         if active_encounters.count() == 1:
@@ -62,6 +75,31 @@ class Patient(Base):
             raise dbexception.AutoMODatabaseError("Multiple active Encounters for patient found. This should not happen.")
         else:
             return None
+
+
+    def admit(self, session, doctor, bed, admission_time=datetime.datetime.now()):
+        """Admit the patient to the provided bed. If patient is already admitted or the bed
+          is occupied, raises AutoMODatabaseError. Returns the created encounter object."""
+        current_encounter = self.get_current_encounter(session)
+        if current_encounter is not None:
+            raise dbexception.AutoMODatabaseError("There is an active encounter, end it before admitting.")
+
+        if bed.admission is not None:
+            raise dbexception.AutoMODatabaseError("Bed {0} is already occupied.".format(bed))
+
+        if doctor.type != 'doctor':
+            raise dbexception.AutoMODatabaseError("Patient can only be admitted under a doctor.")
+
+        new_admission = Admission(
+            patient = self,
+            personnel = doctor,
+            bed = bed,
+            start_time = admission_time
+        )
+
+        session.add(new_admission)
+
+        return new_admission
 
 
     def discharge(self, session, discharge_time=datetime.datetime.now(), admission=None):
@@ -78,22 +116,6 @@ class Patient(Base):
         admission.end(discharge_time)
 
 
-    def admit(self, session, bed, admission_time=datetime.datetime.now()):
-        """Admit the patient to the provided bed. If patient is already admitted or the bed
-          is occupied, raises AutoMODatabaseError. Returns the created encounter object."""
-        current_encounter = self.get_current_encounter(session)
-        if current_encounter is not None:
-            raise dbexception.AutoMODatabaseError("There is an active encounter, end it before admitting.")
-
-        if bed.admission is not None:
-            raise dbexception.AutoMODatabaseError("Bed {0} is already occupied.".format(bed))
-
-        new_admission = Admission(
-            patient = self,
-            start_time = admission_time,
-            bed = bed
-        )
-
-        session.add(new_admission)
-
-        return new_admission
+    def add_encounter(self, encounter):
+        """Add an encounter to the patient"""
+        self.encounters.append(encounter)

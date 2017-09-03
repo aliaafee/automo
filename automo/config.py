@@ -2,6 +2,8 @@
 
 def format_duration(duration): #from_date, to_date):
     """Format python relative delta duration to human readable form."""
+    if duration is None:
+        return ""
     if duration.years < 1:
         if duration.months < 1:
             return "{0} d".format(duration.days)

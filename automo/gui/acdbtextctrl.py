@@ -10,7 +10,6 @@ of database.
 
 Find the original at https://github.com/RajaS/ACTextCtrl
 """
-
 import wx
 
 from .dbtextctrl import DbTextCtrl
@@ -127,7 +126,7 @@ class AcDbTextCtrl(DbTextCtrl):
             setattr(self.db_object, self.db_str_attr, self.GetValue())
             self.session.commit()
 
-        event = DbCtrChangedEvent(object=self.db_object)
+        event = DbCtrlChangedEvent(object=self.db_object)
         wx.PostEvent(self, event)
 
 
@@ -325,4 +324,3 @@ class ACPopup(wx.PopupWindow):
         else:
             self._popdown = True
             self.SetPosition((left_x, upper_y + height))
-

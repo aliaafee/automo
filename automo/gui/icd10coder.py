@@ -8,10 +8,10 @@ import wx.html
 from sqlalchemy import or_, and_
 from sqlalchemy.orm.exc import NoResultFound
 
-#from database import db.Icd10Class
 from .. import database as db
 from .dbqueryresultbox import DbQueryResultBox
 from .dbcombobox import DbComboBox
+from .pydatepickerctrl import PyDatePickerCtrl
 
 
 class Icd10ChapterTree(wx.TreeCtrl):
@@ -287,8 +287,13 @@ class Icd10Coder(wx.Dialog):
 
         self.session = session
 
-        self.problem = None
-        self.selected_category = None
+        #self.problem = None
+        #self.selected_category = None
+        self.selected_icd10class = None
+        self.selected_start_time = None
+        self.selected_comment = None
+        self.selected_modifier_class = None
+        self.selected_modifier_extra_class = None
 
         sizer = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -359,28 +364,24 @@ class Icd10Coder(wx.Dialog):
         foot_sizer.Add(self.lbl_modifier, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx. LEFT, border=5)
         self.cmb_modifier = DbComboBox(self, self.session,
                                        self._modifier_decorator, size=(200, -1))
-        self.cmb_modifier.Bind(wx.EVT_COMBOBOX, self._on_change_modifier)
         self.cmb_modifier.Hide()
         foot_sizer.Add(self.cmb_modifier, 0,
                        wx.EXPAND | wx.BOTTOM | wx.RIGHT | wx. LEFT, border=5)
 
-        self.lbl_extra_modifier = wx.StaticText(self, label="Additional Modifier")
-        self.lbl_extra_modifier.Hide()
-        foot_sizer.Add(self.lbl_extra_modifier, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx. LEFT,
+        self.lbl_modifier_extra = wx.StaticText(self, label="Additional Modifier")
+        self.lbl_modifier_extra.Hide()
+        foot_sizer.Add(self.lbl_modifier_extra, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx. LEFT,
                        border=5)
-        self.cmb_extra_modifier = DbComboBox(self, self.session,
+        self.cmb_modifier_extra = DbComboBox(self, self.session,
                                              self._modifier_decorator, size=(200, -1))
-        self.cmb_extra_modifier.Bind(wx.EVT_COMBOBOX, self._on_change_extra_modifier)
-        self.cmb_extra_modifier.Hide()
-        foot_sizer.Add(self.cmb_extra_modifier, 0,
+        self.cmb_modifier_extra.Hide()
+        foot_sizer.Add(self.cmb_modifier_extra, 0,
                        wx.EXPAND | wx.BOTTOM | wx.RIGHT | wx. LEFT, border=5)
 
         self.lbl_date = wx.StaticText(self, label="Date")
         foot_sizer.Add(self.lbl_date, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx. LEFT,
                        border=5)
-        self.date_picker = wx.DatePickerCtrl(self,
-                                             style=wx.DP_DROPDOWN)
-        self.date_picker.Bind(wx.EVT_DATE_CHANGED, self._on_change_date)
+        self.date_picker = PyDatePickerCtrl(self, style=wx.DP_DROPDOWN)
         foot_sizer.Add(self.date_picker, 0,
                        wx.EXPAND | wx.BOTTOM | wx.RIGHT | wx. LEFT, border=5)
 
@@ -389,13 +390,8 @@ class Icd10Coder(wx.Dialog):
                        border=5)
         self.txt_comment = wx.TextCtrl(self, size=(200, 60),
                                        style=wx.TE_MULTILINE)
-        self.txt_comment.Bind(wx.EVT_TEXT, self._on_change_comment)
         foot_sizer.Add(self.txt_comment, 0,
                        wx.EXPAND | wx.BOTTOM | wx.RIGHT | wx. LEFT, border=5)
-
-        self.chk_main_problem = wx.CheckBox(self, label="Main db.")
-        foot_sizer.Add(self.chk_main_problem, 0, wx.EXPAND | wx.ALL, border=5)
-        self.chk_main_problem.Bind(wx.EVT_CHECKBOX, self._on_change_main_problem)
 
         foot_sizer.AddStretchSpacer()
 
@@ -417,71 +413,47 @@ class Icd10Coder(wx.Dialog):
         self.Layout()
 
 
-    def ShowModal(self, problem=None):
-        self.problem = problem
+    def ShowModal(self, icd10class=None, start_time=None, comment=None, modifier_class=None, modifier_extra_class=None):
+        self.selected_icd10class = icd10class
+        self.selected_start_time = start_time
+        self.selected_comment = comment
+        self.selected_modifier_class = modifier_class
+        self.selected_modifier_extra_class = modifier_extra_class
 
         self.txt_search.SetValue("")
 
         update_tree = False
-        if self.problem is None:
+        if self.selected_icd10class is None:
             selection = self.chapter_tree.GetSelection()
             if selection.IsOk():
                 self.chapter_tree.SelectItem(selection, False)
             self.category_list.set_category(None)
-            self.problem = db.Problem()
             self.left_panel.SetSelection(0)
         else:
-            if self.problem.icd10class is None:
-                selection = self.chapter_tree.GetSelection()
-                if selection.IsOk():
-                    self.chapter_tree.SelectItem(selection, False)
-                self.category_list.set_category(None)
-                self.problem = db.Problem()
-                self.left_panel.SetSelection(0)
-            else:
-                update_tree = True
-                self.chapter_tree.initialize()
-                self.left_panel.SetSelection(1)
+            update_tree = True
+            self.chapter_tree.initialize()
+            self.left_panel.SetSelection(1)
 
-        self.set_category(self.problem.icd10class, update_tree=update_tree)
+        self.set_category(self.selected_icd10class, update_tree=update_tree)
 
-        if self.problem.date_start is None:
-            self.problem.date_start = datetime.date.today()
+        if self.selected_start_time is None:
+            self.selected_start_time = datetime.date.today()
 
-        wxdatetime = wx.DateTime()
-        wxdatetime.Set(
-            self.problem.date_start.day,
-            self.problem.date_start.month - 1,
-            self.problem.date_start.year
-        )
-        self.date_picker.SetValue(wxdatetime)
+        self.date_picker.set_pydatetime(self.selected_start_time)
 
-        if self.problem.comment is not None:
-            self.txt_comment.ChangeValue(self.problem.comment)
-
-        #if self.problem.main_problem is None:
-        #    self.problem.main_problem = False
-
-        #self.chk_main_problem.SetValue(self.problem.main_problem)
+        if self.selected_comment is not None:
+            self.txt_comment.ChangeValue(self.selected_comment)
 
         return super(Icd10Coder, self).ShowModal()
 
 
-    def get_problem(self):
-        """Get the problem"""
-        return self.problem
-
-
     def set_category(self, icd10class, update_tree=False):
         """Set currently displayed db.Icd10Class"""
-        self.problem.icd10class = icd10class
 
-        if self.problem.icd10class is None:
+        if icd10class is None:
             self.category_list.set_category(None)
             self._update_browser_title()
             return
-
-        self.problem.icd10class_code = self.problem.icd10class.code
 
         self.category_list.set_category(icd10class)
         self._update_browser_title()
@@ -491,52 +463,55 @@ class Icd10Coder(wx.Dialog):
             if active_page_text == "Browse":
                 self.chapter_tree.set_class(icd10class)
 
-        if self.problem.icd10class.modifier is not None:
+        if icd10class.modifier is not None:
             self.lbl_modifier.Show()
             self.lbl_modifier.SetLabel(
-                self.problem.icd10class.modifier.name)
+                icd10class.modifier.name)
             self.cmb_modifier.Show()
             self.cmb_modifier.set_items(
-                self.problem.icd10class.modifier.classes)
-            self.Layout()
-            if self.problem.icd10modifier_class is not None:
-                if self.problem.icd10modifier_class.modifier.code == self.problem.icd10class.modifier_code:
-                    self.cmb_modifier.set_selected_item(self.problem.icd10modifier_class)
+                icd10class.modifier.classes)
+            if self.selected_modifier_class is not None:
+                if self.selected_modifier_class.modifier.code == icd10class.modifier_code:
+                    self.cmb_modifier.set_selected_item(self.selected_modifier_class)
                 else:
-                    self.problem.icd10modifier_class_code = None
-                    self.problem.icd10modifier_class = None
+                    self.selected_modifier_class = None
         else:
             self.lbl_modifier.Hide()
             self.cmb_modifier.Hide()
-            self.problem.icd10modifier_class_code = None
-            self.problem.icd10modifier_class = None
-            self.Layout()
+            self.selected_modifier_class = None
 
-        if self.problem.icd10class.modifier_extra is not None:
-            self.lbl_extra_modifier.Show()
-            self.lbl_extra_modifier.SetLabel(
-                self.problem.icd10class.modifier_extra.name)
-            self.cmb_extra_modifier.Show()
-            self.cmb_extra_modifier.set_items(
-                self.problem.icd10class.modifier_extra.classes)
-            self.Layout()
-            if self.problem.icd10modifier_extra_class is not None:
-                if self.problem.icd10modifier_extra_class.modifier.code == self.problem.icd10class.modifier_extra_code:
-                    self.cmb_modifier.set_selected_item(self.problem.icd10modifier_extra_class)
+        if icd10class.modifier_extra is not None:
+            self.lbl_modifier_extra.Show()
+            self.lbl_modifier_extra.SetLabel(
+                icd10class.modifier_extra.name)
+            self.cmb_modifier_extra.Show()
+            self.cmb_modifier_extra.set_items(
+                icd10class.modifier_extra.classes)
+            if self.selected_modifier_extra_class is not None:
+                if self.selected_modifier_extra_class.modifier.code == icd10class.modifier_extra_code:
+                    self.cmb_modifier.set_selected_item(self.selected_modifier_extra_class)
                 else:
-                    self.problem.icd10modifier_extra_class_code = None
-                    self.problem.icd10modifier_extra_class = None
+                    self.selected_modifier_extra_class = None
         else:
-            self.lbl_extra_modifier.Hide()
-            self.cmb_extra_modifier.Hide()
-            self.problem.icd10modifier_extra_class_code = None
-            self.problem.icd10modifier_extra_class = None
-            self.Layout()
+            self.lbl_modifier_extra.Hide()
+            self.cmb_modifier_extra.Hide()
+            self.selected_modifier_extra_class = None
+
+        self.Layout()
 
 
     def _on_ok(self, event):
-        if self.problem.icd10class is None:
+        self.selected_icd10class = self.category_list.get_selected_category()
+        self.selected_modifier_class = self.cmb_modifier.get_selected_item()
+        self.selected_modifier_extra_class = self.cmb_modifier_extra.get_selected_item()
+        self.selected_start_time = self.date_picker.get_pydatetime()
+        self.selected_comment = self.txt_comment.GetValue()
+        if self.selected_comment == "":
+            self.selected_comment = None
+
+        if self.selected_icd10class is None:
             print "TODO: Error message nothing selected"
+            self.EndModal(wx.ID_CANCEL)
             return
 
         if self.chk_favourites.GetValue() is True:
@@ -547,44 +522,6 @@ class Icd10Coder(wx.Dialog):
 
     def _on_cancel(self, event):
         self.EndModal(wx.ID_CANCEL)
-
-
-    def _on_change_modifier(self, event):
-        self.problem.icd10modifier_class = self.cmb_modifier.get_selected_item()
-        if self.problem.icd10modifier_class is not None:
-            self.problem.icd10modifier_class_code = self.problem.icd10modifier_class.code
-        else:
-            self.problem.icd10modifier_class_code = None
-
-
-    def _on_change_extra_modifier(self, event):
-        self.problem.icd10modifier_extra_class = self.cmb_extra_modifier.get_selected_item()
-        if self.problem.icd10modifier_extra_class is not None:
-            self.problem.icd10modifier_extra_class_code = self.problem.icd10modifier_extra_class.code
-        else:
-            self.problem.icd10modifier_extra_class_code = None
-
-
-    def _on_change_date(self, event):
-        new_wxdate = self.date_picker.GetValue()
-        new_date = datetime.date(
-            new_wxdate.GetYear(),
-            new_wxdate.GetMonth() + 1,
-            new_wxdate.GetDay()
-        )
-        if self.problem is not None:
-            self.problem.date_start = new_date
-
-
-    def _on_change_comment(self, event):
-        new_comment = self.txt_comment.GetValue()
-        if self.problem is not None:
-            self.problem.comment = new_comment
-
-
-    def _on_change_main_problem(self, event):
-        if self.problem is not None:
-            self.problem.main_problem = self.chk_main_problem.GetValue()
 
 
     def _modifier_decorator(self, modifier_item):
@@ -695,38 +632,33 @@ class Icd10Coder(wx.Dialog):
 
 
     def _update_browser_title(self):
-        if self.problem is None:
+        if self.selected_icd10class is None:
             self.browser_title.SetPage(
                 "<table><tr><td><b>Internation Classification of Disease - 10</b></td></tr></table>")
             return
 
-        if self.problem.icd10class is None:
-            self.browser_title.SetPage(
-                "<table><tr><td><b>Internation Classification of Disease - 10</b></td></tr></table>")
-            return
-
-        if self.problem.icd10class.kind == "chapter":
+        if self.selected_icd10class.kind == "chapter":
             chapter_html = "<b>Chapter {0} {1}</b>".format(
-                self.problem.icd10class.code, self.problem.icd10class.preferred_plain)
+                self.selected_icd10class.code, self.selected_icd10class.preferred_plain)
         else:
             try:
                 chapter_code, chapter_title = \
                     self.session.query(db.Icd10Class.code, db.Icd10Class.preferred_plain)\
-                        .filter(db.Icd10Class.code == self.problem.icd10class.chapter_code)\
+                        .filter(db.Icd10Class.code == self.selected_icd10class.chapter_code)\
                         .one()
                 chapter_html = "<b>Chapter {0} {1}</b>".format(chapter_code, chapter_title)
             except NoResultFound:
                 chapter_html = ""
 
 
-        if self.problem.icd10class.kind == "block":
+        if self.selected_icd10class.kind == "block":
             block_html = "<b>{0} </b> {1}".format(
-                self.problem.icd10class.code, self.problem.icd10class.preferred_plain)
+                self.selected_icd10class.code, self.selected_icd10class.preferred_plain)
         else:
             try:
                 block_code, block_title = \
                     self.session.query(db.Icd10Class.code, db.Icd10Class.preferred_plain)\
-                        .filter(db.Icd10Class.code == self.problem.icd10class.parent_block_code)\
+                        .filter(db.Icd10Class.code == self.selected_icd10class.parent_block_code)\
                         .one()
 
                 block_html = "<b>{0} </b> {1}".format(block_code, block_title)
@@ -748,38 +680,3 @@ class Icd10Coder(wx.Dialog):
 
         self.set_category(current_class, update_tree=True)
 
-
-def main():
-    """Test code"""
-    import database
-    database.StartEngine("sqlite:///wardpresc-data.db", False, "")
-    session = database. Session()
-
-    app = wx.PySimpleApp(0)
-
-    with Icd10Coder(None, session) as dlg:
-        if dlg.ShowModal() == wx.ID_OK:
-            new_problem = dlg.get_problem()
-            output = "admission id \t {0}\n"\
-                     "icd10class_code \t {1}\n"\
-                     "icd10modifier_class_code \t {2}\n"\
-                     "icd10modifier_extra_class_code \t {3}\n"\
-                     "date \t {4}\n"\
-                     "comment \t {5}\n"\
-                     "main_problem \t {6}\n"
-            print output.format(
-                new_problem.admission_id,
-                new_problem.icd10class_code,
-                new_problem.icd10modifier_class_code,
-                new_problem.icd10modifier_extra_class_code,
-                new_problem.date_start,
-                new_problem.comment,
-                new_problem.main_problem
-            )
-        else:
-            print "Cancelled"
-    app.MainLoop()
-
-
-if __name__ == "__main__":
-    main()

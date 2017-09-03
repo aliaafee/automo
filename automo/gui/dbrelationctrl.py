@@ -1,5 +1,4 @@
 """DbRelationCtrl"""
-
 import wx
 
 

@@ -1,6 +1,6 @@
 """Problem"""
 
-from sqlalchemy import Column, Integer, ForeignKey, Date, Text, String
+from sqlalchemy import Column, Integer, ForeignKey, DateTime, Text, String
 from sqlalchemy.orm import relationship
 
 from . import dbexception
@@ -23,8 +23,8 @@ class Problem(Base):
     patient_id = Column(Integer, ForeignKey('patient.id'))
     patient = relationship("Patient", back_populates="problems")
 
-    date_start = Column(Date())
-    date_end = Column(Date())
+    start_time = Column(DateTime())
+    end_time = Column(DateTime())
 
     encounters = relationship("Encounter",
                               secondary=problem_encounter_association_table,
@@ -47,7 +47,13 @@ class Problem(Base):
         if self.patient != encounter.patient:
             raise dbexception.AutoMODatabaseError("The Problem and Encounter should be from the same patient")
 
-        if encounter in self.encounter:
+        if encounter in self.encounters:
             raise dbexception.AutoMODatabaseError("This encounter already exists in this problem")
 
         self.encounters.append(encounter)
+
+
+    def __repr__(self):
+        if self.icd10class is not None:
+            return '<Problem "{0}">'.format(self.icd10class.preferred_plain)
+        return '<Problem>'

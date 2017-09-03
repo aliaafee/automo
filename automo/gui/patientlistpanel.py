@@ -2,7 +2,6 @@
 import wx
 
 from . import events
-from . import images
 from .wardpanel import WardPanel
 from .patientsearchpanel import PatientSearchPanel
 

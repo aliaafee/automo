@@ -6,6 +6,7 @@ import wx.lib.agw.hyperlink as hl
 from .._version import __version__
 from . import images
 
+
 class AboutDlg(wx.Dialog):
     """The About Dialog"""
     def __init__(self, parent):

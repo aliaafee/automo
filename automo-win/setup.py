@@ -17,10 +17,10 @@ packages=[
 ]
 
 setup(
-    name="mopresc",
+    name="automo",
     windows = [
         {
-            "script": '__main__.py',
+            "script": 'automo.py',
             "icon_resources": [(1, "automo.ico")]
         }
     ],

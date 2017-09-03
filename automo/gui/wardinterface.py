@@ -28,7 +28,7 @@ class WardInterface(BaseInterface):
         self.patient_panel = PatientPanel(splitter, self.session, style=wx.BORDER_SUNKEN)
 
         splitter.SplitVertically(self.patient_list_panel, self.patient_panel)
-        splitter.SetMinimumPaneSize(100)
+        splitter.SetMinimumPaneSize(5)
         splitter.SetSashPosition(250)
 
         sizer = wx.BoxSizer(wx.VERTICAL)

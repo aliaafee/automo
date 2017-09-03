@@ -1,4 +1,6 @@
 """AutoMO Python Shell"""
+from dateutil.relativedelta import relativedelta as duration
+from datetime import datetime, date
 import wx
 import wx.py
 
@@ -16,12 +18,19 @@ class ShellInterface(BaseInterface):
 
         patients = self.session.query(db.Patient).all()
         beds = self.session.query(db.Bed).all()
+        doctors = self.session.query(db.Doctor).all()
+        nurses = self.session.query(db.Nurse).all()
         self.shell.interp.locals = {
-            'p': patients,
-            'beds': beds,
+            'patient': patients,
+            'bed': beds,
+            'doctor' : doctors,
+            'nurse' : nurses,
             'session': self.session,
             'query': self.session.query,
             'db': db,
             'quit': self.Close,
-            'icd10coder': Icd10Coder 
+            'icd10coder': Icd10Coder,
+            'duration' : duration,
+            'datetime' : datetime,
+            'date' : date
         }

@@ -38,6 +38,10 @@ class WardPanel(wx.Panel):
         )   
         if selection != wx.NOT_FOUND:
             self.cmb_ward.SetSelection(selection)
+        else:
+            self.cmb_ward.SetSelection(0)
+
+        self._on_change_ward(None)
 
         self.beds_list.RefreshAll()
 
