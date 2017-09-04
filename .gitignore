@@ -4,3 +4,4 @@ venv
 *.swp
 automo-data.db
 automo-win/src
+*.log
