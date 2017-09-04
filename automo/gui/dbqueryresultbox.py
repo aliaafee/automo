@@ -14,7 +14,6 @@ class DbQueryResultBox(wx.HtmlListBox):
             parent, **kwds
         )
         self.parent = parent
-        #self.session = session
         self.html_decorator = html_decorator
         self.minimum_fetch = minimum_fetch
 
@@ -24,9 +23,8 @@ class DbQueryResultBox(wx.HtmlListBox):
         self.query_result = None
         self.query_result_count = 0
         self.SetItemCount(0)
-        self.visible_begin = -1
-        self.visible_end = -1
-        self.visible_items = []
+
+        self.items_cache = {}
 
         if self.html_decorator is None:
             self.html_decorator = self._html_decorator
@@ -62,9 +60,7 @@ class DbQueryResultBox(wx.HtmlListBox):
         self.query_result_count = self.query_result.count()
         self.extra_row_value = extra_row_value
 
-        self.visible_begin = -1
-        self.visible_end = -1
-        self.visible_items = []
+        self.items_cache = {}
 
         self.ScrollToRow(0)
         if extra_row_value is None:
@@ -76,43 +72,30 @@ class DbQueryResultBox(wx.HtmlListBox):
         self.Refresh()
 
 
-    def get_object(self, index, get_uncached=False):
+    def _fetch_items(self, page):
+        start = page * self.minimum_fetch
+        print "Fetching {0} starting from {1}".format(self.minimum_fetch, start)
+        items = self.query_result.offset(start).limit(self.minimum_fetch).all()
+        for index, item in enumerate(items):
+            self.items_cache[start+index] = item
+
+
+    def get_object(self, index):
         """Return the object at the given index"""
         if index < 0 or index > self.query_result_count - 1:
             return None
 
-        visible_index = index - self.visible_begin
         try:
-            return self.visible_items[visible_index]
-        except IndexError:
-            start = self.GetVisibleRowsBegin()
-            end = self.GetVisibleRowsEnd()
-
-            if end != self.visible_end:
-                if end - start > self.minimum_fetch:
-                    if end != self.visible_end:
-                        self._fetch_visible()
-                else:
-                    if start != self.visible_begin:
-                        self._fetch_visible()
-            
-            visible_index = index - self.visible_begin
-            try:
-                return self.visible_items[visible_index]
-            except IndexError:
-                if not get_uncached:
-                    return None
-
-                item = self.query_result\
-                        .offset(index)\
-                        .limit(1).one()
-
-                return item
+            return self.items_cache[index]
+        except KeyError:
+            page = int(index / float(self.minimum_fetch))
+            self._fetch_items(page)
+            return self.items_cache[index]
 
 
     def get_selected_object(self):
         """Return the selected database object, or the first one if multiple selected"""
-        return self.get_object(self.GetSelection(), True)
+        return self.get_object(self.GetSelection())
 
 
     def get_all_selected_object(self):
@@ -123,22 +106,10 @@ class DbQueryResultBox(wx.HtmlListBox):
         selected_items = []
         current_index, cookie = self.GetFirstSelected()
         while current_index != wx.NOT_FOUND:
-            selected_items.append(self.get_object(current_index, True))
+            selected_items.append(self.get_object(current_index))
             current_index, cookie = self.GetNextSelected(cookie)
 
         return selected_items
-
-
-    def _fetch_visible(self):
-        self.visible_begin = self.GetVisibleRowsBegin()
-        self.visible_end = self.GetVisibleRowsEnd()
-
-        row_limit = self.visible_end - self.visible_begin
-        row_limit = self.minimum_fetch if row_limit < self.minimum_fetch else row_limit
-
-        self.visible_items = self.query_result\
-                                .offset(self.visible_begin)\
-                                .limit(row_limit).all()
 
 
     def OnGetItem(self, n):

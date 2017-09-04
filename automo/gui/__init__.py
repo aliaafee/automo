@@ -4,6 +4,7 @@ import wx
 from .baseinterface import BaseInterface
 from .shellinterface import ShellInterface
 from .wardinterface import WardInterface
+from .cwardinterface import CWardInterface
 
 
 class AutoMOApp(wx.App):
@@ -20,6 +21,8 @@ class AutoMOApp(wx.App):
             self.main_frame = ShellInterface(None)
         elif self.interface == 'gui-ward':
             self.main_frame = WardInterface(None)
+        elif self.interface == 'gui-cward':
+            self.main_frame = CWardInterface(None)
         else:
             return False
 

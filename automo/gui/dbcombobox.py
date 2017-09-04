@@ -2,8 +2,6 @@
 import wx
 import wx.html
 
-from dbqueryresultbox import DbQueryResultBox
-
 
 class DbComboBox(wx.ComboBox):
     """DB Combo Result"""

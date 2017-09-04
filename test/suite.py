@@ -11,6 +11,46 @@ sys.path.append("./")
 
 from automo._version import __version__
 from automo import database as db
+from automo import config
+
+
+class ConfigTest(unittest.TestCase):
+    def test_parse_duration(self):
+        #Parse integer as years
+        self.assertEqual(config.parse_duration("12"), relativedelta(years=12))
+
+        #Parse _y string
+        self.assertEqual(config.parse_duration("12y"), relativedelta(years=12))
+
+        #Parse _m string
+        self.assertEqual(config.parse_duration("3m"), relativedelta(months=3))
+
+        #Parse _d string
+        self.assertEqual(config.parse_duration("3d"), relativedelta(days=3))
+
+        #Parse _y _m _d string
+        self.assertEqual(config.parse_duration("1y 2m 3d"),
+                         relativedelta(years=1, months=2, days=3))
+
+        #Parse _d _y _m string
+        self.assertEqual(config.parse_duration("3d 1y 2m "),
+                         relativedelta(years=1, months=2, days=3))
+
+        #Parse multi year months
+        self.assertEqual(config.parse_duration("19m"),
+                         relativedelta(years=1, months=7))
+
+        #Parse noisy string
+        self.assertEqual(config.parse_duration("3y asfk 2m asfkawf 1d"),
+                         relativedelta(years=3, months=2, days=1))
+
+        #Parse invalid thing
+        with self.assertRaises(ValueError):
+            config.parse_duration("xyamgd")
+        with self.assertRaises(ValueError):
+            config.parse_duration("1 years 3 months")
+
+
 
 
 class BaseTest(unittest.TestCase):

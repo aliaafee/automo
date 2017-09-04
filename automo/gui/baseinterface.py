@@ -36,6 +36,9 @@ class BaseInterface(wx.Frame):
         self.filemenu.Append(wx.ID_EXIT, "Exit", "Exit the program")
         wx.EVT_MENU(self, wx.ID_EXIT, self._on_exit)
 
+        self.print_menu = wx.Menu()
+        self.menu_bar.Append(self.print_menu, "&Print")
+
         self.tool_menu = wx.Menu()
         self.menu_bar.Append(self.tool_menu, "&Tools")
 
@@ -43,6 +46,11 @@ class BaseInterface(wx.Frame):
         self.menu_bar.Append(self.help_menu, "&Help")
         self.help_menu.Append(wx.ID_ABOUT, "&About", "About this software")
         wx.EVT_MENU(self, wx.ID_ABOUT, self._on_about)
+
+
+    def set_title(self, title):
+        """Set the window title"""
+        self.SetTitle("AutoMO - {}".format(title))
 
 
     def  _on_about(self, event):

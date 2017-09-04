@@ -94,7 +94,8 @@ class EncountersPanel(wx.Panel):
                     .order_by(db.Encounter.start_time.desc())
 
         self.encounters_list.set_result(items, "")
-        self.encounters_list.SetSelection(0)
+        if self.encounters_list.GetItemCount() > 0:
+            self.encounters_list.SetSelection(0)
 
         self.encounter_panel.set(self.encounters_list.get_selected_object())
 
