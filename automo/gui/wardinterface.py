@@ -15,6 +15,8 @@ class WardInterface(BaseInterface):
     def __init__(self, parent, session=None):
         super(WardInterface, self).__init__(parent, session)
 
+        self.set_title("Ward")
+
         self.toolbar = self._get_toolbar()
 
         self.tool_menu.Append(wx.ID_FILE1, "Python Shell", "AutoMO Python Shell")

@@ -1,7 +1,7 @@
 """C Ward Interface"""
 import wx
 
-from .. import database as db
+from . import images
 from . import events
 from .baseinterface import BaseInterface
 from .shellinterface import ShellInterface
@@ -18,6 +18,8 @@ class CWardInterface(BaseInterface):
         super(CWardInterface, self).__init__(parent, session)
 
         self.set_title("C Ward")
+
+        self.toolbar = self._get_toolbar()
 
         self.tool_menu.Append(ID_IMPORT_PATIENTS, "Patient Importer", "Batch Patient Importer")
         wx.EVT_MENU(self, ID_IMPORT_PATIENTS, self._on_import)
@@ -37,10 +39,35 @@ class CWardInterface(BaseInterface):
         splitter.SetSashPosition(250)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(self.toolbar, 0, wx.EXPAND)
         sizer.Add(splitter, 1, wx.EXPAND)
         self.SetSizer(sizer)
 
         self.Layout()
+
+
+    def refresh(self):
+        self.patient_list_panel.refresh()
+        self.patient_panel.refresh()
+
+
+    def _get_toolbar(self):
+        toolbar = wx.ToolBar(self, style=wx.TB_FLAT | wx.TB_NODIVIDER)
+
+        toolbar.AddLabelTool(wx.ID_REFRESH, "Refresh", images.get("refresh_24"),
+                                  wx.NullBitmap, wx.ITEM_NORMAL, "Refresh", "")
+
+        toolbar.AddSeparator()
+
+        toolbar.Bind(wx.EVT_TOOL, self._on_refresh, id=wx.ID_REFRESH)
+
+        toolbar.Realize()
+
+        return toolbar
+
+
+    def _on_refresh(self, event):
+        self.refresh()
 
 
     def _on_python_shell(self, event):

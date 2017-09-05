@@ -14,6 +14,8 @@ class ShellInterface(BaseInterface):
     def __init__(self, parent, session=None):
         super(ShellInterface, self).__init__(parent, session)
 
+        self.set_title("Python Shell")
+
         self.shell = wx.py.shell.Shell(self)
 
         patients = self.session.query(db.Patient).all()

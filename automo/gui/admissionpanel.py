@@ -9,6 +9,7 @@ from .dbdatepicker import DbDatePicker
 from .problempanel import ProblemPanel
 from .encounternote import EncounterNote
 from .measurementspanel import MeasurementsPanel
+from .vitalspanel import VitalsPanel
 
 
 class AdmissionPanel(wx.Panel):
@@ -57,6 +58,9 @@ class AdmissionPanel(wx.Panel):
 
         self.measurements_panel = MeasurementsPanel(self.notebook, self.session)
         self.notebook.AddPage(self.measurements_panel, "Measurements")
+
+        self.vitals_panel = VitalsPanel(self.notebook, self.session)
+        self.notebook.AddPage(self.vitals_panel, "Vitals")
 
         self.discharge_note_panel = EncounterNote(self.notebook, self.session, 'discharge_note')
         self.notebook.AddPage(self.discharge_note_panel, "Discharge Note")

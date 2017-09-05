@@ -1,4 +1,4 @@
-"""Measurements Panel"""
+"""Vital Signs Panel"""
 import wx
 
 from .. import database as db
@@ -6,10 +6,10 @@ from . import images
 from .dbqueryresultgrid import DbQueryResultGrid, GridColumnDateTime, GridColumnFloat
 
 
-class MeasurementsPanel(wx.Panel):
-    """Measurements Panel"""
+class VitalsPanel(wx.Panel):
+    """Vital Signs Panel"""
     def __init__(self, parent, session, **kwds):
-        super(MeasurementsPanel, self).__init__(parent, **kwds)
+        super(VitalsPanel, self).__init__(parent, **kwds)
 
         self.session = session
         self.encounter = None
@@ -24,9 +24,11 @@ class MeasurementsPanel(wx.Panel):
         
         self.measurements_grid = DbQueryResultGrid(self, session)
         self.measurements_grid.add_column(GridColumnDateTime("Time", 'record_time', editable=True, width=120))
-        self.measurements_grid.add_column(GridColumnFloat("Weight (kg)", 'weight', precision=2, editable=True))
-        self.measurements_grid.add_column(GridColumnFloat("Height (m)", 'height', precision=2, editable=True))
-        self.measurements_grid.add_column(GridColumnFloat(u"BMI (kg/m\u00B2)", 'bmi', precision=2, editable=False))
+        self.measurements_grid.add_column(GridColumnFloat("Pulse (bmp)", 'pulse_rate', precision=0, editable=True))
+        self.measurements_grid.add_column(GridColumnFloat("Resp (bmp)", 'respiratory_rate', precision=0, editable=True))
+        self.measurements_grid.add_column(GridColumnFloat("SBP (mmHg)", 'systolic_bp', precision=0, editable=True))
+        self.measurements_grid.add_column(GridColumnFloat("DBP (mmHg)", 'diastolic_bp', precision=0, editable=True))
+        self.measurements_grid.add_column(GridColumnFloat(u"Temp (\u00B0C)", 'temperature', precision=1, editable=True))
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.toolbar, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx.LEFT, border=5)
@@ -66,8 +68,8 @@ class MeasurementsPanel(wx.Panel):
         """Set the current encounter"""
         self.encounter = encounter
 
-        query_result = self.session.query(db.Measurements)\
-                            .filter(db.Measurements.parent_id == self.encounter.id)\
-                            .order_by(db.Measurements.start_time.desc())
+        query_result = self.session.query(db.VitalSigns)\
+                            .filter(db.VitalSigns.parent_id == self.encounter.id)\
+                            .order_by(db.VitalSigns.start_time.desc())
 
         self.measurements_grid.set_result(query_result)

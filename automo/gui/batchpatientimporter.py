@@ -16,10 +16,10 @@ COL_BED = 4
 
 class BatchPatientImporter(wx.Dialog):
     """Dialog to import a group of patients from tab delimated file/clipboard"""
-    def __init__(self, parent, session, **kwds):
+    def __init__(self, parent, session, size=wx.Size(1000, 600), **kwds):
         super(BatchPatientImporter, self).__init__(
              parent, style=wx.CLOSE_BOX | wx.RESIZE_BORDER | wx.SYSTEM_MENU | wx.CAPTION,
-            **kwds)
+             size=size, **kwds)
         self.session = session
 
         self.col_definition = [
@@ -40,21 +40,33 @@ class BatchPatientImporter(wx.Dialog):
         self.cmd_save = wx.Button(self, label="Import and Admit")
         self.cmd_save.Bind(wx.EVT_BUTTON, self._on_save)
 
-        self.cmb_doctor = DbComboBox(self, self.session)
+        self.cmd_cancel = wx.Button(self, label="Cancel")
+        self.cmd_cancel.Bind(wx.EVT_BUTTON, self._on_cancel)
+
+        self.lbl_doctor = wx.StaticText(self, label="Admitting Doctor")
+        self.cmb_doctor = DbComboBox(self, self.session, size=(200, -1))
         self.cmb_doctor.set_items(self.session.query(db.Doctor).all())
 
-        self.cmb_ward = DbComboBox(self, self.session)
+        self.lbl_ward = wx.StaticText(self, label="Ward")
+        self.cmb_ward = DbComboBox(self, self.session, size=(200, -1))
         self.cmb_ward.set_items(self.session.query(db.Ward).all())
 
         self.patient_grid = wx.grid.Grid(self)
         self._setup_grid()
 
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self.cmb_doctor, 0, wx.EXPAND | wx.ALL, border=5)
-        sizer.Add(self.cmb_ward, 0, wx.EXPAND | wx.ALL, border=5)
-        sizer.Add(self.cmd_paste, 0, wx.EXPAND | wx.ALL, border=5)
+        foot_sizer = wx.BoxSizer(wx.VERTICAL)
+        foot_sizer.Add(self.lbl_doctor, 0 , wx.EXPAND | wx.TOP | wx.RIGHT | wx.LEFT, border=5)
+        foot_sizer.Add(self.cmb_doctor, 0 , wx.EXPAND | wx.BOTTOM | wx.RIGHT | wx.LEFT, border=5)
+        foot_sizer.Add(self.lbl_ward, 0 , wx.EXPAND | wx.TOP | wx.RIGHT | wx.LEFT, border=5)
+        foot_sizer.Add(self.cmb_ward, 0 , wx.EXPAND | wx.BOTTOM | wx.RIGHT | wx.LEFT, border=5)
+        foot_sizer.Add(self.cmd_paste, 0 , wx.EXPAND | wx.ALL, border=5)
+        foot_sizer.AddStretchSpacer()
+        foot_sizer.Add(self.cmd_save, 0 , wx.EXPAND | wx.ALL, border=5)
+        foot_sizer.Add(self.cmd_cancel, 0 , wx.EXPAND | wx.ALL, border=5)
+
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.Add(self.patient_grid, 1, wx.EXPAND | wx.ALL, border=5)
-        sizer.Add(self.cmd_save, 0, wx.EXPAND | wx.ALL, border=5)
+        sizer.Add(foot_sizer, 0, wx.EXPAND | wx.ALL, border=5)
         self.SetSizer(sizer)
 
 
@@ -79,21 +91,6 @@ class BatchPatientImporter(wx.Dialog):
     def _on_paste(self, event):
         text = self._get_clipboard_text()
 
-        text = """A123456	400001	Circum One	1y	M	10	1
-A123457	400002	Circum Two	3y	M	12	2
-A123458	400003	Circum Three	1y8m	M	13	3
-A123459	400004	Circum Four	2y4m	M	15	4
-A123460	400005	Circum Five	8y	M	13	5
-A123461	400006	Circum Six	4y	M	14	6
-A123462	400007	Circum Seven	6y	M	17	7
-A123463	400008	Circum Eight	4y	M	18	8
-A123464	400009	Circum Nine	5y	M	19	9
-A123465	400010	Circum Ten	3y	M	20	10
-A123466	400011	Circum Eleven	5y	M	10	11
-A123467	400012	Circum Twelve	6y	M	11	12
-A123468	400013	Circum Thirteen	7y	M	12	13
-A123469	400014	Circum Fourteen	8y	M	13	14"""
-
         if text is None:
             return
 
@@ -107,6 +104,10 @@ A123469	400014	Circum Fourteen	8y	M	13	14"""
             for col, value in enumerate(patient):
                 if col < self.col_count:
                     self.patient_grid.SetCellValue(row, col, value)
+
+
+    def _on_cancel(self, event):
+        self.EndModal(wx.ID_CANCEL)
 
 
     def _on_save(self, event):
@@ -256,6 +257,7 @@ A123469	400014	Circum Fourteen	8y	M	13	14"""
                     self.validation_errors.append(
                         "In row {0}, A patient with the same Nation ID number found in database.".format(row)
                     )
+        #TODO: Look for duplicates in this list
         return isvalid
 
 
