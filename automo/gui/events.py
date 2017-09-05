@@ -4,6 +4,9 @@ import wx.lib.newevent
 """Emitted when value of DbDatePicker, DbRelationCtrl, DbRichTextCtrl, DbTextCtrl is changed"""
 DbCtrlChangedEvent, EVT_AM_DB_CTRL_CHANGED = wx.lib.newevent.NewEvent()
 
+"""Emitted when DbQueryResultGrid cell is changed, contains the object that was changed"""
+DbGridCellChangedEvent, EVT_AM_DB_GRID_CELL_CHANGED = wx.lib.newevent.NewEvent()
+
 """Emitter by Encounter Panel when encounter is changed"""
 EncounterChangedEvent, EVT_AM_ENCOUNTER_CHANGED = wx.lib.newevent.NewEvent()
 

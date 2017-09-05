@@ -272,18 +272,22 @@ A123469	400014	Circum Fourteen	8y	M	13	14"""
                 new_patient.sex = self._get_cell_value(row, 4)
                 patients.append(new_patient)
                 self.session.add(new_patient)
+
                 bed = self._get_cell_value(row, 6)
+                
                 admission = new_patient.admit(self.session, admitting_doctor, bed)
+                
                 problem = db.Problem()
                 problem.icd10class_code = "Z41.2"
                 problem.start_time = admission.start_time
                 new_patient.problems.append(problem)
                 admission.add_problem(problem)
+                
                 measurement = db.Measurements()
                 measurement.weight = self._get_cell_value(row, 5)
-                measurement.start_time = admission.start_time
-                measurement.end_time = admission.start_time
+                measurement.record_time = admission.start_time
                 admission.add_child_encounter(measurement)
+                
             self.session.commit()
             return True
         except ValueError:

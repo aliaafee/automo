@@ -80,9 +80,12 @@ class Encounter(Base):
         self.children.append(encounter)
 
 
-    def end(self, end_time=datetime.datetime.now()):
+    def end(self, end_time=None):
         if self.end_time is not None:
             raise dbexception.AutoMODatabaseError("This encounter has already ended")
+        if end_time is None:
+            end_time = datetime.datetime.now()
+
         self.end_time = end_time
 
 

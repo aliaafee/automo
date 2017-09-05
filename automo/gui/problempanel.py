@@ -171,14 +171,15 @@ class ProblemPanel(wx.Panel):
 
     def set_editable(self, editable):
         """Set control to editable or not"""
-        self.editable = editable
-
-        if self.editable:
+        if editable:
             self.toolbar.Show()
         else:
             self.toolbar.Hide()
 
-        self.Layout()
+        if self.editable != editable:
+            self.Layout()
+
+        self.editable = editable
 
     def is_unsaved(self):
         """Check to see if any changes have been saved, must do before closing.
@@ -191,10 +192,8 @@ class ProblemPanel(wx.Panel):
         pass
 
 
-    def set_encounter(self, encounter, editable=True):
+    def set_encounter(self, encounter):
         """Set the current encounter"""
         self.encounter = encounter
-
-        self.set_editable(editable)
 
         self.problems_list.set_items(self.encounter.problems)

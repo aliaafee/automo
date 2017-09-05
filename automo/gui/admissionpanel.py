@@ -8,6 +8,7 @@ from .dbrelationcombo import DbRelationCombo
 from .dbdatepicker import DbDatePicker
 from .problempanel import ProblemPanel
 from .encounternote import EncounterNote
+from .measurementspanel import MeasurementsPanel
 
 
 class AdmissionPanel(wx.Panel):
@@ -54,6 +55,9 @@ class AdmissionPanel(wx.Panel):
         self.progress_notes_panel = EncounterNote(self.notebook, self.session, 'progress_note')
         self.notebook.AddPage(self.progress_notes_panel, "Progress Notes")
 
+        self.measurements_panel = MeasurementsPanel(self.notebook, self.session)
+        self.notebook.AddPage(self.measurements_panel, "Measurements")
+
         self.discharge_note_panel = EncounterNote(self.notebook, self.session, 'discharge_note')
         self.notebook.AddPage(self.discharge_note_panel, "Discharge Note")
 
@@ -92,7 +96,8 @@ class AdmissionPanel(wx.Panel):
 
     def _on_change_notebook(self, event):
         active_page = self.notebook.GetPage(event.GetSelection())
-        active_page.set_encounter(self.admission, self.editable)
+        active_page.set_encounter(self.admission)
+        active_page.set_editable(self.editable)
 
 
     def _on_changing_notebook(self, event):

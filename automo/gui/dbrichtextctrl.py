@@ -112,12 +112,10 @@ class DbRichTextCtrl(wx.Panel):
         self._has_changed()
 
 
-    def set_dbobject_attr(self, db_object, str_attr, editable=True):
+    def set_dbobject_attr(self, db_object, str_attr):
         """Set which object needs to be updated"""
         self.db_object = db_object
         self.db_str_attr = str_attr
-
-        self.set_editable(editable)
 
         if self.db_object is None or self.db_str_attr == "":
             self.text_ctrl.ChangeValue("")
@@ -165,16 +163,17 @@ class DbRichTextCtrl(wx.Panel):
 
     def set_editable(self, editable):
         """Set control to editable or not"""
-        self.editable = editable
-
-        if self.editable:
+        if editable:
             self.toolbar.Show()
             self.text_ctrl.SetEditable(True)
         else:
             self.toolbar.Hide()
             self.text_ctrl.SetEditable(False)
 
-        self.Layout()
+        if self.editable != editable:
+            self.Layout()
+
+        self.editable = editable
 
 
     def is_unsaved(self):

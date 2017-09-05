@@ -1,6 +1,10 @@
 """Configuration"""
 import re
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
+
+DATE_FORMAT = "%d/%m/%Y"
+DATETIME_FORMAT = "%d/%m/%Y %H:%M:%S"
 
 def format_duration(duration): #from_date, to_date):
     """Format python relative delta duration to human readable form."""
@@ -56,4 +60,22 @@ def format_date(date_object):
     if date_object is None:
         return ""
 
-    return date_object.strftime("%d/%m/%Y")
+    return date_object.strftime(DATE_FORMAT)
+
+
+def parse_date(date_str):
+    """Parse date"""
+    return datetime.strptime(date_str, DATE_FORMAT)
+
+
+def format_datetime(datetime_object):
+    """Format datetime"""
+    if datetime_object is None:
+        return ""
+
+    return datetime_object.strftime(DATETIME_FORMAT)
+
+
+def parse_datetime(datetime_str):
+    """Parse datetime"""
+    return datetime.strptime(datetime_str, DATETIME_FORMAT)

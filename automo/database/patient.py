@@ -42,15 +42,19 @@ class Patient(Base):
 
     active = Column(Boolean)
 
-    def set_age(self, age, today=datetime.date.today()):
+    def set_age(self, age, today=None):
         """Set age of patient as relativedelta, age is not acctually stored,
           date of birth is calculated and stored"""
+        if today is None:
+            today = datetime.date.today()
         self.date_of_birth = today - age
 
-    def get_age(self, today=datetime.date.today()):
+    def get_age(self, today=None):
         """Calculate and return age of patient as a relativedelta object"""
         if self.date_of_birth is None:
             return None
+        if today is None:
+            today = datetime.date.today()
         return dateutil.relativedelta.relativedelta(today, self.date_of_birth)
 
     age = property(get_age, set_age, None, "Age of the patient as relativedelta.")
@@ -77,7 +81,7 @@ class Patient(Base):
             return None
 
 
-    def admit(self, session, doctor, bed, admission_time=datetime.datetime.now()):
+    def admit(self, session, doctor, bed, admission_time=None):
         """Admit the patient to the provided bed. If patient is already admitted or the bed
           is occupied, raises AutoMODatabaseError. Returns the created encounter object."""
         current_encounter = self.get_current_encounter(session)
@@ -89,6 +93,9 @@ class Patient(Base):
 
         if doctor.type != 'doctor':
             raise dbexception.AutoMODatabaseError("Patient can only be admitted under a doctor.")
+
+        if admission_time is None:
+            admission_time = datetime.datetime.now()
 
         new_admission = Admission(
             patient = self,
@@ -102,7 +109,7 @@ class Patient(Base):
         return new_admission
 
 
-    def discharge(self, session, discharge_time=datetime.datetime.now(), admission=None):
+    def discharge(self, session, discharge_time=None, admission=None):
         """End the currently active admission, raises AutoMODatabase Error if their is no
           active admission"""
         if admission is None:
@@ -112,6 +119,9 @@ class Patient(Base):
             if current_encounter.type != "admission":
                 raise dbexception.AutoMODatabaseError("Current encounter is not an admission")
             admission = current_encounter
+
+        if discharge_time is None:
+            discharge_time = datetime.datetime.now()
 
         admission.end(discharge_time)
 

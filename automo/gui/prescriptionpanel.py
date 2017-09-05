@@ -313,6 +313,7 @@ class PrescriptionPanel(wx.Panel):
             #self.toolbar.Show()
             self.drug_add_panel.Show()
             self.prescription_list.SetColumns([
+                Colum
                 ColumnDefn("Medication", "left", 180, "drug", isEditable=False),
                 ColumnDefn("Order", "left", 140, "drug_order"),
                 ColumnDefn("From", "left", 90, "date_from", isEditable=False),

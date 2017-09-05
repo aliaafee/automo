@@ -16,6 +16,20 @@ class VitalSigns(Encounter):
         'polymorphic_identity':'vitalsigns',
     }
 
+    def set_record_time(self, record_time):
+        """In this encounter start-time and end-time are same, use this attr
+          to change both at the same time"""
+        self.start_time = record_time
+        self.end_time = record_time
+
+    def get_record_time(self):
+        """In this encounter start-time and end-time are same, use this attr
+          to change both at the same time"""
+        return self.start_time
+
+    record_time = property(get_record_time, set_record_time, None,
+                           "Time this parameter was recorded.")
+
     pulse_rate = Column(Float)
     respiratory_rate = Column(Float)
     diastolic_bp = Column(Float)

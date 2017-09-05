@@ -9,6 +9,6 @@ class EncounterNote(DbRichTextCtrl):
         self.str_note_attr = str_note_attr
 
 
-    def set_encounter(self, encounter, editable=True):
+    def set_encounter(self, encounter):
         """Set the current ecnounter"""
-        self.set_dbobject_attr(encounter, self.str_note_attr, editable)
+        self.set_dbobject_attr(encounter, self.str_note_attr)

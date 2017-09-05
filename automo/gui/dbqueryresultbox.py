@@ -1,4 +1,4 @@
-"""DB Query Result"""
+"""DB Query Result List Box"""
 import re
 import string
 import wx
@@ -7,8 +7,7 @@ import wx
 class DbQueryResultBox(wx.HtmlListBox):
     """Display results of sqlalchemy query, formated in HTML.
       Results are displayed in a virtual list so very large
-      query results are supported without slowdown or excessive
-      memory usage"""
+      query results are supported without slowdown"""
     def __init__(self, parent, html_decorator=None, minimum_fetch=50, **kwds):
         super(DbQueryResultBox, self).__init__(
             parent, **kwds
