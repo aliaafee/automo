@@ -9,7 +9,7 @@ from .batchpatientimporter import BatchPatientImporter
 from .patientlistpanel import PatientListPanel
 from .patientpanel import PatientPanel
 
-ID_IMPORT_PATIENTS = 0
+ID_IMPORT_PATIENTS = 100
 
 
 class CWardInterface(BaseInterface):

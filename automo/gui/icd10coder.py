@@ -452,11 +452,11 @@ class Icd10Coder(wx.Dialog):
 
         if icd10class is None:
             self.category_list.set_category(None)
-            self._update_browser_title()
+            self._update_browser_title(icd10class)
             return
 
         self.category_list.set_category(icd10class)
-        self._update_browser_title()
+        self._update_browser_title(icd10class)
 
         if update_tree:
             active_page_text = self.left_panel.GetPageText(self.left_panel.GetSelection())
@@ -478,6 +478,7 @@ class Icd10Coder(wx.Dialog):
         else:
             self.lbl_modifier.Hide()
             self.cmb_modifier.Hide()
+            self.cmb_modifier.clear()
             self.selected_modifier_class = None
 
         if icd10class.modifier_extra is not None:
@@ -495,6 +496,7 @@ class Icd10Coder(wx.Dialog):
         else:
             self.lbl_modifier_extra.Hide()
             self.cmb_modifier_extra.Hide()
+            self.cmb_modifier_extra.clear()
             self.selected_modifier_extra_class = None
 
         self.Layout()
@@ -631,34 +633,34 @@ class Icd10Coder(wx.Dialog):
         print "Clicked a link href={0}".format(link_info.GetHref())
 
 
-    def _update_browser_title(self):
-        if self.selected_icd10class is None:
+    def _update_browser_title(self, icd10class):
+        if icd10class is None:
             self.browser_title.SetPage(
                 "<table><tr><td><b>Internation Classification of Disease - 10</b></td></tr></table>")
             return
 
-        if self.selected_icd10class.kind == "chapter":
+        if icd10class.kind == "chapter":
             chapter_html = "<b>Chapter {0} {1}</b>".format(
-                self.selected_icd10class.code, self.selected_icd10class.preferred_plain)
+                icd10class.code, icd10class.preferred_plain)
         else:
             try:
                 chapter_code, chapter_title = \
                     self.session.query(db.Icd10Class.code, db.Icd10Class.preferred_plain)\
-                        .filter(db.Icd10Class.code == self.selected_icd10class.chapter_code)\
+                        .filter(db.Icd10Class.code == icd10class.chapter_code)\
                         .one()
                 chapter_html = "<b>Chapter {0} {1}</b>".format(chapter_code, chapter_title)
             except NoResultFound:
                 chapter_html = ""
 
 
-        if self.selected_icd10class.kind == "block":
+        if icd10class.kind == "block":
             block_html = "<b>{0} </b> {1}".format(
-                self.selected_icd10class.code, self.selected_icd10class.preferred_plain)
+                icd10class.code, icd10class.preferred_plain)
         else:
             try:
                 block_code, block_title = \
                     self.session.query(db.Icd10Class.code, db.Icd10Class.preferred_plain)\
-                        .filter(db.Icd10Class.code == self.selected_icd10class.parent_block_code)\
+                        .filter(db.Icd10Class.code == icd10class.parent_block_code)\
                         .one()
 
                 block_html = "<b>{0} </b> {1}".format(block_code, block_title)

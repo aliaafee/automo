@@ -42,7 +42,6 @@ class DbComboBox(wx.ComboBox):
         self.items_iterable = None
         self.items = []
         self.Clear()
-        self.ChangeValue("")
 
 
     def set_selected_item(self, selected_item):
