@@ -24,7 +24,7 @@ class MeasurementsPanel(wx.Panel):
         
         self.measurements_grid = DbQueryResultGrid(self, session)
         self.measurements_grid.add_column(GridColumnDateTime("Time", 'record_time', editable=True, width=120))
-        self.measurements_grid.add_column(GridColumnFloat("Weight (kg)", 'weight', precision=2, editable=True))
+        self.measurements_grid.add_column(GridColumnFloat("Weight (kg)", 'weight', precision=1, editable=True))
         self.measurements_grid.add_column(GridColumnFloat("Height (m)", 'height', precision=2, editable=True))
         self.measurements_grid.add_column(GridColumnFloat(u"BMI (kg/m\u00B2)", 'bmi', precision=2, editable=False))
 
@@ -42,11 +42,7 @@ class MeasurementsPanel(wx.Panel):
             self.toolbar.Hide()
 
         if self.editable != editable:
-            print "Laying it out"
             self.Layout()
-
-        print self.editable
-        print editable
 
         self.editable = editable
 

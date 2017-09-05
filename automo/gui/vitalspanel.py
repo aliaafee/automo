@@ -44,11 +44,7 @@ class VitalsPanel(wx.Panel):
             self.toolbar.Hide()
 
         if self.editable != editable:
-            print "Laying it out"
             self.Layout()
-
-        print self.editable
-        print editable
 
         self.editable = editable
 

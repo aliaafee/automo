@@ -77,6 +77,7 @@ class CWardInterface(BaseInterface):
 
     def _on_import(self, event):
         with BatchPatientImporter(self, self.session) as importer:
+            importer.CenterOnScreen()
             importer.ShowModal()
 
 

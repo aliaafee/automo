@@ -73,7 +73,6 @@ class DbQueryResultBox(wx.HtmlListBox):
 
     def _fetch_items(self, page):
         start = page * self.minimum_fetch
-        print "Fetching {0} starting from {1}".format(self.minimum_fetch, start)
         items = self.query_result.offset(start).limit(self.minimum_fetch).all()
         for index, item in enumerate(items):
             self.items_cache[start+index] = item
