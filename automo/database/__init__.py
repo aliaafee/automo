@@ -19,7 +19,13 @@ from .encounters import Encounter,\
                         Measurements,\
                         VitalSigns,\
                         VitalSignsExtended,\
-                        SurgicalProcedure
+                        SurgicalProcedure,\
+                        Investigation,\
+                        Imaging,\
+                        Endoscopy,\
+                        CompleteBloodCount,\
+                        RenalFunctionTest,\
+                        LiverFunctionTest
 from .notes import Note,\
                    History,\
                    Progress
@@ -42,8 +48,3 @@ def StartEngine(uri, echo, client_version):
     Base.metadata.create_all(engine)
 
     Session.configure(bind=engine)
-
-
-
-if __name__ == '__main__':
-    main()
