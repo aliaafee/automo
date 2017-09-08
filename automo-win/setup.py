@@ -13,7 +13,8 @@ packages=[
     'reportlab.pdfgen',
     'reportlab.platypus',
     'sqlalchemy',
-    'six'
+    'six',
+    'lxml'
 ]
 
 setup(

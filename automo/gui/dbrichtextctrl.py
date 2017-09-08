@@ -1,6 +1,7 @@
 """Db Rich Text Ctrl"""
 from StringIO import StringIO
 
+from bs4 import BeautifulSoup
 import wx
 import wx.richtext
 
@@ -9,9 +10,8 @@ from .events import DbCtrlChangedEvent
 
 
 class DbRichTextCtrl(wx.Panel):
-    """Rich Text ctrl that automatically updates database entry, on text change
-      TODO: Save and retrive in html format, now only saves and retrieves in internal
-      xml format."""
+    """Rich Text ctrl that automatically updates database entry, on text change.
+      currently only supports bold, italic and underline formatting."""
     def __init__(self, parent, session, **kwds):
         super(DbRichTextCtrl, self).__init__(parent, **kwds)
 
@@ -124,7 +124,7 @@ class DbRichTextCtrl(wx.Panel):
             if value is None:
                 value = ""
 
-            self._set_xml(value)
+            self._set_html(value)
 
         self.changed = False
         self.toolbar.EnableTool(wx.ID_SAVE, False)
@@ -146,16 +146,98 @@ class DbRichTextCtrl(wx.Panel):
         return content
 
 
-    def _set_xml(self, html_str):
+    def _get_html(self):
+        """Get richtext html."""
+        out = StringIO()
+        handler = wx.richtext.RichTextHTMLHandler()
+        buff = self.text_ctrl.GetBuffer()
+        handler.SaveStream(buff, out)
+        out.seek(0)
+        content = out.read()
+        #strip extra stuff
+        content = content.replace('<font face="Tahoma" size="1" color="#000000" >', '')
+        content = content.replace('</font>', '')
+        content = content.replace(' align="left"', '')
+        content = content.replace('<html>', '')
+        content = content.replace('</html>', '')
+        content = content.replace('<head></head>', '')
+        content = content.replace('<body>', '')
+        content = content.replace('</body>', '')
+        return content
+
+
+    def _parse_tag(self, tag):
+        attributes = []
+        strings = []
+        if tag.name == 'b':
+            attributes.append('fontweight="92"')
+        elif tag.name == 'i':
+            attributes.append('fontstyle="93"')
+        elif tag.name == 'u':
+            attributes.append('fontunderlined="1"')
+        for child in tag.children:
+            if child.__class__.__name__ == "NavigableString":
+                strings.append(unicode(child))
+            elif child.__class__.__name__ == "Tag":
+                child_attributes, child_strings = self._parse_tag(child)
+                attributes.extend(child_attributes)
+                strings.extend(child_strings)
+        return attributes, strings
+
+
+    def _convert_html_to_xml(self, html_str):
+        """Convert html to xml, accepts document without <body> and <html> tags
+          Currently only supports <b> <i> and <u> tags."""
+        html_str = "<html>{}</html>".format(html_str)
+        soup = BeautifulSoup(html_str, "lxml-xml")
+
+        paragraphs_xml = []
+        paragraphs = soup.find_all("p")
+        for paragraph in paragraphs:
+            paragraph_xml = []
+            was_bold = False
+            for child in paragraph.children:
+                if child.__class__.__name__ == "NavigableString":
+                    if was_bold:
+                        paragraph_xml.append('<text fontweight="90">"{}"</text>'.format(child))
+                        was_bold = False
+                    else:
+                        paragraph_xml.append('<text>"{}"</text>'.format(child))
+                elif child.__class__.__name__ == "Tag":
+                    attributes, strings = self._parse_tag(child)
+                    paragraph_xml.append(
+                        '<text {0}>"{1}"</text>'.format(
+                            " ".join(attributes),
+                            "".join(strings)
+                        )
+                    )
+                    if 'fontweight="92"' in attributes:
+                        was_bold = True
+            paragraphs_xml.append(
+                "<paragraph>\n{}\n</paragraph>\n".format(
+                    "\n".join(paragraph_xml)
+                )
+            )
+        document = '<?xml version="1.0" encoding="UTF-8"?>\n<richtext version="1.0.0.0" xmlns="http://www.wxwidgets.org">\n<paragraphlayout textcolor="#000000" fontpointsize="8" fontfamily="70" fontstyle="90" fontweight="90" fontunderlined="0" fontface="Tahoma" alignment="1" parspacingafter="10" parspacingbefore="0" linespacing="10" margin-left="5,4098" margin-right="5,4098" margin-top="5,4098" margin-bottom="5,4098">\n{}</paragraphlayout>\n</richtext>'
+        return document.format("".join(paragraphs_xml))
+
+
+    def _set_html(self, html_str):
+        """Set richtext html."""
+        xml_str = self._convert_html_to_xml(html_str)
+        self._set_xml(xml_str)
+
+
+    def _set_xml(self, xml_str):
         """Set richtext xml."""
         self.text_ctrl.ChangeValue("")
-        if html_str == "":
+        if xml_str == "":
             return        
         out = StringIO()
         handler = wx.richtext.RichTextXMLHandler()
         buff = self.text_ctrl.GetBuffer()
         buff.AddHandler(handler)
-        out.write(str(html_str))
+        out.write(str(xml_str))
         out.seek(0)
         handler.LoadStream(buff, out)
         self.text_ctrl.Refresh()
@@ -191,7 +273,7 @@ class DbRichTextCtrl(wx.Panel):
         if self.db_object is None or self.db_str_attr == "":
             return
 
-        value = self._get_xml()
+        value = self._get_html()
 
         setattr(self.db_object, self.db_str_attr, value)
 
