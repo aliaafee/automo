@@ -20,21 +20,24 @@ class PatientPanel(wx.Panel):
 
         self.patient_info = PatientInfoPanelSmall(self, session)
 
-        self.notebook = wx.Notebook(self)
-        self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self._on_changing_notebook)
-        self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self._on_change_notebook)
+        #self.notebook = wx.Notebook(self)
+        #self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self._on_changing_notebook)
+        #self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self._on_change_notebook)
 
-        self.encounters_panel = EncountersPanel(self.notebook, session)
+        #self.encounters_panel = EncountersPanel(self.notebook, session)
+        self.encounters_panel = EncountersPanel(self, session)
         self.encounters_panel.Bind(events.EVT_AM_ENCOUNTER_CHANGED, self._on_admission_changed)
-        self.notebook.AddPage(self.encounters_panel, "Encounters")
+        #self.notebook.AddPage(self.encounters_panel, "Encounters")
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.patient_info, 0, wx.EXPAND | wx.ALL, border=5)
-        sizer.Add(self.notebook, 1, wx.EXPAND | wx.ALL, border=5)
+        #sizer.Add(self.notebook, 1, wx.EXPAND | wx.ALL, border=5)
+        sizer.Add(self.encounters_panel, 1, wx.EXPAND | wx.ALL, border=5)
 
         self.SetSizer(sizer)
         self.patient_info.Hide()
-        self.notebook.Hide()
+        #self.notebook.Hide()
+        self.encounters_panel.Hide()
 
         self.Bind(wx.EVT_WINDOW_DESTROY, self._on_close)
 
@@ -78,15 +81,15 @@ class PatientPanel(wx.Panel):
         return html.format(date_str, diagnoses_str)
 
 
-    def _on_change_notebook(self, event):
-        active_page = self.notebook.GetPage(event.GetSelection())
-        active_page.set_patient(self.patient)
+    #def _on_change_notebook(self, event):
+    #    active_page = self.notebook.GetPage(event.GetSelection())
+    #    active_page.set_patient(self.patient)
 
 
-    def _on_changing_notebook(self, event):
-        active_page = self.notebook.GetPage(self.notebook.GetSelection())
-        if active_page.is_unsaved():
-            active_page.save_changes()
+    #def _on_changing_notebook(self, event):
+    #    active_page = self.notebook.GetPage(self.notebook.GetSelection())
+    #    if active_page.is_unsaved():
+    #        active_page.save_changes()
 
 
     def _on_admission_changed(self, event):
@@ -98,8 +101,10 @@ class PatientPanel(wx.Panel):
         if self.patient is None:
             return False
 
-        active_page = self.notebook.GetPage(self.notebook.GetSelection())
-        if active_page.is_unsaved():
+        #active_page = self.notebook.GetPage(self.notebook.GetSelection())
+        #if active_page.is_unsaved():
+        #    return True
+        if self.encounters_panel.is_unsaved():
             return True
 
         return False
@@ -109,9 +114,11 @@ class PatientPanel(wx.Panel):
         if self.patient is None:
             return
 
-        active_page = self.notebook.GetPage(self.notebook.GetSelection())
-        if active_page.is_unsaved():
-            active_page.save_changes()
+        #active_page = self.notebook.GetPage(self.notebook.GetSelection())
+        #if active_page.is_unsaved():
+        #    active_page.save_changes()
+        if self.encounters_panel.is_unsaved():
+            self.encounters_panel.save_changes()
 
 
     def refresh(self):
@@ -133,7 +140,8 @@ class PatientPanel(wx.Panel):
         self.patient_info.unset()
 
         self.patient_info.Hide()
-        self.notebook.Hide()
+        #self.notebook.Hide()
+        self.encounters_panel.Hide()
 
 
     def set(self, patient):
@@ -147,9 +155,11 @@ class PatientPanel(wx.Panel):
         self.patient_info.set(self.patient)
 
         self.patient_info.Show()
-        self.notebook.Show()
+        #self.notebook.Show()
+        self.encounters_panel.Show()
 
         self.Layout()
 
-        active_page = self.notebook.GetPage(self.notebook.GetSelection())
-        active_page.set_patient(self.patient)
+        #active_page = self.notebook.GetPage(self.notebook.GetSelection())
+        #active_page.set_patient(self.patient)
+        self.encounters_panel.set_patient(self.patient)

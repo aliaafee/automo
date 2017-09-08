@@ -130,6 +130,14 @@ def generate():
     admission4 = patient3.admit(session, doctor2, bed3, datetime(2017, 8, 30, 5, 42))
     admission4.add_problem(problem4)
 
+    drug1 = db.Drug()
+    drug1.name = "INJ NEWMED"
+    session.add(drug1)
+
+    drug2 = db.Drug()
+    drug2.name = "INJ ULTRAMED"
+    session.add(drug2)
+
     session.commit()
 
 

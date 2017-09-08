@@ -20,6 +20,8 @@ class BatchPatientImporter(wx.Dialog):
         super(BatchPatientImporter, self).__init__(
              parent, style=wx.CLOSE_BOX | wx.RESIZE_BORDER | wx.SYSTEM_MENU | wx.CAPTION,
              size=size, **kwds)
+        self.SetTitle("Batch Patient Importer")
+        
         self.session = session
 
         self.col_definition = [
@@ -289,6 +291,9 @@ class BatchPatientImporter(wx.Dialog):
                 measurement.weight = self._get_cell_value(row, 5)
                 measurement.record_time = admission.start_time
                 admission.add_child_encounter(measurement)
+
+                admission.prescribe_drug(self.session, None, "SYP CEFO-L (50MG/5ML)", "[ ] PO BD x 5DAYS")
+                admission.prescribe_drug(self.session, None, "SYP PARACETAMOL (250MG/5ML)", "[ ] PO BD x 5DAYS")
                 
             self.session.commit()
             return True

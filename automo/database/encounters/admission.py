@@ -4,6 +4,9 @@ import datetime
 from sqlalchemy import Column, Integer, ForeignKey, Text
 from sqlalchemy.orm import relationship
 from .encounter import Encounter
+from .. import dbexception
+from ..drug import Drug
+from ..prescription import Prescription
 
 class Admission(Encounter):
     """Admission Encounter. Each hospital stay is associated with a bed, when the
@@ -26,9 +29,37 @@ class Admission(Encounter):
     progress_note = Column(Text)
     discharge_note = Column(Text)
 
+    prescription = relationship("Prescription", back_populates="admission",
+                                cascade="all, delete, delete-orphan")
+
     def end(self, end_time=datetime.datetime.now()):
         """Ends the admission"""
         super(Admission, self).end(end_time)
 
         self.discharged_bed = self.bed
         self.bed = None
+
+
+    def prescribe_drug(self, session, drug, drug_str, drug_order, active=True):
+        """Precribe medication. Drug can be passed as an object, or object can be None
+          and a string name of Drug can be passed. If this string name not found in drug list
+          it will be added."""
+        if drug is None:
+            if drug_str == "":
+                raise dbexception.AutoMODatabaseError("New drug name cannot be empty")
+            query = session.query(Drug)\
+                        .filter(Drug.name == drug_str)
+            if query.count() == 0:
+                new_drug = Drug(
+                    name = drug_str
+                )
+                session.add(new_drug)
+                drug = new_drug
+            else:
+                drug = query.first()
+        new_presc = Prescription(
+            drug = drug,
+            drug_order = drug_order,
+            active = active
+        )
+        self.prescription.append(new_presc)

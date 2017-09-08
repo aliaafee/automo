@@ -161,6 +161,40 @@ class EncounterTest(BaseTest):
 
 
 
+class AdmissionTest(BaseTest):
+    def test_prescribe_drug(self):
+        drugs = self.session.query(db.Drug).all()
+
+        #Prescribe drug by object
+        self.patients[0].encounters[0].prescribe_drug(self.session, drugs[0], "", "1 tab OD x 10days")
+        self.assertEqual(
+            self.patients[0].encounters[0].prescription[0].drug,
+            drugs[0]
+        )
+
+        #Prescribe drug by string name
+        self.patients[0].encounters[0].prescribe_drug(self.session, None, drugs[1].name, "1 tab OD x 10days")
+        self.assertEqual(
+            self.patients[0].encounters[0].prescription[1].drug,
+            drugs[1]
+        )
+
+        #Prescribe with name as empty string
+        with self.assertRaises(db.dbexception.AutoMODatabaseError):
+            self.patients[0].encounters[0].prescribe_drug(self.session, None, "", "1 tab OD x 10days")
+
+
+        #Prescribe drug by string for drug not in database, it should be added automatically
+        self.patients[0].encounters[0].prescribe_drug(self.session, None, "Prodrug", "1 tab OD x 10days")
+        drugs = self.session.query(db.Drug).all()
+        self.assertEqual(
+            drugs[2].name,
+            "Prodrug"
+        )
+
+
+
+
 class ProblemTest(BaseTest):
     def test_add_encounter(self):
         #Try to add encounter from other patient to problem

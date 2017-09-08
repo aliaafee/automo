@@ -84,9 +84,7 @@ class AcDbTextCtrl(DbTextCtrl):
         self.selected_object = None
 
         # if txt is empty (after backspace), hide popup
-        # and save changes(ie: set data to "")
         if not txt:
-            self._save_changes(event)
             if self.popup.IsShown():
                 self.popup.Show(False)
                 return
@@ -103,8 +101,6 @@ class AcDbTextCtrl(DbTextCtrl):
 
         self.popup.show_candidates(result, txt,
                                    self.GetScreenPositionTuple(), self.GetSizeTuple())
-        #self.popup.show_candidates(self.select_candidates, txt,
-        #                           self.GetScreenPositionTuple(), self.GetSizeTuple())
 
 
     def _on_focus_loss(self, event):
@@ -119,15 +115,6 @@ class AcDbTextCtrl(DbTextCtrl):
             self.popup.Show(False)
 
         event.Skip()
-
-
-    def _save_changes(self, event):
-        if self.db_object is not None and self.db_str_attr != "":
-            setattr(self.db_object, self.db_str_attr, self.GetValue())
-            self.session.commit()
-
-        event = DbCtrlChangedEvent(object=self.db_object)
-        wx.PostEvent(self, event)
 
 
     def _on_key_down(self, event):
@@ -181,24 +168,12 @@ class AcDbTextCtrl(DbTextCtrl):
                 self.selected_object = None
                 self.SetValue(self.popup.add_text)
                 self.SetInsertionPointEnd()
-
-                candidates_count = self.session.query(self.candidates_table.name)\
-                                    .filter(self.candidates_table.name == self.GetValue())\
-                                    .count()
-                if candidates_count == 0:
-                    new_name = self.candidates_table(name=self.popup.add_text)
-                    self.session.add(new_name)
-                    self.session.commit()
-
-                self.SetInsertionPointEnd()
                 self.popup.Show(False)
-                self._save_changes(event)
             else:
                 self.selected_object = self.popup.get_selected()
                 self.SetValue(unicode(self.selected_object))
                 self.SetInsertionPointEnd()
                 self.popup.Show(False)
-                self._save_changes(event)
 
         # Tab  - set selected choice as text
         elif event.GetKeyCode() == wx.WXK_TAB:

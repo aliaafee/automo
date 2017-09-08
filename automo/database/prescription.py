@@ -9,19 +9,19 @@ class Prescription(Base):
     """Patient Prescription"""
     id = Column(Integer, primary_key=True)
 
-    patient_id = Column(Integer, ForeignKey('patient.id'))
-    patient = relationship("Patient", back_populates="prescription")
+    admission_id = Column(Integer, ForeignKey('admission.id'))
+    admission = relationship("Admission", back_populates="prescription")
 
-    date_from = Column(Date())
-    date_to = Column(Date())
+    #date_from = Column(Date())
+    #date_to = Column(Date())
 
-    started_by_id = Column(Integer, ForeignKey('doctor.id'))
-    started_by = relationship("Doctor", foreign_keys=[started_by_id],
-                              back_populates="started_medications")
+    #started_by_id = Column(Integer, ForeignKey('doctor.id'))
+    #started_by = relationship("Doctor", foreign_keys=[started_by_id],
+    #                          back_populates="started_medications")
 
-    stopped_by_id = Column(Integer, ForeignKey('doctor.id'))
-    stopped_by = relationship("Doctor", foreign_keys=[stopped_by_id],
-                              back_populates="stopped_medications")
+    #stopped_by_id = Column(Integer, ForeignKey('doctor.id'))
+    #stopped_by = relationship("Doctor", foreign_keys=[stopped_by_id],
+    #                          back_populates="stopped_medications")
 
     drug_id = Column(Integer, ForeignKey('drug.id'))
     drug = relationship("Drug")

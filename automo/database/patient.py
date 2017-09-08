@@ -37,8 +37,8 @@ class Patient(Base):
     encounters = relationship("Encounter", back_populates="patient",
                               cascade="all, delete, delete-orphan")
 
-    prescription = relationship("Prescription", back_populates="patient",
-                                cascade="all, delete, delete-orphan")
+    #prescription = relationship("Prescription", back_populates="patient",
+    #                            cascade="all, delete, delete-orphan")
 
     active = Column(Boolean)
 

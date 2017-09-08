@@ -32,18 +32,17 @@ class Doctor(Personnel):
 
     pmr_no = Column(String(250))
 
-    started_medications = relationship("Prescription", back_populates="started_by",
-                                       foreign_keys="Prescription.started_by_id")
-    stopped_medications = relationship("Prescription", back_populates="stopped_by",
-                                       foreign_keys="Prescription.stopped_by_id")
+    #started_medications = relationship("Prescription", back_populates="started_by",
+    #                                   foreign_keys="Prescription.started_by_id")
+    #stopped_medications = relationship("Prescription", back_populates="stopped_by",
+    #                                   foreign_keys="Prescription.stopped_by_id")
 
     def __repr__(self):
         return "{0} ({1})".format(self.name, self.pmr_no)
 
 
 class Nurse(Personnel):
-    """Nurses
-      TODO: Record administered drugs."""
+    """Nurses."""
     id = Column(Integer, ForeignKey('personnel.id'), primary_key=True)
 
     __mapper_args__ = {

@@ -10,6 +10,7 @@ from .problempanel import ProblemPanel
 from .encounternote import EncounterNote
 from .measurementspanel import MeasurementsPanel
 from .vitalspanel import VitalsPanel
+from .prescriptionpanel import PrescriptionPanel
 
 
 class AdmissionPanel(wx.Panel):
@@ -64,6 +65,9 @@ class AdmissionPanel(wx.Panel):
 
         self.discharge_note_panel = EncounterNote(self.notebook, self.session, 'discharge_note')
         self.notebook.AddPage(self.discharge_note_panel, "Discharge Note")
+
+        self.prescription_panel = PrescriptionPanel(self.notebook, self.session)
+        self.notebook.AddPage(self.prescription_panel, "Prescription")
 
         grid_sizer = wx.FlexGridSizer(2, 4, 2, 2)
         grid_sizer.AddGrowableCol(1, 1)

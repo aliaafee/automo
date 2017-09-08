@@ -285,6 +285,8 @@ class Icd10Coder(wx.Dialog):
             parent, style=wx.CLOSE_BOX | wx.RESIZE_BORDER | wx.SYSTEM_MENU | wx.CAPTION,
             size=size, **kwds)
 
+        self.SetTitle("ICD-10")
+
         self.session = session
 
         #self.problem = None
