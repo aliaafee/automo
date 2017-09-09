@@ -59,6 +59,11 @@ class Patient(Base):
 
     age = property(get_age, set_age, None, "Age of the patient as relativedelta.")
 
+    @property
+    def age_td(self):
+        """Age as a timedelta"""
+        return datetime.date.today() - self.date_of_birth
+
 
     def __repr__(self):
         return "<Patient {0}>".format(self.name)
