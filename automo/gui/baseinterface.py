@@ -48,6 +48,10 @@ class BaseInterface(wx.Frame):
         wx.EVT_MENU(self, wx.ID_ABOUT, self._on_about)
 
 
+    def refresh(self):
+        self.session.commit()
+
+
     def set_title(self, title):
         """Set the window title"""
         self.SetTitle("AutoMO - {}".format(title))

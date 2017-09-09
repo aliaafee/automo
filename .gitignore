@@ -2,6 +2,6 @@
 venv
 *.pyc
 *.swp
-automo-data.db
+patient-data.db
 automo-win/src
 *.log

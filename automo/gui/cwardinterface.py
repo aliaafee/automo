@@ -47,6 +47,7 @@ class CWardInterface(BaseInterface):
 
 
     def refresh(self):
+        super(WardInterface, self).refresh()
         self.patient_list_panel.refresh()
         self.patient_panel.refresh()
 

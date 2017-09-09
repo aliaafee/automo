@@ -2,7 +2,8 @@ mkdir src
 mkdir src\automo
 mkdir src\dist
 xcopy /Y /E ..\automo\*.py src\automo\
-copy /Y ..\automo.py src\
+copy /Y ..\automo-gui.py src\
+copy /Y ..\automo-cli.py src\
 copy /Y setup.py src\
 copy /Y ..\images\src\icon_pack.ico src\automo.ico
 cd src

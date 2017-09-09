@@ -21,17 +21,16 @@ setup(
     name="automo",
     windows = [
         {
-            "script": 'automo.py',
+            "script": 'automo-gui.py',
             "icon_resources": [(1, "automo.ico")]
         }
     ],
-    #windows=['__main__.py'],
+    console = ["automo-cli.py"],
     options={
         "py2exe": {
             'bundle_files': 3,
             'compressed' : False,
             "packages": packages
             }
-    }#,
-    #zipfile = None
+    }
 )

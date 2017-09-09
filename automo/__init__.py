@@ -7,43 +7,19 @@ Electronic Medical Record.
 Copyright (C) 2017 Ali Aafee
 """
 import sys
-import getopt
 import code
-from dateutil.relativedelta import relativedelta as duration
 from datetime import datetime, date
+from dateutil.relativedelta import relativedelta as duration
 
 from ._version import __version__
 from . import icd10claml
 from . import database as db
 from .gui import AutoMOApp
 
+DEFAULT_DB_URI = "sqlite:///patient-data.db"
+
 CLI_INTERFACES = ['shell']
 GUI_INTERFACES = ['gui-shell', 'gui-ward', 'gui-cward']
-
-
-def app_license():
-    """App license"""
-    print "Auto MO {0}".format(__version__)
-    print "----------------------------"
-    print "Copyright (C) 2017 Ali Aafee"
-    print ""
-
-
-def usage():
-    """App usage"""
-    app_license()
-    print "Usage:"
-    print "    -f, --interface (Option is required)"
-    print "       Set the interface to start with."
-    print "       available interfaces:"
-    print '           cli: "{}"'.format('", "'.join(CLI_INTERFACES))
-    print '           gui: "{}"'.format('", "'.join(GUI_INTERFACES))
-    print "    -h, --help"
-    print "       Displays this help"
-    print "    -d, --debug"
-    print "       Output database debug data"
-    print "    -i, --icd10claml [filename]"
-    print "       Import ICD10 2016 Classification from ClaML xml file"
 
 
 def start(uri, debug):
@@ -88,7 +64,7 @@ def start_cli(uri, interface, debug):
         print "Interface '{}' is not available".format(interface)
 
 
-def import_icd10claml(filename, uri, debug):
+def import_icd10claml(filename, uri, debug=False):
     """Import Icd 10 ClaML file to database"""
     db.StartEngine(uri, debug, __version__)
 
@@ -99,36 +75,3 @@ def import_icd10claml(filename, uri, debug):
     icd10claml.import_to_database(filename, session)
 
     print "Done import"
-
-
-def main(argv):
-    """starts the app, also reads command line arguments"""
-    database_uri = "sqlite:///automo-data.db"
-    debug = False
-    interface = ''
-
-    try:
-        opts, args = getopt.getopt(argv, "hdi:f:", ["help", "debug", "icd10claml=", "interface="])
-    except getopt.GetoptError:
-        usage()
-        sys.exit(2)
-
-    for opt, arg in opts:
-        if opt in ("-h", "--help"):
-            usage()
-            sys.exit()
-        if opt in ("-i", "--icd10claml"):
-            import_icd10claml(arg, database_uri, debug)
-            sys.exit()
-        if opt in ("-f", "--interface"):
-            interface = arg
-        if opt in ("-d", "--debug"):
-            debug = True
-
-    if interface in CLI_INTERFACES:
-        start_cli(database_uri, interface, debug)
-    elif interface in GUI_INTERFACES:
-        start_gui(database_uri, interface, debug)
-    else:
-        usage()
-        sys.exit(2)
