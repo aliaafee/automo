@@ -40,7 +40,7 @@ class EncountersPanel(wx.Panel):
         date_str = ""
         if encounter_object.type == "admission":
             date_str = "Admission"
-        elif encounter_object.type == "clinicvisit":
+        elif encounter_object.type == "outpatientencounter":
             date_str = "Outpatient"
         date_str += " <b>{0}</b>".format(config.format_date(encounter_object.start_time))
         if encounter_object.end_time is None:
@@ -88,10 +88,10 @@ class EncountersPanel(wx.Panel):
             self.unset_patient()
             return
 
-        items = self.session.query(db.Encounter)\
-                    .filter(db.Encounter.patient == self.patient)\
-                    .filter(db.Encounter.parent == None)\
-                    .order_by(db.Encounter.start_time.desc())
+        items = self.session.query(db.ClinicalEncounter)\
+                    .filter(db.ClinicalEncounter.patient == self.patient)\
+                    .filter(db.ClinicalEncounter.parent == None)\
+                    .order_by(db.ClinicalEncounter.start_time.desc())
 
         self.encounters_list.set_result(items, "")
         if self.encounters_list.GetItemCount() > 0:

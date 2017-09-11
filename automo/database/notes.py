@@ -19,8 +19,8 @@ class Note(Base):
         'polymorphic_on':type
     }
 
-    encounter_id = Column(Integer, ForeignKey('encounter.id'))
-    encounter = relationship("Encounter", back_populates="notes")
+    clinicalencounter_id = Column(Integer, ForeignKey('clinicalencounter.id'))
+    clinicalencounter = relationship("ClinicalEncounter", back_populates="notes")
 
 
 class History(Note):

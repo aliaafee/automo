@@ -9,8 +9,8 @@ class Prescription(Base):
     """Patient Prescription"""
     id = Column(Integer, primary_key=True)
 
-    admission_id = Column(Integer, ForeignKey('admission.id'))
-    admission = relationship("Admission", back_populates="prescription")
+    clinicalencounter_id = Column(Integer, ForeignKey('clinicalencounter.id'))
+    clinicalencounter = relationship("Admission", back_populates="prescription")
 
     #date_from = Column(Date())
     #date_to = Column(Date())

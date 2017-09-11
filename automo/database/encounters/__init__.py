@@ -1,8 +1,9 @@
 """Encounters"""
 
 from .encounter import Encounter
-from .admission import Admission
-from .clinicvisit import ClinicVisit
+from .clinicalencounter import ClinicalEncounter,\
+                               Admission,\
+                               OutpatientEncounter
 from .measurements import Measurements
 from .vitalsigns import VitalSigns,\
                         VitalSignsExtended

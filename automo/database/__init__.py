@@ -14,8 +14,9 @@ from .ward import Ward
 from .problem_encounter import problem_encounter_association_table
 from .problem import Problem
 from .encounters import Encounter,\
+                        ClinicalEncounter,\
                         Admission,\
-                        ClinicVisit,\
+                        OutpatientEncounter,\
                         Measurements,\
                         VitalSigns,\
                         VitalSignsExtended,\

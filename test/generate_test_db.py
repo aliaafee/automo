@@ -102,7 +102,7 @@ def generate():
     admission2.add_problem(problem1)
     patient1.discharge(session, datetime(2017, 3, 10, 17, 0))
 
-    clinicvisit1 = db.ClinicVisit()
+    clinicvisit1 = db.OutpatientEncounter()
     patient1.add_encounter(clinicvisit1)
     clinicvisit1.start_time = datetime(2017, 3, 21, 10, 55)
     clinicvisit1.personnel = doctor1
@@ -113,14 +113,14 @@ def generate():
     admission3.add_problem(problem2)
     patient2.discharge(session, datetime(2017, 2, 4, 17,0))
 
-    clinicvisit2 = db.ClinicVisit()
+    clinicvisit2 = db.OutpatientEncounter()
     patient2.add_encounter(clinicvisit2)
     clinicvisit2.start_time = datetime(2017, 2, 8, 9, 30)
     clinicvisit2.personnel = doctor2
     clinicvisit2.add_problem(problem2)
     clinicvisit2.end(datetime(2017, 2, 8, 9, 35))
 
-    clinicvisit3 = db.ClinicVisit()
+    clinicvisit3 = db.OutpatientEncounter()
     patient2.add_encounter(clinicvisit3)
     clinicvisit3.start_time = datetime(2017, 5, 4, 13, 3)
     clinicvisit3.personnel = doctor1

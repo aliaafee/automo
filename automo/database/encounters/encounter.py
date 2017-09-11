@@ -46,8 +46,6 @@ class Encounter(Base):
                             secondary=problem_encounter_association_table,
                             back_populates="encounters")
 
-    notes = relationship("Note", back_populates="encounter",
-                         cascade="all, delete, delete-orphan")
 
     def add_problem(self, problem):
         """Add a problem to the encounter"""
