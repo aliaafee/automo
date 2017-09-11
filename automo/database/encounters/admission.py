@@ -32,7 +32,7 @@ class Admission(Encounter):
     prescription = relationship("Prescription", back_populates="admission",
                                 cascade="all, delete, delete-orphan")
 
-    def end(self, end_time=datetime.datetime.now()):
+    def end(self, end_time=None):
         """Ends the admission"""
         super(Admission, self).end(end_time)
 

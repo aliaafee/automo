@@ -39,7 +39,7 @@ def generate():
 
     patient1 = db.Patient(name="Patient One")
     patient1.sex = "M"
-    patient1.date_of_birth = date(1982, 1, 2)
+    patient1.time_of_birth = date(1982, 1, 2)
     patient1.hospital_no = "1231"
     patient1.national_id_no = "A123451"
     session.add(patient1)
@@ -52,7 +52,7 @@ def generate():
 
     patient2 = db.Patient(name="Patient Two")
     patient2.sex = "F"
-    patient2.date_of_birth = date(1972, 1, 2)
+    patient2.time_of_birth = date(1972, 1, 2)
     patient2.hospital_no = "1232"
     patient2.national_id_no = "A123452"
     session.add(patient2)
@@ -70,7 +70,7 @@ def generate():
 
     patient3 = db.Patient(name="Patient Three")
     patient3.sex = "M"
-    patient3.date_of_birth = date(2016, 2, 1)
+    patient3.time_of_birth = date(2016, 2, 1)
     patient3.hospital_no = "1233"
     patient3.national_id_no = "A123453"
 

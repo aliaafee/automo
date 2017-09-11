@@ -67,10 +67,20 @@ class PatientInfoPanelSmall(wx.Panel):
 
         self.patient = patient
 
+        age = self.patient.age
+        if age is None:
+            if self.patient.time_of_death is not None:
+                age_str = "(<i>Deceased</i> on {})".format(config.format_date(self.patient.time_of_death))
+            else:
+                age_str = "?"
+        else:
+            age_str = config.format_duration(age)
+
+
         self.lbl_hospital_no.SetLabelMarkup("<b>{}</b>".format(self.patient.hospital_no))
         self.lbl_national_id_no.SetLabelMarkup("<b>{}</b>".format(self.patient.national_id_no))
         self.lbl_name.SetLabelMarkup("<b>{}</b>".format(self.patient.name))
-        self.lbl_age_sex.SetLabelMarkup("<b>{0} / {1}</b>".format(config.format_duration(self.patient.age), self.patient.sex))
+        self.lbl_age_sex.SetLabelMarkup("<b>{0} / {1}</b>".format(age_str, self.patient.sex))
         
         measurements = self.session.query(db.Measurements)\
                             .filter(db.Measurements.patient == self.patient)\

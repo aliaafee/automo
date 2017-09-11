@@ -2,7 +2,7 @@
 import datetime
 import dateutil.relativedelta
 
-from sqlalchemy import Column, Integer, String, Date, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 
 from . import dbexception
@@ -19,8 +19,8 @@ class Patient(Base):
     hospital_no = Column(String(10))
     national_id_no = Column(String(10))
     name = Column(String(250))
-    date_of_birth = Column(Date())
-    date_of_death = Column(Date())
+    time_of_birth = Column(DateTime())
+    time_of_death = Column(DateTime())
     sex = Column(String(1))
 
     permanent_address_id = Column(Integer, ForeignKey('address.id'))
@@ -42,27 +42,30 @@ class Patient(Base):
 
     active = Column(Boolean)
 
-    def set_age(self, age, today=None):
+    def set_age(self, age, now=None):
         """Set age of patient as relativedelta, age is not acctually stored,
           date of birth is calculated and stored"""
-        if today is None:
-            today = datetime.date.today()
-        self.date_of_birth = today - age
+        if now is None:
+            now = datetime.datetime.now()
+        self.time_of_birth = now - age
 
-    def get_age(self, today=None):
+    def get_age(self, now=None):
         """Calculate and return age of patient as a relativedelta object"""
-        if self.date_of_birth is None:
+        if self.time_of_birth is None:
             return None
-        if today is None:
-            today = datetime.date.today()
-        return dateutil.relativedelta.relativedelta(today, self.date_of_birth)
+        if now is None:
+            now = datetime.datetime.now()
+        if self.time_of_death is not None:
+            if now > self.time_of_death:
+                return None
+        return dateutil.relativedelta.relativedelta(now, self.time_of_birth)
 
     age = property(get_age, set_age, None, "Age of the patient as relativedelta.")
 
     @property
     def age_td(self):
         """Age as a timedelta"""
-        return datetime.date.today() - self.date_of_birth
+        return datetime.date.today() - self.time_of_birth
 
 
     def __repr__(self):

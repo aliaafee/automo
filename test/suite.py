@@ -81,8 +81,8 @@ class PatientTest(BaseTest):
 
 
     def test_set_age(self):
-        self.patients[0].set_age(relativedelta(years=37), today=datetime.date(2017,1,1))
-        self.assertEqual(datetime.date(1980,1,1), self.patients[0].date_of_birth)
+        self.patients[0].set_age(relativedelta(years=37), now=datetime.datetime(2017,1,1))
+        self.assertEqual(datetime.datetime(1980,1,1), self.patients[0].time_of_birth)
 
 
     def test_admit(self):

@@ -265,6 +265,37 @@ class BatchPatientImporter(wx.Dialog):
         return isvalid
 
 
+    def paracetamol_dose(self, age, weight):
+        """Paracetamol dose for 250mg/5ml Concentration"""
+        if age < timedelta(days=6*30):
+            print "Too Young"
+            return None
+        if weight > 50.0:
+                print "Too Heavy"
+                return None
+        if weight < 6.0:
+                print "Too Light"
+                return None
+        divided_dose = 12.5 * weight
+        if divided_dose > 1000.0:
+            print "Divided dose too high"
+            return None
+        daily_dose = divided_dose * 4.0
+        if daily_dose > 4000.0:
+            print "Daily dose too high"
+            return None
+        volume_divided_dose = (divided_dose * 5.0) / 250.0
+        fraction = volume_divided_dose - math.floor(volume_divided_dose)
+        if fraction < 0.25:
+            corrected_fraction = 0.0
+        elif fraction >= 0.25 and fraction <= 0.75:
+            corrected_fraction = 0.5
+        else:
+            corrected_fraction = 1.0
+        corrected_volume_divided_dose = math.floor(volume_divided_dose) + corrected_fraction
+        return corrected_volume_divided_dose
+
+
     def cefixime_dose(self, age_td, weight):
         if age_td < timedelta(days=6*30):
             print "Too Young"
@@ -324,9 +355,15 @@ class BatchPatientImporter(wx.Dialog):
                 measurement.record_time = admission.start_time
                 admission.add_child_encounter(measurement)
 
-                cefixime_dose = self.cefixime_dose(new_patient.age_td, measurement.weight)
-                admission.prescribe_drug(self.session, None, "SYP CEFO-L (50MG/5ML)", "{}ML PO BD x 5DAYS".format(cefixime_dose))
-                admission.prescribe_drug(self.session, None, "SYP PARACETAMOL (250MG/5ML)", "[ ] PO TDS x 5DAYS")
+                #cefixime_dose = self.cefixime_dose(new_patient.age_td, measurement.weight)
+                #if cefixime_dose is not None:
+                #    cefixime_order_str = "{}ML PO BD x 5DAYS".format(cefixime_dose)
+                admission.prescribe_drug(self.session, None, "SYP CEFO-L", "")
+
+                #paracetamol_dose = self.paracetamol_dose(new_patient.age_td, measurement.weight)
+                #if paracetamol_dose is not None:
+                #    paracetamol_order_str = "{}ML PO TDS x 5DAYS".format(paracetamol_dose)
+                admission.prescribe_drug(self.session, None, "SYP PARACETAMOL", "")
                 
             self.session.commit()
             return True
