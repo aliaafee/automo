@@ -2,6 +2,7 @@
 import wx
 import wx.py
 
+from .. import database as db
 from . import events
 from . import images
 from .baseinterface import BaseInterface
@@ -28,6 +29,7 @@ class WardInterface(BaseInterface):
         self.patient_list_panel.Bind(events.EVT_AM_PATIENT_CHANGED, self._on_patient_selected)
 
         self.patient_panel = PatientPanel(splitter, self.session, style=wx.BORDER_SUNKEN)
+        self.patient_panel.Bind(events.EVT_AM_PATIENT_INFO_CHANGED, self._on_patient_info_changed)
 
         splitter.SplitVertically(self.patient_list_panel, self.patient_panel)
         splitter.SetMinimumPaneSize(5)
@@ -64,6 +66,12 @@ class WardInterface(BaseInterface):
 
     def _on_refresh(self, event):
         self.refresh()
+
+
+    def _on_patient_info_changed(self, event):
+        if type(event.object) == db.Patient:
+            self.patient_list_panel.refresh_selected()
+        event.Skip()
 
 
     def _on_patient_selected(self, event):

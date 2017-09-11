@@ -26,7 +26,7 @@ class PatientPanel(wx.Panel):
 
         #self.encounters_panel = EncountersPanel(self.notebook, session)
         self.encounters_panel = EncountersPanel(self, session)
-        self.encounters_panel.Bind(events.EVT_AM_ENCOUNTER_CHANGED, self._on_admission_changed)
+        self.Bind(events.EVT_AM_PATIENT_INFO_CHANGED, self._on_patient_info_changed)
         #self.notebook.AddPage(self.encounters_panel, "Encounters")
 
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -92,8 +92,9 @@ class PatientPanel(wx.Panel):
     #        active_page.save_changes()
 
 
-    def _on_admission_changed(self, event):
-        pass
+    def _on_patient_info_changed(self, event):
+        self.patient_info.refresh()
+        event.Skip()
 
 
     def is_unsaved(self):

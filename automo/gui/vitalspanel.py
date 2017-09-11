@@ -22,17 +22,17 @@ class VitalsPanel(wx.Panel):
 
         self.toolbar.Realize()
         
-        self.measurements_grid = DbQueryResultGrid(self, session)
-        self.measurements_grid.add_column(GridColumnDateTime("Time", 'record_time', editable=True, width=120))
-        self.measurements_grid.add_column(GridColumnFloat("Pulse (bmp)", 'pulse_rate', precision=0, editable=True))
-        self.measurements_grid.add_column(GridColumnFloat("Resp (bmp)", 'respiratory_rate', precision=0, editable=True))
-        self.measurements_grid.add_column(GridColumnFloat("SBP (mmHg)", 'systolic_bp', precision=0, editable=True))
-        self.measurements_grid.add_column(GridColumnFloat("DBP (mmHg)", 'diastolic_bp', precision=0, editable=True))
-        self.measurements_grid.add_column(GridColumnFloat(u"Temp (\u00B0C)", 'temperature', precision=1, editable=True))
+        self.vitals_grid = DbQueryResultGrid(self, session)
+        self.vitals_grid.add_column(GridColumnDateTime("Time", 'record_time', editable=True, width=120))
+        self.vitals_grid.add_column(GridColumnFloat("Pulse (bmp)", 'pulse_rate', precision=0, editable=True))
+        self.vitals_grid.add_column(GridColumnFloat("Resp (bmp)", 'respiratory_rate', precision=0, editable=True))
+        self.vitals_grid.add_column(GridColumnFloat("SBP (mmHg)", 'systolic_bp', precision=0, editable=True))
+        self.vitals_grid.add_column(GridColumnFloat("DBP (mmHg)", 'diastolic_bp', precision=0, editable=True))
+        self.vitals_grid.add_column(GridColumnFloat(u"Temp (\u00B0C)", 'temperature', precision=1, editable=True))
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.toolbar, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx.LEFT, border=5)
-        sizer.Add(self.measurements_grid, 1, wx.EXPAND | wx.ALL, border=5)
+        sizer.Add(self.vitals_grid, 1, wx.EXPAND | wx.ALL, border=5)
         self.SetSizer(sizer)
 
 
@@ -40,8 +40,10 @@ class VitalsPanel(wx.Panel):
         """Set control to editable or not"""
         if editable:
             self.toolbar.Show()
+            self.vitals_grid.EnableEditing(True)
         else:
             self.toolbar.Hide()
+            self.vitals_grid.EnableEditing(False)
 
         if self.editable != editable:
             self.Layout()
@@ -68,4 +70,4 @@ class VitalsPanel(wx.Panel):
                             .filter(db.VitalSigns.parent_id == self.encounter.id)\
                             .order_by(db.VitalSigns.start_time.desc())
 
-        self.measurements_grid.set_result(query_result)
+        self.vitals_grid.set_result(query_result)

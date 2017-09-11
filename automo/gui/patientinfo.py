@@ -22,13 +22,13 @@ class PatientInfoPanelSmall(wx.Panel):
         self.lbl_lbl_hospital_no = wx.StaticText(self, label='IP No', size=(40,-1))
         self.lbl_lbl_hospital_no.SetFont(lbl_font)
 
-        self.lbl_hospital_no = wx.StaticText(self, label='', size=(60,-1))
+        self.lbl_hospital_no = wx.StaticText(self, label='', size=(-1,-1))
         self.lbl_hospital_no.SetFont(bold_font)
 
         self.lbl_lbl_national_id_no = wx.StaticText(self, label='ID No', size=(40, -1))
         self.lbl_lbl_national_id_no.SetFont(lbl_font)
 
-        self.lbl_national_id_no = wx.StaticText(self, label='', size=(60, -1))
+        self.lbl_national_id_no = wx.StaticText(self, label='', size=(-1, -1))
         self.lbl_national_id_no.SetFont(bold_font)
 
         self.lbl_name = wx.StaticText(self, label='')
@@ -37,9 +37,9 @@ class PatientInfoPanelSmall(wx.Panel):
         self.lbl_age_sex = wx.StaticText(self, label='')
         self.lbl_age_sex.SetFont(med_font)
 
-        self.lbl_weight = wx.StaticText(self, label="", size=(60,-1))
-        self.lbl_height = wx.StaticText(self, label="", size=(60,-1))
-        self.lbl_bmi = wx.StaticText(self, label="", size=(60,-1))
+        self.lbl_weight = wx.StaticText(self, label="")
+        self.lbl_height = wx.StaticText(self, label="")
+        self.lbl_bmi = wx.StaticText(self, label="")
         
         grid_sizer = wx.FlexGridSizer(2, 2, 2, 2)
         grid_sizer.Add(self.lbl_lbl_hospital_no, 1, wx.EXPAND)
@@ -53,10 +53,16 @@ class PatientInfoPanelSmall(wx.Panel):
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         hsizer.Add(grid_sizer, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, border=5)
         hsizer.Add(self.lbl_name, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, border=5)
-        hsizer.Add(self.lbl_age_sex, 1, wx.ALIGN_CENTER_VERTICAL | wx.ALL, border=5)
+        hsizer.Add(self.lbl_age_sex, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, border=5)
         hsizer.Add(msizer, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, border=5)
+        hsizer.AddStretchSpacer()
 
         self.SetSizer(hsizer)
+
+
+    def refresh(self):
+        """Refresh the panel"""
+        self.set(self.patient)
 
 
     def set(self, patient):

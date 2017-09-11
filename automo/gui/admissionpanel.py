@@ -48,7 +48,6 @@ class AdmissionPanel(wx.Panel):
         self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self._on_change_notebook)
 
         self.problems_panel = ProblemPanel(self.notebook, self.session)
-        self.problems_panel.Bind(events.EVT_AM_PROBLEM_CHANGED, self._on_change_admission)
         self.notebook.AddPage(self.problems_panel, "Diagnosis")
 
         self.admission_note_panel = EncounterNote(self.notebook, self.session, 'admission_note')
@@ -98,8 +97,8 @@ class AdmissionPanel(wx.Panel):
 
 
     def _on_change_admission(self, event):
-        event = events.EncounterChangedEvent(object=event.object)
-        wx.PostEvent(self, event)
+        new_event = events.EncounterChangedEvent(events.ID_ENCOUNTER_CHANGED, object=event.object) 
+        wx.PostEvent(self, new_event)
 
 
     def _on_change_notebook(self, event):

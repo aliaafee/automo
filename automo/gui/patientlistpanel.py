@@ -65,12 +65,14 @@ class PatientListPanel(wx.Panel):
         event.Skip()
 
 
-    #def _on_refresh(self, event):
-    #    active_page = self.notebook.GetPage(self.notebook.GetSelection())
-    #    active_page.refresh()
     def refresh(self):
         active_page = self.notebook.GetPage(self.notebook.GetSelection())
         active_page.refresh()
+
+
+    def refresh_selected(self):
+        active_page = self.notebook.GetPage(self.notebook.GetSelection())
+        active_page.refresh_selected()
 
 
     def _on_patient_selected(self, event):

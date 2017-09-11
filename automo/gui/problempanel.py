@@ -128,8 +128,8 @@ class ProblemPanel(wx.Panel):
             self.session.commit()
             self.set_encounter(self.encounter)
 
-            event = events.ProblemChangedEvent(object=new_problem)
-            wx.PostEvent(self, event)
+            new_event = events.EncounterChangedEvent(events.ID_ENCOUNTER_CHANGED, object=new_problem) 
+            wx.PostEvent(self, new_event)
 
 
     def _on_add_quick(self, event):
@@ -163,8 +163,8 @@ class ProblemPanel(wx.Panel):
 
             self.session.commit()
 
-            event = events.ProblemChangedEvent(object=None)
-            wx.PostEvent(self, event)
+            new_event = events.EncounterChangedEvent(events.ID_ENCOUNTER_CHANGED, object=None) 
+            wx.PostEvent(self, new_event)
 
             self.problems_list.set_items(self.encounter.problems)
 

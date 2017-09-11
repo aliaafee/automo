@@ -5,7 +5,7 @@ import wx
 from .. import config
 from .. import database as db
 
-from . import events#PatientChangedEvent
+from . import events
 from .dbcombobox import DbComboBox
 from .dbqueryresultbox import DbQueryResultBox
 
@@ -44,6 +44,10 @@ class WardPanel(wx.Panel):
         self._on_change_ward(None)
 
         self.beds_list.RefreshAll()
+
+
+    def refresh_selected(self):
+        self.beds_list.RefreshSelected()
 
 
     def _on_bed_selected(self, event):

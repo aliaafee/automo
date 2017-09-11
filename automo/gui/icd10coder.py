@@ -638,7 +638,7 @@ class Icd10Coder(wx.Dialog):
     def _update_browser_title(self, icd10class):
         if icd10class is None:
             self.browser_title.SetPage(
-                "<table><tr><td><b>Internation Classification of Disease - 10</b></td></tr></table>")
+                "<table><tr><td><b>International Classification of Disease - 10</b></td></tr></table>")
             return
 
         if icd10class.kind == "chapter":

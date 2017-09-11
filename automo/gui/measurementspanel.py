@@ -3,6 +3,7 @@ import wx
 
 from .. import database as db
 from . import images
+from . import events
 from .dbqueryresultgrid import DbQueryResultGrid, GridColumnDateTime, GridColumnFloat
 
 
@@ -27,6 +28,7 @@ class MeasurementsPanel(wx.Panel):
         self.measurements_grid.add_column(GridColumnFloat("Weight (kg)", 'weight', precision=1, editable=True))
         self.measurements_grid.add_column(GridColumnFloat("Height (m)", 'height', precision=2, editable=True))
         self.measurements_grid.add_column(GridColumnFloat(u"BMI (kg/m\u00B2)", 'bmi', precision=2, editable=False))
+        self.measurements_grid.Bind(events.EVT_AM_DB_GRID_CELL_CHANGED, self._on_grid_changed)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.toolbar, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx.LEFT, border=5)
@@ -34,12 +36,19 @@ class MeasurementsPanel(wx.Panel):
         self.SetSizer(sizer)
 
 
+    def _on_grid_changed(self, event):
+        event = events.PatientInfoChangedEvent(events.ID_PATIENT_INFO_CHANGED, object=event.object)
+        wx.PostEvent(self, event)
+
+
     def set_editable(self, editable):
         """Set control to editable or not"""
         if editable:
             self.toolbar.Show()
+            self.measurements_grid.EnableEditing(True)
         else:
             self.toolbar.Hide()
+            self.measurements_grid.EnableEditing(False)
 
         if self.editable != editable:
             self.Layout()
