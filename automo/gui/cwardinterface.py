@@ -9,7 +9,8 @@ from .batchpatientimporter import BatchPatientImporter
 from .patientlistpanel import PatientListPanel
 from .patientpanel import PatientPanel
 
-ID_IMPORT_PATIENTS = 100
+ID_SHELL = wx.NewId()
+ID_IMPORT_PATIENTS = wx.NewId()
 
 
 class CWardInterface(BaseInterface):
@@ -24,8 +25,8 @@ class CWardInterface(BaseInterface):
         self.tool_menu.Append(ID_IMPORT_PATIENTS, "Patient Importer", "Batch Patient Importer")
         wx.EVT_MENU(self, ID_IMPORT_PATIENTS, self._on_import)
 
-        self.tool_menu.Append(wx.ID_FILE1, "Python Shell", "AutoMO Python Shell")
-        wx.EVT_MENU(self, wx.ID_FILE1, self._on_python_shell)
+        self.tool_menu.Append(ID_SHELL, "Python Shell", "AutoMO Python Shell")
+        wx.EVT_MENU(self, ID_SHELL, self._on_python_shell)
 
         splitter = wx.SplitterWindow(self, style=wx.SP_LIVE_UPDATE)
 

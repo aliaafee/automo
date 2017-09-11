@@ -10,6 +10,8 @@ from .shellinterface import ShellInterface
 from .patientlistpanel import PatientListPanel
 from .patientpanel import PatientPanel
 
+ID_SHELL = wx.NewId()
+
 
 class WardInterface(BaseInterface):
     """Ward Interface"""
@@ -20,8 +22,8 @@ class WardInterface(BaseInterface):
 
         self.toolbar = self._get_toolbar()
 
-        self.tool_menu.Append(wx.ID_FILE1, "Python Shell", "AutoMO Python Shell")
-        wx.EVT_MENU(self, wx.ID_FILE1, self._on_python_shell)
+        self.tool_menu.Append(ID_SHELL, "Python Shell", "AutoMO Python Shell")
+        wx.EVT_MENU(self, ID_SHELL, self._on_python_shell)
 
         splitter = wx.SplitterWindow(self, style=wx.SP_LIVE_UPDATE)
 
