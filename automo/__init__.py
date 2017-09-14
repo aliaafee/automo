@@ -14,7 +14,7 @@ from dateutil.relativedelta import relativedelta as duration
 from ._version import __version__
 from . import icd10claml
 from . import database as db
-from .gui import AutoMOApp
+from . import gui
 
 DEFAULT_DB_URI = "sqlite:///patient-data.db"
 
@@ -27,11 +27,11 @@ def start(uri, debug):
     db.StartEngine(uri, debug, __version__)
 
 
-def start_gui(uri, interface, debug):
+def start_gui(uri):
     """start gui interface"""
-    start(uri, debug)
+    start(uri, False)
 
-    app = AutoMOApp(interface)
+    app = gui.AutoMOApp()
 
     app.MainLoop()
 
@@ -42,10 +42,10 @@ def start_cli(uri, interface, debug):
 
     if interface == 'shell':
         session = db.Session()
-        patients = session.query(db.Patient).all()
-        beds = session.query(db.Bed).all()
-        doctors = session.query(db.Doctor).all()
-        nurses = session.query(db.Nurse).all()
+        patients = session.query(db.Patient)
+        beds = session.query(db.Bed)
+        doctors = session.query(db.Doctor)
+        nurses = session.query(db.Nurse)
         shell_locals = {
             'patient': patients,
             'bed': beds,

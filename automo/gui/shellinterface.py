@@ -18,10 +18,10 @@ class ShellInterface(BaseInterface):
 
         self.shell = wx.py.shell.Shell(self)
 
-        patients = self.session.query(db.Patient).all()
-        beds = self.session.query(db.Bed).all()
-        doctors = self.session.query(db.Doctor).all()
-        nurses = self.session.query(db.Nurse).all()
+        patients = self.session.query(db.Patient)
+        beds = self.session.query(db.Bed)
+        doctors = self.session.query(db.Doctor)
+        nurses = self.session.query(db.Nurse)
         def create_ward(name, bed_prefix, bed_count):
             ward = db.Ward()
             ward.name = name
