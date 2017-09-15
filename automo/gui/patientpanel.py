@@ -2,11 +2,12 @@
 import dateutil.relativedelta as rd
 import wx
 
+from .. import database as db
 from .. import config
 
 from . import events
-from .patientinfo import PatientInfoPanelSmall
-
+from .patientinfo import PatientInfoPanelSmall,\
+                         PatientInfoEditorDialog
 from .encounterspanel import EncountersPanel
 
 
@@ -19,6 +20,8 @@ class PatientPanel(wx.Panel):
         self.patient = None
 
         self.patient_info = PatientInfoPanelSmall(self, session)
+
+        self.toolbar = self.patient_info.toolbar
 
         #self.notebook = wx.Notebook(self)
         #self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self._on_changing_notebook)
@@ -39,7 +42,49 @@ class PatientPanel(wx.Panel):
         #self.notebook.Hide()
         self.encounters_panel.Hide()
 
+        self.toolbar.Bind(wx.EVT_TOOL, self._on_edit, id=wx.ID_EDIT)
+
         self.Bind(wx.EVT_WINDOW_DESTROY, self._on_close)
+
+
+    def _on_edit(self, event):
+        with PatientInfoEditorDialog(self, size=(500, -1)) as editor:
+            editor.CenterOnParent()
+            editor.set(self.patient)
+            if editor.ShowModal() == wx.ID_OK:
+                changed_patient = editor.get()
+                self.patient.hospital_no = changed_patient.hospital_no
+                self.patient.national_id_no = changed_patient.national_id_no
+                self.patient.name = changed_patient.name
+                self.patient.time_of_birth = changed_patient.time_of_birth
+                self.patient.sex = changed_patient.sex
+                self.patient.phone_no = changed_patient.phone_no
+
+                if self.patient.permanent_address is None:
+                    self.patient.permanent_address = db.Address()
+                    
+                self.patient.permanent_address.line_1 = changed_patient.permanent_address.line_1
+                self.patient.permanent_address.line_2 = changed_patient.permanent_address.line_2
+                self.patient.permanent_address.line_3 = changed_patient.permanent_address.line_3
+                self.patient.permanent_address.city = changed_patient.permanent_address.city
+                self.patient.permanent_address.region = changed_patient.permanent_address.region
+                self.patient.permanent_address.country = changed_patient.permanent_address.country
+
+
+                if self.patient.current_address is None:
+                    self.patient.current_address = db.Address()
+                    
+                self.patient.current_address.line_1 = changed_patient.current_address.line_1
+                self.patient.current_address.line_2 = changed_patient.current_address.line_2
+                self.patient.current_address.line_3 = changed_patient.current_address.line_3
+                self.patient.current_address.city = changed_patient.current_address.city
+                self.patient.current_address.region = changed_patient.current_address.region
+                self.patient.current_address.country = changed_patient.current_address.country
+
+                self.session.commit()
+
+                event = events.PatientInfoChangedEvent(events.ID_PATIENT_INFO_CHANGED, object=self.patient)
+                wx.PostEvent(self, event)
 
 
     def _on_close(self, event):

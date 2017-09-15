@@ -23,6 +23,8 @@ class Patient(Base):
     time_of_death = Column(DateTime())
     sex = Column(String(1))
 
+    phone_no = Column(String(250))
+
     permanent_address_id = Column(Integer, ForeignKey('address.id'))
     permanent_address = relationship("Address", foreign_keys=[permanent_address_id],
                                      back_populates="permanent_residents")

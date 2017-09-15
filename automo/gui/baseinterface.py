@@ -30,20 +30,33 @@ class BaseInterface(wx.Frame):
 
         self.SetMenuBar(self.menu_bar)
 
-        self.filemenu = wx.Menu()
-        self.menu_bar.Append(self.filemenu, "&File")
-        self.filemenu.AppendSeparator()
-        self.filemenu.Append(wx.ID_EXIT, "Exit", "Exit the program")
-        wx.EVT_MENU(self, wx.ID_EXIT, self._on_exit)
+        self.file_menu = wx.Menu()
+        self.menu_bar.Append(self.file_menu, "&File")
 
-        self.print_menu = wx.Menu()
-        self.menu_bar.Append(self.print_menu, "&Print")
+        #self.print_menu = wx.Menu()
+        #self.menu_bar.Append(self.print_menu, "&Print")
 
         self.tool_menu = wx.Menu()
         self.menu_bar.Append(self.tool_menu, "&Tools")
 
         self.help_menu = wx.Menu()
         self.menu_bar.Append(self.help_menu, "&Help")
+
+        self.create_file_menu()
+        self.create_tool_menu()
+        self.create_help_menu()
+
+
+    def create_file_menu(self):
+        self.file_menu.Append(wx.ID_EXIT, "Exit", "Exit the program")
+        wx.EVT_MENU(self, wx.ID_EXIT, self._on_exit)
+
+
+    def create_tool_menu(self):
+        pass
+
+
+    def create_help_menu(self):
         self.help_menu.Append(wx.ID_ABOUT, "&About", "About this software")
         wx.EVT_MENU(self, wx.ID_ABOUT, self._on_about)
 

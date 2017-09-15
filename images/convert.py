@@ -27,10 +27,11 @@ _IMAGE = {}
 files = os.listdir("src")
 
 for filename in files:
-    with open(os.path.join("src",filename), "rb") as image_file:
-        b64 = base64.b64encode(image_file.read())
-        var_name = "{0}".format(os.path.splitext(filename)[0])
-        result += "_IMAGE['{0}'] = \"{1}\"\n\n".format(var_name, b64)
+    if filename[0] != ".":
+        with open(os.path.join("src",filename), "rb") as image_file:
+            b64 = base64.b64encode(image_file.read())
+            var_name = "{0}".format(os.path.splitext(filename)[0])
+            result += "_IMAGE['{0}'] = \"{1}\"\n\n".format(var_name, b64)
 
 print result
 

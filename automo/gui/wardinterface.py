@@ -10,6 +10,8 @@ from .shellinterface import ShellInterface
 from .patientlistpanel import PatientListPanel
 from .patientpanel import PatientPanel
 
+ID_NEW_PATIENT = wx.NewId()
+ID_NEW_ADMISSION = wx.NewId()
 ID_SHELL = wx.NewId()
 
 
@@ -20,10 +22,9 @@ class WardInterface(BaseInterface):
 
         self.set_title("Ward")
 
-        self.toolbar = self._get_toolbar()
-
-        self.tool_menu.Append(ID_SHELL, "Python Shell", "AutoMO Python Shell")
-        wx.EVT_MENU(self, ID_SHELL, self._on_python_shell)
+        self.toolbar = wx.ToolBar(self, style=wx.TB_FLAT | wx.TB_NODIVIDER)
+        self.create_toolbar()
+        self.toolbar.Realize()
 
         splitter = wx.SplitterWindow(self, style=wx.SP_LIVE_UPDATE)
 
@@ -45,6 +46,26 @@ class WardInterface(BaseInterface):
         self.Layout()
 
 
+    def create_toolbar(self):
+        self.toolbar.AddLabelTool(wx.ID_REFRESH, "Refresh", images.get("refresh_24"),
+                                  wx.NullBitmap, wx.ITEM_NORMAL, "Refresh", "")
+
+        self.toolbar.Bind(wx.EVT_TOOL, self._on_refresh, id=wx.ID_REFRESH)
+
+
+    def create_file_menu(self):
+        self.file_menu.Append(ID_NEW_PATIENT, "New Patient", "Create New Patient")
+        self.file_menu.Append(ID_NEW_PATIENT, "New Admission", "Create New Admission")
+        self.file_menu.AppendSeparator()
+        super(WardInterface, self).create_file_menu()
+
+
+    def create_tool_menu(self):
+        super(WardInterface, self).create_tool_menu()
+        self.tool_menu.Append(ID_SHELL, "Python Shell", "AutoMO Python Shell")
+        wx.EVT_MENU(self, ID_SHELL, self._on_python_shell)
+
+
     def refresh(self):
         super(WardInterface, self).refresh()
         self.patient_list_panel.refresh()
@@ -52,14 +73,9 @@ class WardInterface(BaseInterface):
 
 
     def _get_toolbar(self):
-        toolbar = wx.ToolBar(self, style=wx.TB_FLAT | wx.TB_NODIVIDER)
+        
 
-        toolbar.AddLabelTool(wx.ID_REFRESH, "Refresh", images.get("refresh_24"),
-                                  wx.NullBitmap, wx.ITEM_NORMAL, "Refresh", "")
-
-        toolbar.AddSeparator()
-
-        toolbar.Bind(wx.EVT_TOOL, self._on_refresh, id=wx.ID_REFRESH)
+        
 
         toolbar.Realize()
 

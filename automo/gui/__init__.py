@@ -1,4 +1,5 @@
 """WxPython Based Graphical User Interface"""
+import sys
 import wx
 
 from . import guiconfig
@@ -19,6 +20,8 @@ class AutoMOApp(wx.App):
 
     def OnInit(self):
         """Initializes the App"""
+        sys.excepthook = self.exception_handler
+
         guiconfig.load_config()
 
         self.interface = guiconfig.STARTUP_INTERFACE
@@ -47,6 +50,16 @@ class AutoMOApp(wx.App):
         self.main_frame.Bind(wx.EVT_CLOSE, self._on_main_frame_close)
         self.main_frame.Show()
         return True
+
+
+    def exception_handler(self, type, value, trace_back):
+        with wx.MessageDialog(None,
+                              "An unhandled excpetion has occured, AutoMO will close. Detals of erro:\n\n{0}\n{1}\n{2}".format(type, value, trace_back),
+                              "Fatal Error",
+                              wx.OK | wx.ICON_ERROR) as dlg:
+            dlg.ShowModal()
+            dlg.Destroy()
+        sys.exit()
 
 
     def _on_main_frame_close(self, event):

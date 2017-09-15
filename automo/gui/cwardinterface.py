@@ -2,94 +2,34 @@
 import wx
 
 from . import images
-from . import events
-from .baseinterface import BaseInterface
-from .shellinterface import ShellInterface
+from .wardinterface import WardInterface
 from .batchpatientimporter import BatchPatientImporter
-from .patientlistpanel import PatientListPanel
-from .patientpanel import PatientPanel
 
-ID_SHELL = wx.NewId()
 ID_IMPORT_PATIENTS = wx.NewId()
 
 
-class CWardInterface(BaseInterface):
-    """C Ward Interface"""
+class CWardInterface(WardInterface):
     def __init__(self, parent, session=None):
         super(CWardInterface, self).__init__(parent, session)
 
-        self.set_title("C Ward")
+        self.set_title("Circumcision Ward")
 
-        self.toolbar = self._get_toolbar()
 
-        self.tool_menu.Append(ID_IMPORT_PATIENTS, "Patient Importer", "Batch Patient Importer")
+    def create_toolbar(self):
+        self.toolbar.AddLabelTool(ID_IMPORT_PATIENTS, "Import Patients", images.get("add"),
+                                  wx.NullBitmap, wx.ITEM_NORMAL, "Import Patients", "")
+        self.toolbar.AddSeparator()
+        super(CWardInterface, self).create_toolbar()
+
+
+    def create_tool_menu(self):
+        self.tool_menu.Append(ID_IMPORT_PATIENTS, "Import Patients", "Import Patients")
         wx.EVT_MENU(self, ID_IMPORT_PATIENTS, self._on_import)
-
-        self.tool_menu.Append(ID_SHELL, "Python Shell", "AutoMO Python Shell")
-        wx.EVT_MENU(self, ID_SHELL, self._on_python_shell)
-
-        splitter = wx.SplitterWindow(self, style=wx.SP_LIVE_UPDATE)
-
-        self.patient_list_panel = PatientListPanel(splitter, self.session, style=wx.BORDER_SUNKEN)
-        self.patient_list_panel.Bind(events.EVT_AM_PATIENT_CHANGED, self._on_patient_selected)
-
-        self.patient_panel = PatientPanel(splitter, self.session, style=wx.BORDER_SUNKEN)
-
-        splitter.SplitVertically(self.patient_list_panel, self.patient_panel)
-        splitter.SetMinimumPaneSize(5)
-        splitter.SetSashPosition(250)
-
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self.toolbar, 0, wx.EXPAND)
-        sizer.Add(splitter, 1, wx.EXPAND)
-        self.SetSizer(sizer)
-
-        self.Layout()
-
-
-    def refresh(self):
-        super(CWardInterface, self).refresh()
-        self.patient_list_panel.refresh()
-        self.patient_panel.refresh()
-
-
-    def _get_toolbar(self):
-        toolbar = wx.ToolBar(self, style=wx.TB_FLAT | wx.TB_NODIVIDER)
-
-        toolbar.AddLabelTool(wx.ID_REFRESH, "Refresh", images.get("refresh_24"),
-                                  wx.NullBitmap, wx.ITEM_NORMAL, "Refresh", "")
-
-        toolbar.AddSeparator()
-
-        toolbar.Bind(wx.EVT_TOOL, self._on_refresh, id=wx.ID_REFRESH)
-
-        toolbar.Realize()
-
-        return toolbar
-
-
-    def _on_refresh(self, event):
-        self.refresh()
-
-
-    def _on_python_shell(self, event):
-        shell = ShellInterface(self, self.session)
-        shell.Show()
+        self.tool_menu.AppendSeparator()
+        super(CWardInterface, self).create_tool_menu()
 
 
     def _on_import(self, event):
         with BatchPatientImporter(self, self.session) as importer:
             importer.CenterOnScreen()
             importer.ShowModal()
-
-
-    def _on_patient_selected(self, event):
-        selected_patient = event.object
-
-        if self.patient_panel.is_unsaved():
-            self.patient_panel.save_changes()
-
-        if selected_patient is None:
-            self.patient_panel.unset()
-
-        self.patient_panel.set(selected_patient)
