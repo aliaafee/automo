@@ -9,6 +9,7 @@ from .baseinterface import BaseInterface
 from .shellinterface import ShellInterface
 from .patientlistpanel import PatientListPanel
 from .patientpanel import PatientPanel
+from .patientinfo import PatientForm
 
 ID_NEW_PATIENT = wx.NewId()
 ID_NEW_ADMISSION = wx.NewId()
@@ -28,10 +29,9 @@ class WardInterface(BaseInterface):
 
         splitter = wx.SplitterWindow(self, style=wx.SP_LIVE_UPDATE)
 
-        self.patient_list_panel = PatientListPanel(splitter, self.session, style=wx.BORDER_SUNKEN)
-        self.patient_list_panel.Bind(events.EVT_AM_PATIENT_CHANGED, self._on_patient_selected)
+        self.patient_list_panel = PatientListPanel(splitter, self.session, style=wx.BORDER_THEME)
 
-        self.patient_panel = PatientPanel(splitter, self.session, style=wx.BORDER_SUNKEN)
+        self.patient_panel = PatientPanel(splitter, self.session, style=wx.BORDER_THEME)
         self.patient_panel.Bind(events.EVT_AM_PATIENT_INFO_CHANGED, self._on_patient_info_changed)
 
         splitter.SplitVertically(self.patient_list_panel, self.patient_panel)
@@ -42,6 +42,8 @@ class WardInterface(BaseInterface):
         sizer.Add(self.toolbar, 0, wx.EXPAND)
         sizer.Add(splitter, 1, wx.EXPAND)
         self.SetSizer(sizer)
+
+        self.Bind(events.EVT_AM_PATIENT_SELECTED, self._on_patient_selected)
 
         self.Layout()
 
@@ -57,6 +59,9 @@ class WardInterface(BaseInterface):
         self.file_menu.Append(ID_NEW_PATIENT, "New Patient", "Create New Patient")
         self.file_menu.Append(ID_NEW_PATIENT, "New Admission", "Create New Admission")
         self.file_menu.AppendSeparator()
+
+        wx.EVT_MENU(self, ID_NEW_PATIENT, self._on_new_patient)
+
         super(WardInterface, self).create_file_menu()
 
 
@@ -72,14 +77,15 @@ class WardInterface(BaseInterface):
         self.patient_panel.refresh()
 
 
-    def _get_toolbar(self):
-        
-
-        
-
-        toolbar.Realize()
-
-        return toolbar
+    def _on_new_patient(self, event):
+        with PatientForm(self, title="New Patient") as editor:
+            editor.CenterOnParent()
+            if editor.ShowModal() == wx.ID_OK:
+                new_patient = editor.get_object()
+                self.session.add(new_patient)
+                self.session.commit()
+                event = events.PatientSelectedEvent(events.ID_PATIENT_SELECTED, object=new_patient)
+                wx.PostEvent(self, event)
 
 
     def _on_refresh(self, event):

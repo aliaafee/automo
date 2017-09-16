@@ -21,11 +21,11 @@ class PatientListPanel(wx.Panel):
         self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self._on_change_notebook)
 
         self.ward_panel = WardPanel(self.notebook, self.session)
-        self.ward_panel.Bind(events.EVT_AM_PATIENT_CHANGED, self._on_patient_selected)
+        #self.ward_panel.Bind(events.EVT_AM_PATIENT_SELECTED, self._on_patient_selected)
         self.notebook.AddPage(self.ward_panel, "Ward")
 
         self.search_panel = PatientSearchPanel(self.notebook, self.session)
-        self.search_panel.Bind(events.EVT_AM_PATIENT_CHANGED, self._on_patient_selected)
+        #self.search_panel.Bind(events.EVT_AM_PATIENT_SELECTED, self._on_patient_selected)
         self.notebook.AddPage(self.search_panel, "Search")
 
         self.sizer = wx.BoxSizer(wx.VERTICAL)
@@ -75,6 +75,6 @@ class PatientListPanel(wx.Panel):
         active_page.refresh_selected()
 
 
-    def _on_patient_selected(self, event):
-        event = events.PatientChangedEvent(object=event.object)
-        wx.PostEvent(self, event)
+    #def _on_patient_selected(self, event):
+    #    event = events.PatientSelectedEvent(object=event.object)
+    #    wx.PostEvent(self, event)

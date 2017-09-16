@@ -51,7 +51,7 @@ class PatientSearchPanel(wx.Panel):
     def _on_patient_selected(self, event):
         selected_patient = self.patients_list.get_selected_object()
 
-        event = events.PatientChangedEvent(object=selected_patient)
+        event = events.PatientSelectedEvent(events.ID_PATIENT_SELECTED, object=selected_patient)
         wx.PostEvent(self, event)
 
 

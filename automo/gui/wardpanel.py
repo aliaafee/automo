@@ -58,7 +58,7 @@ class WardPanel(wx.Panel):
         except AttributeError:
             selected_patient = None
 
-        event = events.PatientChangedEvent(object=selected_patient)
+        event = events.PatientSelectedEvent(events.ID_PATIENT_SELECTED, object=selected_patient)
         wx.PostEvent(self, event)
 
 

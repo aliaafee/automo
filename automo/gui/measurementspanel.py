@@ -5,6 +5,7 @@ from .. import database as db
 from . import images
 from . import events
 from .dbqueryresultgrid import DbQueryResultGrid, GridColumnDateTime, GridColumnFloat
+from .dbform import DbFormDialog, DbDateField, DbFloatField
 
 
 class MeasurementsPanel(wx.Panel):
@@ -20,6 +21,7 @@ class MeasurementsPanel(wx.Panel):
         self.toolbar = wx.ToolBar(self, style=wx.TB_FLAT | wx.TB_NODIVIDER)
 
         self.toolbar.AddLabelTool(wx.ID_ADD, "Add", images.get("add"), wx.NullBitmap, wx.ITEM_NORMAL, "Add", "")
+        self.toolbar.Bind(wx.EVT_TOOL, self._on_add, id=wx.ID_ADD)
 
         self.toolbar.Realize()
         
@@ -34,6 +36,24 @@ class MeasurementsPanel(wx.Panel):
         sizer.Add(self.toolbar, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx.LEFT, border=5)
         sizer.Add(self.measurements_grid, 1, wx.EXPAND | wx.ALL, border=5)
         self.SetSizer(sizer)
+
+
+    def _on_add(self, event):
+        fields = [
+            DbDateField("Time", 'record_time', required=True),
+            DbFloatField("Weight (kg)", 'weight'),
+            DbFloatField("Height (m)", 'height')
+        ]
+        with DbFormDialog(self, db.Measurements, fields, size=(500, 150), title="Add Measurement") as dlg:
+            dlg.CenterOnParent()
+            if dlg.ShowModal() == wx.ID_OK:
+                new_measurement = dlg.get_object()
+                self.encounter.add_child_encounter(new_measurement)
+                self.session.add(new_measurement)
+                self.session.commit()
+                self.set_encounter(self.encounter)
+                event = events.PatientInfoChangedEvent(events.ID_PATIENT_INFO_CHANGED, object=self.encounter)
+                wx.PostEvent(self, event)
 
 
     def _on_grid_changed(self, event):

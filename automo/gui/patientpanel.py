@@ -6,9 +6,10 @@ from .. import database as db
 from .. import config
 
 from . import events
-from .patientinfo import PatientInfoPanelSmall,\
-                         PatientInfoEditorDialog
+from .patientinfo import PatientInfoPanelSmall, PatientForm
 from .encounterspanel import EncountersPanel
+
+#from .dbform import DbFormDialog, DbStringField, DbDateField, DbAddressField, DbEnumField
 
 
 class PatientPanel(wx.Panel):
@@ -48,41 +49,12 @@ class PatientPanel(wx.Panel):
 
 
     def _on_edit(self, event):
-        with PatientInfoEditorDialog(self, size=(500, -1)) as editor:
+        with PatientForm(self, title="Edit Patient") as editor:
             editor.CenterOnParent()
-            editor.set(self.patient)
+            editor.set_object(self.patient)
             if editor.ShowModal() == wx.ID_OK:
-                changed_patient = editor.get()
-                self.patient.hospital_no = changed_patient.hospital_no
-                self.patient.national_id_no = changed_patient.national_id_no
-                self.patient.name = changed_patient.name
-                self.patient.time_of_birth = changed_patient.time_of_birth
-                self.patient.sex = changed_patient.sex
-                self.patient.phone_no = changed_patient.phone_no
-
-                if self.patient.permanent_address is None:
-                    self.patient.permanent_address = db.Address()
-                    
-                self.patient.permanent_address.line_1 = changed_patient.permanent_address.line_1
-                self.patient.permanent_address.line_2 = changed_patient.permanent_address.line_2
-                self.patient.permanent_address.line_3 = changed_patient.permanent_address.line_3
-                self.patient.permanent_address.city = changed_patient.permanent_address.city
-                self.patient.permanent_address.region = changed_patient.permanent_address.region
-                self.patient.permanent_address.country = changed_patient.permanent_address.country
-
-
-                if self.patient.current_address is None:
-                    self.patient.current_address = db.Address()
-                    
-                self.patient.current_address.line_1 = changed_patient.current_address.line_1
-                self.patient.current_address.line_2 = changed_patient.current_address.line_2
-                self.patient.current_address.line_3 = changed_patient.current_address.line_3
-                self.patient.current_address.city = changed_patient.current_address.city
-                self.patient.current_address.region = changed_patient.current_address.region
-                self.patient.current_address.country = changed_patient.current_address.country
-
+                editor.update_object(self.patient)
                 self.session.commit()
-
                 event = events.PatientInfoChangedEvent(events.ID_PATIENT_INFO_CHANGED, object=self.patient)
                 wx.PostEvent(self, event)
 

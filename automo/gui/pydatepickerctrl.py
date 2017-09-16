@@ -25,9 +25,10 @@ class PyDatePickerCtrl(wx.DatePickerCtrl):
     def set_pydatetime(self, pydatetime_object):
         """Sets datetime to python datetime object"""
         wxdatetime = wx.DateTime()
-        wxdatetime.Set(
-            pydatetime_object.day,
-            pydatetime_object.month - 1,
-            pydatetime_object.year
-        )
+        if pydatetime_object is not None:
+            wxdatetime.Set(
+                pydatetime_object.day,
+                pydatetime_object.month - 1,
+                pydatetime_object.year
+            )
         self.SetValue(wxdatetime)

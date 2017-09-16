@@ -4,6 +4,7 @@ import wx
 from .. import database as db
 from . import images
 from .dbqueryresultgrid import DbQueryResultGrid, GridColumnDateTime, GridColumnFloat
+from .dbform import DbFormDialog, DbDateField, DbFloatField
 
 
 class VitalsPanel(wx.Panel):
@@ -19,6 +20,7 @@ class VitalsPanel(wx.Panel):
         self.toolbar = wx.ToolBar(self, style=wx.TB_FLAT | wx.TB_NODIVIDER)
 
         self.toolbar.AddLabelTool(wx.ID_ADD, "Add", images.get("add"), wx.NullBitmap, wx.ITEM_NORMAL, "Add", "")
+        self.toolbar.Bind(wx.EVT_TOOL, self._on_add, id=wx.ID_ADD)
 
         self.toolbar.Realize()
         
@@ -34,6 +36,25 @@ class VitalsPanel(wx.Panel):
         sizer.Add(self.toolbar, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx.LEFT, border=5)
         sizer.Add(self.vitals_grid, 1, wx.EXPAND | wx.ALL, border=5)
         self.SetSizer(sizer)
+
+
+    def _on_add(self, event):
+        fields = [
+            DbDateField("Time", 'record_time', required=True),
+            DbFloatField("Pulse (bmp)", 'pulse_rate'),
+            DbFloatField("Resp (bmp)", 'respiratory_rate'),
+            DbFloatField("SBP (mmHg)", 'systolic_bp'),
+            DbFloatField("DBP (mmHg)", 'diastolic_bp'),
+            DbFloatField(u"Temp (\u00B0C)", 'temperature')
+        ]
+        with DbFormDialog(self, db.VitalSigns, fields, size=(500, 200), title="Add Vital Signs") as dlg:
+            dlg.CenterOnParent()
+            if dlg.ShowModal() == wx.ID_OK:
+                new_vitals = dlg.get_object()
+                self.encounter.add_child_encounter(new_vitals)
+                self.session.add(new_vitals)
+                self.session.commit()
+                self.set_encounter(self.encounter)
 
 
     def set_editable(self, editable):
