@@ -4,8 +4,7 @@ import wx
 from .. import database as db
 from . import events
 from .dbrelationctrl import DbRelationCtrl
-from .dbrelationcombo import DbRelationCombo
-from .dbdatepicker import DbDatePicker
+from .baseclinicalencounterpanel import BaseClinicalEncounterPanel
 from .problempanel import ProblemPanel
 from .encounternote import EncounterNote
 from .measurementspanel import MeasurementsPanel
@@ -13,7 +12,131 @@ from .vitalspanel import VitalsPanel
 from .prescriptionpanel import PrescriptionPanel
 
 
-class AdmissionPanel(wx.Panel):
+class AdmissionPanel(BaseClinicalEncounterPanel):
+    """Admission Panel"""
+    def __init__(self, parent, session, **kwds):
+        super(AdmissionPanel, self).__init__(parent, session, **kwds)
+
+        self.set_title("Admission")
+
+        self.txt_bed = DbRelationCtrl(self.info_panel, self.session)
+
+        self.notebook = wx.Notebook(self)
+        self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self._on_changing_notebook)
+        self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self._on_change_notebook)
+
+        self.problems_panel = ProblemPanel(self.notebook, self.session)
+        self.notebook.AddPage(self.problems_panel, "Diagnosis")
+
+        self.admission_note_panel = EncounterNote(self.notebook, self.session, 'admission_note')
+        self.notebook.AddPage(self.admission_note_panel, "Admission Note")
+
+        self.progress_notes_panel = EncounterNote(self.notebook, self.session, 'progress_note')
+        self.notebook.AddPage(self.progress_notes_panel, "Progress Notes")
+
+        self.measurements_panel = MeasurementsPanel(self.notebook, self.session)
+        self.notebook.AddPage(self.measurements_panel, "Measurements")
+
+        self.vitals_panel = VitalsPanel(self.notebook, self.session)
+        self.notebook.AddPage(self.vitals_panel, "Vitals")
+
+        self.discharge_note_panel = EncounterNote(self.notebook, self.session, 'discharge_note')
+        self.notebook.AddPage(self.discharge_note_panel, "Discharge Note")
+
+        self.prescription_panel = PrescriptionPanel(self.notebook, self.session)
+        self.notebook.AddPage(self.prescription_panel, "Prescription")
+
+        bed_sizer = wx.FlexGridSizer(2, 2, 2, 2)
+        bed_sizer.AddMany([
+            (wx.StaticText(self.info_panel, label="Bed"), 0, wx.ALIGN_CENTER_VERTICAL),
+            (self.txt_bed, 0, wx.EXPAND)
+        ])
+        bed_sizer.AddSpacer(21)
+        self.info_panel_sizer.Add(bed_sizer, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, border=5)
+        self.sizer.Add(self.notebook, 1, wx.EXPAND)
+
+
+    def _on_change_notebook(self, event):
+        active_page = self.notebook.GetPage(event.GetSelection())
+        active_page.set_encounter(self.encounter)
+        active_page.set_editable(self.editable)
+
+
+    def _on_changing_notebook(self, event):
+        active_page = self.notebook.GetPage(self.notebook.GetSelection())
+        if active_page.is_unsaved():
+            active_page.save_changes()
+            print "Changes saved"
+            #event.Veto() to cancel switch to new tab
+
+
+    def is_unsaved(self):
+        """Check to see if any changes have been saved, must do before closing"""
+        if self.encounter is None:
+            return False
+
+        active_page = self.notebook.GetPage(self.notebook.GetSelection())
+        if active_page.is_unsaved():
+            return True
+        return False
+
+
+    def save_changes(self):
+        """Save changes"""
+        if self.encounter is None:
+            return
+
+        active_page = self.notebook.GetPage(self.notebook.GetSelection())
+        active_page.save_changes()
+
+
+    def set_editable(self, editable):
+        """Set control to editable or not"""
+        super(AdmissionPanel, self).set_editable(editable)
+
+        active_page = self.notebook.GetPage(self.notebook.GetSelection())
+        if self.editable:
+            active_page.set_editable(True)
+        else:
+            active_page.set_editable(False)
+
+
+    def set(self, encounter):
+        """Set The Encounter"""
+        if encounter is None:
+            self.unset()
+            return
+
+        if encounter.type != "admission":
+            self.unset()
+            return
+
+        super(AdmissionPanel, self).set(encounter)
+
+        if self.encounter.is_active():
+            self.txt_bed.set_dbobject_attr(encounter, "bed_id", "bed")
+        else:
+            self.txt_bed.set_dbobject_attr(encounter, "discharged_bed_id", "discharged_bed")
+
+        active_page = self.notebook.GetPage(self.notebook.GetSelection())
+        active_page.set_encounter(self.encounter)
+        self.notebook.Show()
+
+
+    def unset(self):
+        """Clear the panel"""
+        super(AdmissionPanel, self).unset()
+
+        self.txt_bed.set_dbobject_attr(None, "", "")
+
+        self.notebook.Hide()
+
+
+
+######################
+
+
+class AdmissionPanel2(wx.Panel):
     """Admission Panel"""
     def __init__(self, parent, session, **kwds):
         super(AdmissionPanel, self).__init__(parent, **kwds)

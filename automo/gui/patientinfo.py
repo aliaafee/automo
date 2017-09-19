@@ -16,8 +16,9 @@ class PatientInfoPanelSmall(wx.Panel):
         self.patient = None
 
         self.toolbar = wx.ToolBar(self, style=wx.TB_FLAT | wx.TB_NODIVIDER)
-        self.toolbar.AddLabelTool(wx.ID_EDIT, "Edit", images.get("edit_24"), wx.NullBitmap, wx.ITEM_NORMAL, "Edit Patient", "")
         self.toolbar.AddStretchableSpace()
+        self.toolbar.AddLabelTool(wx.ID_EDIT, "Edit", images.get("edit_24"), wx.NullBitmap, wx.ITEM_NORMAL, "Edit Patient", "")
+        self.toolbar.AddLabelTool(wx.ID_NEW, "Open", images.get("new_widow_24"), wx.NullBitmap, wx.ITEM_NORMAL, "Open in New Window", "")
         self.toolbar.Realize()
 
         lbl_font = self.GetFont()

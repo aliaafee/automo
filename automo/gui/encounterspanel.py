@@ -7,6 +7,7 @@ from .. import database as db
 from . import events
 from .dbqueryresultbox import DbQueryResultBox
 from .admissionpanel import AdmissionPanel
+from .baseclinicalencounterpanel import BaseClinicalEncounterPanel
 
 
 class EncountersPanel(wx.Panel):
@@ -23,6 +24,7 @@ class EncountersPanel(wx.Panel):
         self.encounters_list.Bind(wx.EVT_LISTBOX, self._on_encounter_selected)
 
         self.encounter_panel = AdmissionPanel(splitter, self.session)
+        #self.encounter_panel = BaseClinicalEncounterPanel(splitter, self.session)
         self.encounter_panel.Bind(events.EVT_AM_ENCOUNTER_CHANGED, self._on_encounter_changed)
 
         splitter.SplitVertically(self.encounters_list, self.encounter_panel)

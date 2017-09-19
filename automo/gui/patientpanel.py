@@ -34,7 +34,7 @@ class PatientPanel(wx.Panel):
         #self.notebook.AddPage(self.encounters_panel, "Encounters")
 
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self.patient_info, 0, wx.EXPAND | wx.ALL, border=5)
+        sizer.Add(self.patient_info, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx.LEFT, border=5)
         #sizer.Add(self.notebook, 1, wx.EXPAND | wx.ALL, border=5)
         sizer.Add(self.encounters_panel, 1, wx.EXPAND | wx.ALL, border=5)
 
@@ -44,6 +44,7 @@ class PatientPanel(wx.Panel):
         self.encounters_panel.Hide()
 
         self.toolbar.Bind(wx.EVT_TOOL, self._on_edit, id=wx.ID_EDIT)
+        self.toolbar.Bind(wx.EVT_TOOL, self._on_new_window, id=wx.ID_NEW)
 
         self.Bind(wx.EVT_WINDOW_DESTROY, self._on_close)
 
@@ -57,6 +58,21 @@ class PatientPanel(wx.Panel):
                 self.session.commit()
                 event = events.PatientInfoChangedEvent(events.ID_PATIENT_INFO_CHANGED, object=self.patient)
                 wx.PostEvent(self, event)
+
+
+    def _on_new_window(self, event):
+        patient_frame = wx.Frame(None)
+        patient_panel = PatientPanel(patient_frame, self.session)
+        patient_panel.toolbar.EnableTool(wx.ID_NEW, False)
+        patient_panel.set(self.patient)
+        patient_frame.SetTitle("{0} - {1} - AutoMO".format(patient_panel.patient.hospital_no, patient_panel.patient.name))
+        sizer= wx.BoxSizer()
+        sizer.Add(patient_panel, wx.EXPAND)
+        def _on_patient_changed(event):
+            patient_frame.SetTitle("{0} - {1} - AutoMO".format(patient_panel.patient.hospital_no, patient_panel.patient.name))
+        patient_frame.Bind(events.EVT_AM_PATIENT_INFO_CHANGED, _on_patient_changed)
+        patient_frame.Show()
+        self.unset()
 
 
     def _on_close(self, event):
