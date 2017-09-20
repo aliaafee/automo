@@ -17,6 +17,8 @@ class DbFormFieldDefn(object):
 
     def create_editor(self, parent):
         self.editor = wx.TextCtrl(parent)
+        if not self.editable:
+            self.editor.SetEditable(False)
         return self.editor
 
     def create_label(self, parent):
@@ -26,25 +28,31 @@ class DbFormFieldDefn(object):
             label = self.label
         return wx.StaticText(parent, label=label)
 
+    def set_editor_value(self, value):
+        if value is None:
+            self.editor.SetValue("")
+            return
+        self.editor.SetValue(value)
+
+    def get_editor_value(self):
+        value_str = self.editor.GetValue()
+        if value_str == "":
+            return None
+        return value_str
+
     def clear(self):
-        self.editor.SetValue("")
+        self.set_editor_value(None)
 
     def set_object(self, db_object):
         self.db_object = db_object
         value = getattr(self.db_object, self.str_attr)
-        if value is None:
-            self.clear()
-            return
-        self.editor.SetValue(value)
+        self.set_editor_value(value)
 
     def update_object(self, db_object):
         setattr(db_object, self.str_attr, self.get_value())
 
     def get_value(self):
-        value = self.editor.GetValue()
-        if value == "":
-            return None
-        return value
+        return self.get_editor_value()
 
 
 class DbStringField(DbFormFieldDefn):
@@ -56,23 +64,17 @@ class DbFloatField(DbFormFieldDefn):
     def __init__(self, label, str_attr, required=False, editable=True):
         super(DbFloatField, self).__init__(label, str_attr, required, editable)
 
-    def set_object(self, db_object):
-        self.db_object = db_object
-        value = getattr(self.db_object, self.str_attr)
-        if value is None:
-            self.clear()
-            return
+    def set_editor_value(self, value):
         self.editor.SetValue(unicode(value))
 
-    def get_value(self):
+    def get_editor_value(self):
         value_str = self.editor.GetValue()
         if value_str == "":
             return None
         try:
-            value = float(value_str)
+            return float(value_str)
         except ValueError:
             return None
-        return value
 
 
 class DbEnumField(DbFormFieldDefn):
@@ -85,25 +87,19 @@ class DbEnumField(DbFormFieldDefn):
         self.editor.SetItems(self.choices)
         return self.editor
 
-    def clear(self):
-        self.editor.SetSelection(-1)
-
-    def set_object(self, db_object):
-        self.db_object = db_object
-        value = getattr(self.db_object, self.str_attr)
-        if value is None:
-            self.clear()
-            return
+    def set_editor_value(self, value):
         if value in self.choices:
             index = self.choices.index(value)
             self.editor.SetSelection(index)
+        else:
+            self.editor.SetSelection(-1)
 
-    def get_value(self):
+    def get_editor_value(self):
         selection = self.editor.GetSelection()
         if selection != -1:
             return self.choices[selection]
         return None
-            
+
 
 class DbDateField(DbFormFieldDefn):
     def __init__(self, label, str_attr, required=False, editable=True):
@@ -113,18 +109,10 @@ class DbDateField(DbFormFieldDefn):
         self.editor = PyDatePickerCtrl(parent, style=wx.DP_DROPDOWN | wx.DP_ALLOWNONE)
         return self.editor
 
-    def clear(self):
-        self.editor.set_pydatetime(None)
-
-    def set_object(self, db_object):
-        self.db_object = db_object
-        value = getattr(self.db_object, self.str_attr)
-        if value is None:
-            self.clear()
-            return
+    def set_editor_value(self, value):
         self.editor.set_pydatetime(value)
 
-    def get_value(self):
+    def get_editor_value(self):
         return self.editor.get_pydatetime()
 
 
@@ -145,26 +133,11 @@ class DbAddressField(DbFormFieldDefn):
         self.editor.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_LISTBOX))
         return self.editor
 
-    def clear(self):
-        for field in self.fields:
-            field.clear()
-
-    def set_object(self, db_object):
-        self.db_object = db_object
-        value = getattr(self.db_object, self.str_attr)
-        if value is None:
-            self.clear()
-            return
+    def set_editor_value(self, value):
         self.editor.set_object(value)
 
-    def update_object(self, db_object):
-        if getattr(db_object, self.str_attr) is None:
-            setattr(db_object, self.str_attr, db.Address())
-        self.editor.update_object(getattr(db_object, self.str_attr))
-
-    def get_value(self):
+    def get_editor_value(self):
         return self.editor.get_object()
-
 
 
 class DbFormPanel(wx.ScrolledWindow):
@@ -192,6 +165,11 @@ class DbFormPanel(wx.ScrolledWindow):
 
     def set_object(self, db_object):
         self.db_object = db_object
+
+        if self.db_object is None:
+            for field in self.fields:
+                field.clear()
+            return
 
         for field in self.fields:
             field.set_object(db_object)
