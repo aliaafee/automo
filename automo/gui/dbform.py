@@ -85,6 +85,8 @@ class DbEnumField(DbFormFieldDefn):
     def create_editor(self, parent):
         self.editor = wx.Choice(parent)
         self.editor.SetItems(self.choices)
+        if not self.editable:
+            self.editor.Disable()
         return self.editor
 
     def set_editor_value(self, value):
@@ -107,6 +109,8 @@ class DbDateField(DbFormFieldDefn):
 
     def create_editor(self, parent):
         self.editor = PyDatePickerCtrl(parent, style=wx.DP_DROPDOWN | wx.DP_ALLOWNONE)
+        if not self.editable:
+            self.editor.Disable()
         return self.editor
 
     def set_editor_value(self, value):
@@ -120,17 +124,18 @@ class DbAddressField(DbFormFieldDefn):
     def __init__(self, label, str_attr, required=False, editable=True):
         super(DbAddressField, self).__init__(label, str_attr, required, editable)
         self.fields = [
-            DbStringField("Line 1", "line_1"),
-            DbStringField("Line 2", "line_2"),
-            DbStringField("Line 3", "line_3"),
-            DbStringField("City", "city"),
-            DbStringField("Region", "region"),
-            DbStringField("Country", "region")
+            DbStringField("Line 1", "line_1", editable=editable),
+            DbStringField("Line 2", "line_2", editable=editable),
+            DbStringField("Line 3", "line_3", editable=editable),
+            DbStringField("City", "city", editable=editable),
+            DbStringField("Region", "region", editable=editable),
+            DbStringField("Country", "country", editable=editable)
         ]
 
     def create_editor(self, parent):
         self.editor = DbFormPanel(parent, db.Address, self.fields, scrollable=False, style=wx.BORDER_THEME)
-        self.editor.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_LISTBOX))
+        if self.editable:
+            self.editor.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_LISTBOX))
         return self.editor
 
     def set_editor_value(self, value):
