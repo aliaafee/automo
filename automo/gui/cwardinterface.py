@@ -16,10 +16,9 @@ class CWardInterface(WardInterface):
 
 
     def create_toolbar(self):
-        self.toolbar.AddLabelTool(ID_IMPORT_PATIENTS, "Import Patients", images.get("add"),
-                                  wx.NullBitmap, wx.ITEM_NORMAL, "Import Patients", "")
-        self.toolbar.AddSeparator()
         super(CWardInterface, self).create_toolbar()
+        self.toolbar.AddLabelTool(ID_IMPORT_PATIENTS, "Batch Import Patients", images.get("new_patient_many"),
+                                  wx.NullBitmap, wx.ITEM_NORMAL, "Batch Import Patients", "")
 
 
     def create_tool_menu(self):

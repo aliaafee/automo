@@ -49,10 +49,16 @@ class PatientSearchPanel(wx.Panel):
 
 
     def _on_patient_selected(self, event):
-        selected_patient = self.patients_list.get_selected_object()
+        selected_patient = self.get_selected()
 
         event = events.PatientSelectedEvent(events.ID_PATIENT_SELECTED, object=selected_patient)
         wx.PostEvent(self, event)
+
+
+    def get_selected(self):
+        selected_patient = self.patients_list.get_selected_object()
+
+        return selected_patient
 
 
     def refresh(self):
@@ -101,3 +107,11 @@ class PatientSearchPanel(wx.Panel):
             self._non_breaking(config.format_duration(patient.age)),
             patient.sex
         )
+
+
+
+class PatientSearchPanelAdv(wx.Panel):
+    """Advanced Patient Search Panel"""
+    def __init__(self, parent, session, **kwds):
+        super(PatientSearchPanelAdv, self).__init__(parent, **kwds)
+

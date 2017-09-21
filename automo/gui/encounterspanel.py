@@ -25,7 +25,7 @@ class EncountersPanel(wx.Panel):
 
         self.encounter_panel = AdmissionPanel(splitter, self.session)
         #self.encounter_panel = BaseClinicalEncounterPanel(splitter, self.session)
-        self.encounter_panel.Bind(events.EVT_AM_ENCOUNTER_CHANGED, self._on_encounter_changed)
+        self.Bind(events.EVT_AM_ENCOUNTER_CHANGED, self._on_encounter_changed)
 
         splitter.SplitVertically(self.encounters_list, self.encounter_panel)
         splitter.SetMinimumPaneSize(100)

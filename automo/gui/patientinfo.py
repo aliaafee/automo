@@ -4,7 +4,7 @@ import wx
 from .. import config
 from .. import database as db
 from . import images
-from .dbform import DbFormDialog, DbStringField, DbDateField, DbAddressField, DbEnumField
+from .dbform import DbFormPanel, DbFormDialog, DbStringField, DbDateField, DbAddressField, DbEnumField
 
 
 class PatientInfoPanelSmall(wx.Panel):
@@ -16,10 +16,6 @@ class PatientInfoPanelSmall(wx.Panel):
         self.patient = None
 
         self.toolbar = wx.ToolBar(self, style=wx.TB_FLAT | wx.TB_NODIVIDER)
-        self.toolbar.AddStretchableSpace()
-        self.toolbar.AddLabelTool(wx.ID_EDIT, "Edit", images.get("edit_24"), wx.NullBitmap, wx.ITEM_NORMAL, "Edit Patient", "")
-        self.toolbar.AddLabelTool(wx.ID_NEW, "Open", images.get("new_widow_24"), wx.NullBitmap, wx.ITEM_NORMAL, "Open in New Window", "")
-        self.toolbar.Realize()
 
         lbl_font = self.GetFont()
         bold_font = self.GetFont()
@@ -155,3 +151,20 @@ class PatientForm(DbFormDialog):
             DbAddressField("Permanent Address", "permanent_address")
         ]
         super(PatientForm, self).__init__(parent, db.Patient, fields, size=(500, 500), **kwds)
+
+
+
+class PatientFormPanel(DbFormPanel):
+    """Patient Data Form"""
+    def __init__(self, parent, **kwds):
+        fields = [
+            DbStringField("Hospital No.", "hospital_no", required=True),
+            DbStringField("National Id No.", "national_id_no", required=True),
+            DbStringField("Name", "name", required=True),
+            DbDateField("Date of Birth", "time_of_birth", required=True),
+            DbEnumField("Sex", "sex", ["M", "F"], required=True),
+            DbStringField("Phone No.", "phone_no"),
+            DbAddressField("Current Address", "current_address"),
+            DbAddressField("Permanent Address", "permanent_address")
+        ]
+        super(PatientFormPanel, self).__init__(parent, db.Patient, fields, **kwds)

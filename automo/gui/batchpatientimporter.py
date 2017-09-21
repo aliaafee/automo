@@ -1,6 +1,4 @@
 """Batch import patients"""
-import math
-from datetime import timedelta
 import csv
 import wx
 import wx.grid
@@ -263,67 +261,6 @@ class BatchPatientImporter(wx.Dialog):
                     )
         #TODO: Look for duplicates in this list
         return isvalid
-
-
-    def paracetamol_dose(self, age, weight):
-        """Paracetamol dose for 250mg/5ml Concentration"""
-        if age < timedelta(days=6*30):
-            print "Too Young"
-            return None
-        if weight > 50.0:
-                print "Too Heavy"
-                return None
-        if weight < 6.0:
-                print "Too Light"
-                return None
-        divided_dose = 12.5 * weight
-        if divided_dose > 1000.0:
-            print "Divided dose too high"
-            return None
-        daily_dose = divided_dose * 4.0
-        if daily_dose > 4000.0:
-            print "Daily dose too high"
-            return None
-        volume_divided_dose = (divided_dose * 5.0) / 250.0
-        fraction = volume_divided_dose - math.floor(volume_divided_dose)
-        if fraction < 0.25:
-            corrected_fraction = 0.0
-        elif fraction >= 0.25 and fraction <= 0.75:
-            corrected_fraction = 0.5
-        else:
-            corrected_fraction = 1.0
-        corrected_volume_divided_dose = math.floor(volume_divided_dose) + corrected_fraction
-        return corrected_volume_divided_dose
-
-
-    def cefixime_dose(self, age_td, weight):
-        if age_td < timedelta(days=6*30):
-            print "Too Young"
-            return None
-        if age_td >= timedelta(days=6*30) and age_td <= timedelta(days=12*12*30):
-            if weight > 50.0:
-                print "Too Heavy"
-                return None
-            if weight < 5.0:
-                print "Too Light"
-                return None
-            daily_dose = 8.0 * weight
-            if daily_dose > 400.0 :
-                print "Too high daily dose"
-                return None
-            divided_dose = daily_dose / 2.0
-            volume_divided_dose = (divided_dose * 5.0) / 50.0
-            fraction = volume_divided_dose - math.floor(volume_divided_dose)
-            if fraction < 0.2:
-                corrected_fraction = 0.0
-            elif fraction >= 0.2 and fraction <= 0.75:
-                corrected_fraction = 0.5
-            else:
-                corrected_fraction = 1.0
-            corrected_volume_divided_dose = math.floor(volume_divided_dose) + corrected_fraction
-            return corrected_volume_divided_dose
-        print "Too Old"
-        return None
 
 
     def _add_patients(self, admitting_doctor):

@@ -10,6 +10,7 @@ from .shellinterface import ShellInterface
 from .patientlistpanel import PatientListPanel
 from .patientpanel import PatientPanel
 from .patientinfo import PatientForm
+from .newadmission import NewAdmissionDialog
 
 ID_NEW_PATIENT = wx.NewId()
 ID_NEW_ADMISSION = wx.NewId()
@@ -51,16 +52,22 @@ class WardInterface(BaseInterface):
     def create_toolbar(self):
         self.toolbar.AddLabelTool(wx.ID_REFRESH, "Refresh", images.get("refresh_24"),
                                   wx.NullBitmap, wx.ITEM_NORMAL, "Refresh", "")
+        self.toolbar.AddSeparator()
+        self.toolbar.AddLabelTool(ID_NEW_PATIENT, "New Patient", images.get("new_patient"),
+                                  wx.NullBitmap, wx.ITEM_NORMAL, "New Patient", "")
+        self.toolbar.AddLabelTool(ID_NEW_ADMISSION, "New Admission", images.get("admit"),
+                                  wx.NullBitmap, wx.ITEM_NORMAL, "New Admission", "")
 
         self.toolbar.Bind(wx.EVT_TOOL, self._on_refresh, id=wx.ID_REFRESH)
 
 
     def create_file_menu(self):
         self.file_menu.Append(ID_NEW_PATIENT, "New Patient", "Create New Patient")
-        self.file_menu.Append(ID_NEW_PATIENT, "New Admission", "Create New Admission")
+        self.file_menu.Append(ID_NEW_ADMISSION, "New Admission", "Create New Admission")
         self.file_menu.AppendSeparator()
 
         wx.EVT_MENU(self, ID_NEW_PATIENT, self._on_new_patient)
+        wx.EVT_MENU(self, ID_NEW_ADMISSION, self._on_new_admissiont)
 
         super(WardInterface, self).create_file_menu()
 
@@ -80,12 +87,71 @@ class WardInterface(BaseInterface):
     def _on_new_patient(self, event):
         with PatientForm(self, title="New Patient") as editor:
             editor.CenterOnParent()
-            if editor.ShowModal() == wx.ID_OK:
-                new_patient = editor.get_object()
-                self.session.add(new_patient)
-                self.session.commit()
-                event = events.PatientSelectedEvent(events.ID_PATIENT_SELECTED, object=new_patient)
-                wx.PostEvent(self, event)
+            done = False
+            while not done:
+                if editor.ShowModal() == wx.ID_OK:
+                    try:
+                        new_patient = editor.get_object()
+                        self.session.add(new_patient)
+                    except db.dbexception.AutoMODatabaseError as e:
+                        self.session.rollback()
+                        with wx.MessageDialog(None,
+                            "Database Error Occured. {}".format(e.message),
+                            "Database Error",
+                            wx.OK | wx.ICON_EXCLAMATION) as err_dlg:
+                            err_dlg.ShowModal()
+                    except Exception as e:
+                        self.session.rollback()
+                        with wx.MessageDialog(None,
+                            "Error Occured. {}".format(e.message),
+                            "Error",
+                            wx.OK | wx.ICON_EXCLAMATION) as err_dlg:
+                            err_dlg.ShowModal()
+                    else:
+                        self.session.commit()
+                        event = events.PatientSelectedEvent(events.ID_PATIENT_SELECTED, object=new_patient)
+                        wx.PostEvent(self, event)
+                        done = True
+                else:
+                    done = True
+
+
+    def _on_new_admissiont(self, event):
+        with NewAdmissionDialog(self, self.session) as dlg:
+            done = False
+            while not done:
+                dlg.ShowModal()
+                if dlg.GetReturnCode() == wx.ID_OK:
+                    try:
+                        patient = dlg.get_patient()
+                        if not patient in self.session:
+                            self.session.add(patient)
+                        doctor = dlg.get_doctor()
+                        bed = dlg.get_bed()
+                        patient.admit(self.session, doctor, bed)
+                    except db.dbexception.AutoMODatabaseError as e:
+                        self.session.rollback()
+                        with wx.MessageDialog(None,
+                            "Database Error Occured. {}".format(e.message),
+                            "Database Error",
+                            wx.OK | wx.ICON_EXCLAMATION) as err_dlg:
+                            err_dlg.ShowModal()
+                    except Exception as e:
+                        self.session.rollback()
+                        with wx.MessageDialog(None,
+                            "Error Occured. {}".format(e.message),
+                            "Error",
+                            wx.OK | wx.ICON_EXCLAMATION) as err_dlg:
+                            err_dlg.ShowModal()
+                    else:
+                        self.session.commit()
+                        event = events.PatientSelectedEvent(events.ID_PATIENT_SELECTED, object=patient)
+                        wx.PostEvent(self, event)
+                        self.patient_list_panel.refresh()
+                        done = True
+                else:
+                    done = True
+                
 
 
     def _on_refresh(self, event):
