@@ -170,10 +170,8 @@ ID_REMOVE = wx.NewId()
 
 class ProblemSelectorPage(BasePage):
     """Problems Selector"""
-    def __init__(self, parent, session, patient_selector):
+    def __init__(self, parent, session):
         super(ProblemSelectorPage, self).__init__(parent, session, "Add Diagnosis")
-
-        self.patient_selector = patient_selector
 
         self.all_problems = [] #self.session.query(db.Problem).filter(db.Problem.patient == self.patient).all()
         self.selected_problems = []
@@ -250,7 +248,7 @@ class ProblemSelectorPage(BasePage):
 
     def set(self):
         self.selected_problems = []
-        patient = self.patient_selector.get_patient()
+        patient = self.Parent.get_patient()
         self.lbl_existing.Hide()
         self.all_problems_list.Hide()
         self.toolbar.EnableTool(ID_ADD_EXISTING, False)
@@ -276,7 +274,7 @@ class ProblemSelectorPage(BasePage):
 
 class NewAdmissionDialog(wx.wizard.Wizard):
     """New Admission Wizard"""
-    def __init__(self, parent, session, **kwds):
+    def __init__(self, parent, session, patient=None, **kwds):
         super(NewAdmissionDialog, self).__init__(parent, **kwds)
 
         self.SetTitle("New Admission")
@@ -286,13 +284,16 @@ class NewAdmissionDialog(wx.wizard.Wizard):
         self.pages = []
 
         self.session = session
+        self.patient = patient
 
-        self.patient_selector = PatientSelectorPage(self, session)
+        if self.patient is None:
+            self.patient_selector = PatientSelectorPage(self, session)
+            self.add_page(self.patient_selector)
+
         self.doctorbed_selector = DoctorBedSelectorPage(self, session)
-        self.problem_selector = ProblemSelectorPage(self, session, self.patient_selector)
-
-        self.add_page(self.patient_selector)
         self.add_page(self.doctorbed_selector)
+
+        self.problem_selector = ProblemSelectorPage(self, session)
         self.add_page(self.problem_selector)
 
         self.Bind(wx.wizard.EVT_WIZARD_PAGE_CHANGING, self._on_page_changing)
@@ -313,6 +314,8 @@ class NewAdmissionDialog(wx.wizard.Wizard):
 
 
     def get_patient(self):
+        if self.patient is not None:
+            return self.patient
         return self.patient_selector.get_patient()
 
 

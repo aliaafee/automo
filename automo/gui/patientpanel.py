@@ -9,7 +9,9 @@ from . import events
 from . import images
 from .patientinfo import PatientInfoPanelSmall, PatientForm
 from .encounterspanel import EncountersPanel
+from .newadmission import NewAdmissionDialog
 
+ID_ADMIT = wx.NewId()
 ID_DISCHARGE = wx.NewId()
 
 
@@ -26,6 +28,8 @@ class PatientPanel(wx.Panel):
         self.toolbar = self.patient_info.toolbar
         self.toolbar.AddStretchableSpace()
         self.toolbar.AddLabelTool(wx.ID_EDIT, "Edit", images.get("edit_24"), wx.NullBitmap, wx.ITEM_NORMAL, "Edit Patient", "")
+        self.toolbar.AddSeparator()
+        self.toolbar.AddLabelTool(ID_ADMIT, "Admit", images.get("admit"), wx.NullBitmap, wx.ITEM_NORMAL, "Admit Patient", "")
         self.toolbar.AddLabelTool(ID_DISCHARGE, "Discharge", images.get("discharge"), wx.NullBitmap, wx.ITEM_NORMAL, "Discharge Patient", "")
         self.toolbar.AddSeparator()
         self.toolbar.AddLabelTool(wx.ID_NEW, "Open", images.get("new_widow_24"), wx.NullBitmap, wx.ITEM_NORMAL, "Open in New Window", "")
@@ -34,6 +38,7 @@ class PatientPanel(wx.Panel):
         self.toolbar.Bind(wx.EVT_TOOL, self._on_edit, id=wx.ID_EDIT)
         self.toolbar.Bind(wx.EVT_TOOL, self._on_new_window, id=wx.ID_NEW)
         self.toolbar.Bind(wx.EVT_TOOL, self._on_discharge, id=ID_DISCHARGE)
+        self.toolbar.Bind(wx.EVT_TOOL, self._on_admit, id=ID_ADMIT)
         
         #self.notebook = wx.Notebook(self)
         #self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self._on_changing_notebook)
@@ -84,6 +89,45 @@ class PatientPanel(wx.Panel):
             wx.PostEvent(self, event)
             new_event = events.EncounterChangedEvent(events.ID_ENCOUNTER_CHANGED, object=self.patient) 
             wx.PostEvent(self.encounters_panel, new_event)
+
+
+    def _on_admit(self, event):
+        with NewAdmissionDialog(self, self.session, patient=self.patient) as dlg:
+            done = False
+            while not done:
+                dlg.ShowModal()
+                if dlg.GetReturnCode() == wx.ID_OK:
+                    try:
+                        patient = self.patient
+                        doctor = dlg.get_doctor()
+                        bed = dlg.get_bed()
+                        problems = dlg.get_problems()
+                        admission = patient.admit(self.session, doctor, bed)
+                        for problem in problems:
+                            patient.problems.append(problem)
+                            admission.add_problem(problem)
+                    except db.dbexception.AutoMODatabaseError as e:
+                        self.session.rollback()
+                        with wx.MessageDialog(None,
+                            "Database Error Occured. {}".format(e.message),
+                            "Database Error",
+                            wx.OK | wx.ICON_EXCLAMATION) as err_dlg:
+                            err_dlg.ShowModal()
+                    except Exception as e:
+                        self.session.rollback()
+                        with wx.MessageDialog(None,
+                            "Error Occured. {}".format(e.message),
+                            "Error",
+                            wx.OK | wx.ICON_EXCLAMATION) as err_dlg:
+                            err_dlg.ShowModal()
+                    else:
+                        self.session.commit()
+                        self.refresh()
+                        event = events.PatientInfoChangedEvent(events.ID_PATIENT_INFO_CHANGED, object=self.patient)
+                        wx.PostEvent(self, event)
+                        done = True
+                else:
+                    done = True
 
 
     def _on_new_window(self, event):
@@ -154,6 +198,17 @@ class PatientPanel(wx.Panel):
     def _on_patient_info_changed(self, event):
         self.patient_info.refresh()
         event.Skip()
+        self._update_toolbar()
+
+
+    def _update_toolbar(self):
+        current_encounter = self.patient.get_current_encounter(self.session)
+        if current_encounter is None:
+            self.toolbar.EnableTool(ID_DISCHARGE, False)
+            self.toolbar.EnableTool(ID_ADMIT, True)
+        else:
+            self.toolbar.EnableTool(ID_DISCHARGE, True)
+            self.toolbar.EnableTool(ID_ADMIT, False)
 
 
     def is_unsaved(self):
@@ -219,10 +274,7 @@ class PatientPanel(wx.Panel):
         self.encounters_panel.Show()
 
         current_encounter = self.patient.get_current_encounter(self.session)
-        if current_encounter is None:
-            self.toolbar.EnableTool(ID_DISCHARGE, False)
-        else:
-            self.toolbar.EnableTool(ID_DISCHARGE, True)
+        self._update_toolbar()
 
         self.Layout()
 

@@ -61,6 +61,7 @@ class PatientListPanel(wx.Panel):
         if active_page_text == "Search":
             self.search_panel.patients_list.SetSelection(-1)
         else:
+            self.ward_panel.refresh()
             self.ward_panel.beds_list.SetSelection(-1)
         event.Skip()
 

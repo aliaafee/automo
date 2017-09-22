@@ -151,7 +151,7 @@ class WardInterface(BaseInterface):
                         self.session.commit()
                         event = events.PatientSelectedEvent(events.ID_PATIENT_SELECTED, object=patient)
                         wx.PostEvent(self, event)
-                        self.patient_list_panel.refresh()
+                        self.patient_list_panel.refresh_all()
                         done = True
                 else:
                     done = True
@@ -163,10 +163,11 @@ class WardInterface(BaseInterface):
 
 
     def _on_patient_info_changed(self, event):
-        if type(event.object) == db.Patient:
-            self.patient_list_panel.refresh_all()
-        elif type(event.object) == db.Bed:
-            self.patient_list_panel.refresh_all()
+        print "here"
+        #if type(event.object) == db.Patient:
+        self.patient_list_panel.refresh_all()
+        #elif type(event.object) == db.Bed:
+        #self.patient_list_panel.refresh_all()
         event.Skip()
 
 
