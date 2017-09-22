@@ -504,6 +504,24 @@ class Icd10Coder(wx.Dialog):
         self.Layout()
 
 
+    def get_problem(self):
+        new_problem = db.Problem()
+        new_problem.icd10class = self.selected_icd10class
+        new_problem.icd10modifier_class = self.selected_modifier_class
+        new_problem.icd10modifier_extra_class = self.selected_modifier_extra_class
+        new_problem.comment = self.selected_comment
+        new_problem.start_time = self.selected_start_time
+        return new_problem
+
+
+    def update_problem(self, problem):
+        problem.icd10class = self.selected_icd10class
+        problem.icd10modifier_class = self.selected_modifier_class
+        problem.icd10modifier_extra_class = self.selected_modifier_extra_class
+        problem.comment = self.selected_comment
+        problem.start_time = self.selected_start_time
+
+
     def _on_ok(self, event):
         self.selected_icd10class = self.category_list.get_selected_category()
         self.selected_modifier_class = self.cmb_modifier.get_selected_item()

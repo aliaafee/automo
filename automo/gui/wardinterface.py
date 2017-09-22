@@ -67,7 +67,7 @@ class WardInterface(BaseInterface):
         self.file_menu.AppendSeparator()
 
         wx.EVT_MENU(self, ID_NEW_PATIENT, self._on_new_patient)
-        wx.EVT_MENU(self, ID_NEW_ADMISSION, self._on_new_admissiont)
+        wx.EVT_MENU(self, ID_NEW_ADMISSION, self._on_new_admission)
 
         super(WardInterface, self).create_file_menu()
 
@@ -116,7 +116,7 @@ class WardInterface(BaseInterface):
                     done = True
 
 
-    def _on_new_admissiont(self, event):
+    def _on_new_admission(self, event):
         with NewAdmissionDialog(self, self.session) as dlg:
             done = False
             while not done:
@@ -128,7 +128,11 @@ class WardInterface(BaseInterface):
                             self.session.add(patient)
                         doctor = dlg.get_doctor()
                         bed = dlg.get_bed()
-                        patient.admit(self.session, doctor, bed)
+                        problems = dlg.get_problems()
+                        admission = patient.admit(self.session, doctor, bed)
+                        for problem in problems:
+                            patient.problems.append(problem)
+                            admission.add_problem(problem)
                     except db.dbexception.AutoMODatabaseError as e:
                         self.session.rollback()
                         with wx.MessageDialog(None,

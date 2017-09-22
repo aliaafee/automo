@@ -1,5 +1,6 @@
 """WxPython Based Graphical User Interface"""
 import sys
+import traceback
 import wx
 
 from . import guiconfig
@@ -53,9 +54,10 @@ class AutoMOApp(wx.App):
 
 
     def exception_handler(self, type, value, trace_back):
-        with wx.MessageDialog(None,
-                              "An unhandled excpetion has occured, AutoMO will close. Detals of erro:\n\n{0}\n{1}\n{2}".format(type, value, trace_back),
-                              "Fatal Error",
+        error_msg = "And unexpected error has occured, AutoMO will close.\n\n{}"
+        traceback_str = ''.join(traceback.format_exception(type, value, trace_back))
+
+        with wx.MessageDialog(None,error_msg.format(traceback_str), "Fatal Error",
                               wx.OK | wx.ICON_ERROR) as dlg:
             dlg.ShowModal()
             dlg.Destroy()

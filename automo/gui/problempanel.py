@@ -9,6 +9,43 @@ from .icd10coder import Icd10Coder
 from .dblistbox import DbListBox
 
 
+def problems_decorator(problem_object):
+    if problem_object.comment is None or problem_object.comment == "":
+        comment = ""
+    else:
+        comment = "<tr><td></td><td></td><td>({0})</td></tr>".format(problem_object.comment)
+    modifer_cls_strs = []
+    for modifer_cls in [problem_object.icd10modifier_class,
+                        problem_object.icd10modifier_extra_class]:
+        if modifer_cls is not None:
+            modifer_cls_strs.append(
+                '<tr><td></td><td></td><td>{0}: {1} - {2}</td></tr>'.format(
+                    modifer_cls.modifier.name,
+                    modifer_cls.code_short,
+                    modifer_cls.preferred
+                )
+            )
+    modifer_str = "".join(modifer_cls_strs)
+
+    html = u'<font size="2"><table width="100%">'\
+                '<tr>'\
+                    '<td valign="top" width="50">{0}</td>'\
+                    '<td valign="top" width="40"><b>{1}</b></td>'\
+                    '<td valign="top"><b>{2}</b></td>'\
+                    '{4}'\
+                    '{3}'\
+                '</tr>'\
+            '</table></font>'
+
+    return html.format(
+        config.format_date(problem_object.start_time),
+        problem_object.icd10class_code,
+        problem_object.icd10class.preferred_plain,
+        comment,
+        modifer_str
+    )
+
+
 class ProblemPanel(wx.Panel):
     """Problem Panel"""
     def __init__(self, parent, session, **kwds):
@@ -53,7 +90,7 @@ class ProblemPanel(wx.Panel):
         sizer.Add(self.toolbar, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx.LEFT,
                   border=5)
 
-        self.problems_list = DbListBox(self, self._problems_decorator, style=wx.LB_MULTIPLE)
+        self.problems_list = DbListBox(self, problems_decorator, style=wx.LB_MULTIPLE)
         self.problems_list.Bind(wx.EVT_RIGHT_DOWN, self._on_problems_context)
         sizer.Add(self.problems_list, 1, wx.EXPAND | wx.ALL, border=5)
 
@@ -64,44 +101,6 @@ class ProblemPanel(wx.Panel):
         self.problems_menu = wx.Menu()
         self.problems_menu.Append(wx.ID_REMOVE, "Remove", "Remove Selected Conditions.")
         self.problems_menu.Bind(wx.EVT_MENU, self._on_remove_problems, id=wx.ID_REMOVE)
-
-
-
-    def _problems_decorator(self, problem_object):
-        if problem_object.comment is None or problem_object.comment == "":
-            comment = ""
-        else:
-            comment = "<tr><td></td><td></td><td>({0})</td></tr>".format(problem_object.comment)
-        modifer_cls_strs = []
-        for modifer_cls in [problem_object.icd10modifier_class,
-                            problem_object.icd10modifier_extra_class]:
-            if modifer_cls is not None:
-                modifer_cls_strs.append(
-                    '<tr><td></td><td></td><td>{0}: {1} - {2}</td></tr>'.format(
-                        modifer_cls.modifier.name,
-                        modifer_cls.code_short,
-                        modifer_cls.preferred
-                    )
-                )
-        modifer_str = "".join(modifer_cls_strs)
-
-        html = u'<font size="2"><table width="100%">'\
-                    '<tr>'\
-                        '<td valign="top" width="50">{0}</td>'\
-                        '<td valign="top" width="40"><b>{1}</b></td>'\
-                        '<td valign="top"><b>{2}</b></td>'\
-                        '{4}'\
-                        '{3}'\
-                    '</tr>'\
-                '</table></font>'
-
-        return html.format(
-            config.format_date(problem_object.start_time),
-            problem_object.icd10class_code,
-            problem_object.icd10class.preferred_plain,
-            comment,
-            modifer_str
-        )
 
 
     def _on_add_problem(self, event):
@@ -116,13 +115,8 @@ class ProblemPanel(wx.Panel):
 
         self.icd10_coder.CenterOnScreen()
         if self.icd10_coder.ShowModal(start_time=start_time) == wx.ID_OK:
-            new_problem = db.Problem()
+            new_problem = self.icd10_coder.get_problem()
             self.encounter.patient.problems.append(new_problem)
-            new_problem.icd10class = self.icd10_coder.selected_icd10class
-            new_problem.icd10modifier_class = self.icd10_coder.selected_modifier_class
-            new_problem.icd10modifier_extra_class = self.icd10_coder.selected_modifier_extra_class
-            new_problem.comment = self.icd10_coder.selected_comment
-            new_problem.start_time = self.icd10_coder.selected_start_time
             self.session.add(new_problem)
             self.encounter.add_problem(new_problem)
             self.session.commit()
