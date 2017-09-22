@@ -50,6 +50,10 @@ class WardPanel(wx.Panel):
         self.beds_list.RefreshSelected()
 
 
+    def refresh_all(self):
+        self.beds_list.RefreshAll()
+
+
     def _on_bed_selected(self, event):
         selected_bed = self.beds_list.get_selected_object()
 

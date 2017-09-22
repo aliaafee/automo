@@ -17,29 +17,25 @@ class BaseDialog(wx.Dialog):
 
         self.content_sizer = wx.BoxSizer(wx.VERTICAL)
         self.footer_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.base_foot_sizer = wx.BoxSizer(wx.VERTICAL)
 
-
-    def setup_sizers(self):
-        """Setup Sizer"""
-        self.setup_contents()
-        self.setup_footer()
+        self.base_foot_sizer.Add(self.footer_sizer, 1, wx.EXPAND)
+        self.base_foot_sizer.Add(self.button_ok, 0, wx.EXPAND | wx.BOTTOM, border=5)
+        self.base_foot_sizer.Add(self.button_cancel, 0, wx.EXPAND)
 
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.Add(self.content_sizer, 1, wx.EXPAND | wx.ALL, border=5)
-        sizer.Add(self.footer_sizer, 0, wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        sizer.Add(self.base_foot_sizer, 0, wx.EXPAND | wx.TOP | wx.BOTTOM | wx.RIGHT, border=5)
         self.SetSizer(sizer)
 
 
-    def setup_contents(self):
-        """Add Contents to conten_sizer"""
-        pass
+    def add_to_sizer(self, control, *args, **kwds):
+        self.content_sizer.Add(control, *args, **kwds)
 
 
-    def setup_footer(self):
-        """Add Contents to footer_sizer"""
-        self.footer_sizer.Add(self.button_ok, 0, wx.EXPAND | wx.ALL, border=5)
-        self.footer_sizer.Add(self.button_cancel, 0, wx.EXPAND | wx.ALL, border=5)
-        
+    def add_to_foot_sizer(self, control, **kwds):
+        self.footer_sizer.Add(control, **kwds)
+
 
     def on_ok(self, event):
         """OK button pressed"""

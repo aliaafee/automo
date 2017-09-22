@@ -75,6 +75,6 @@ class PatientListPanel(wx.Panel):
         active_page.refresh_selected()
 
 
-    #def _on_patient_selected(self, event):
-    #    event = events.PatientSelectedEvent(object=event.object)
-    #    wx.PostEvent(self, event)
+    def refresh_all(self):
+        active_page = self.notebook.GetPage(self.notebook.GetSelection())
+        active_page.refresh_all()

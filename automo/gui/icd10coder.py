@@ -122,7 +122,7 @@ class Icd10ChapterTree(wx.TreeCtrl):
 
 class Icd10CategoryList(wx.SimpleHtmlListBox):
     """List of Icd10 Categories in a block"""
-    def __init__(self, parent, session, style=wx.SUNKEN_BORDER, **kwds):
+    def __init__(self, parent, session, style=wx.BORDER_THEME, **kwds):
         super(Icd10CategoryList, self).__init__(
             parent, style=style, **kwds)
 
@@ -339,7 +339,7 @@ class Icd10Coder(wx.Dialog):
         right_panel_sizer = wx.BoxSizer(wx.VERTICAL)
 
         self.browser_title = wx.html.HtmlWindow(
-            self.right_panel, style=wx.html.HW_SCROLLBAR_AUTO | wx.html.HW_NO_SELECTION | wx.SUNKEN_BORDER,
+            self.right_panel, style=wx.html.HW_SCROLLBAR_AUTO | wx.html.HW_NO_SELECTION | wx.BORDER_THEME,
             size=(-1, 75))
         right_panel_sizer.Add(self.browser_title, 0,
                               flag=wx.EXPAND | wx.TOP | wx.RIGHT | wx.LEFT, border=5)

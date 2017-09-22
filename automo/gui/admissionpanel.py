@@ -2,7 +2,9 @@
 import wx
 
 from .. import database as db
+from .. import config
 from . import events
+from . import images
 from .dbrelationctrl import DbRelationCtrl
 from .baseclinicalencounterpanel import BaseClinicalEncounterPanel
 from .problempanel import ProblemPanel
@@ -10,7 +12,9 @@ from .encounternote import EncounterNote
 from .measurementspanel import MeasurementsPanel
 from .vitalspanel import VitalsPanel
 from .prescriptionpanel import PrescriptionPanel
+from .bedselector import BedSelectorDialog
 
+ID_TRANSFER_BED = wx.NewId()
 
 class AdmissionPanel(BaseClinicalEncounterPanel):
     """Admission Panel"""
@@ -56,6 +60,66 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
         self.sizer.Add(self.notebook, 1, wx.EXPAND)
 
 
+    def create_toolbar(self):
+        self.toolbar.AddLabelTool(ID_TRANSFER_BED, "Transfer", images.get("bed_transfer"), wx.NullBitmap, wx.ITEM_NORMAL, "Transfer Bed", "")
+        self.toolbar.Bind(wx.EVT_TOOL, self._on_transfer_bed, id=ID_TRANSFER_BED)
+
+        self.toolbar.AddSeparator()
+
+        super(AdmissionPanel, self).create_toolbar()
+
+
+    def _on_transfer_bed(self, event):
+        if self.encounter.is_active():
+            is_active = True
+            current_bed = self.encounter.bed
+        else:
+            is_active = False
+            current_bed = self.encounter.discharged_bed
+
+        with BedSelectorDialog(self, self.session, current_bed=current_bed, empty_beds=False) as selector:
+            selector.CenterOnParent()
+            if selector.ShowModal() == wx.ID_OK:
+                new_bed = selector.get_bed()
+                if not is_active:
+                    self.encounter.discharged_bed = new_bed
+                    self.session.commit()
+                    self.refresh()
+                    new_event = events.EncounterChangedEvent(events.ID_ENCOUNTER_CHANGED, object=new_bed) 
+                    wx.PostEvent(self, new_event)
+                else:
+                    if new_bed.admission is None:
+                        self.encounter.bed = new_bed
+                        self.session.commit()
+                        self.refresh()
+                        new_event = events.PatientInfoChangedEvent(events.ID_PATIENT_INFO_CHANGED, object=self.encounter.bed) 
+                        wx.PostEvent(self, new_event)
+                        new_event = events.EncounterChangedEvent(events.ID_ENCOUNTER_CHANGED, object=new_bed) 
+                        wx.PostEvent(self, new_event)
+                    else:
+                        message = "Bed {0} is occupied by the following patient, "\
+                                  "do you want to exchange the two beds?\n\n{1}\t{2}\t{3}\\{4}"
+                        message = message.format(
+                            new_bed,
+                            new_bed.admission.patient.hospital_no,
+                            new_bed.admission.patient.name,
+                            config.format_duration(new_bed.admission.patient.age),
+                            new_bed.admission.patient.sex
+                        )
+                        with wx.MessageDialog(None, message, "Exchange Beds",
+                                              wx.YES_NO | wx.ICON_QUESTION) as dlg:
+                            if dlg.ShowModal() == wx.ID_YES:
+                                current_bed = self.encounter.bed
+                                new_bed.admission.bed = current_bed
+                                self.encounter.bed = new_bed
+                                self.session.commit()
+                                self.refresh()
+                                new_event = events.PatientInfoChangedEvent(events.ID_PATIENT_INFO_CHANGED, object=self.encounter.bed) 
+                                wx.PostEvent(self, new_event)
+                                new_event = events.EncounterChangedEvent(events.ID_ENCOUNTER_CHANGED, object=new_bed) 
+                                wx.PostEvent(self, new_event)
+
+
     def _on_change_notebook(self, event):
         active_page = self.notebook.GetPage(event.GetSelection())
         active_page.set_encounter(self.encounter)
@@ -97,11 +161,13 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
         active_page = self.notebook.GetPage(self.notebook.GetSelection())
         if self.editable:
             active_page.set_editable(True)
+            self.toolbar.EnableTool(ID_TRANSFER_BED, True)
         else:
             active_page.set_editable(False)
+            self.toolbar.EnableTool(ID_TRANSFER_BED, False)
 
 
-    def set(self, encounter):
+    def set(self, encounter, refresh=False):
         """Set The Encounter"""
         if encounter is None:
             self.unset()
@@ -111,7 +177,7 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
             self.unset()
             return
 
-        super(AdmissionPanel, self).set(encounter)
+        super(AdmissionPanel, self).set(encounter, refresh=refresh)
 
         if self.encounter.is_active():
             self.txt_bed.set_dbobject_attr(encounter, "bed_id", "bed")
@@ -128,219 +194,5 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
         super(AdmissionPanel, self).unset()
 
         self.txt_bed.set_dbobject_attr(None, "", "")
-
-        self.notebook.Hide()
-
-
-
-######################
-
-
-class AdmissionPanel2(wx.Panel):
-    """Admission Panel"""
-    def __init__(self, parent, session, **kwds):
-        super(AdmissionPanel, self).__init__(parent, **kwds)
-
-        self.session = session
-        self.admission = None
-
-        self.editable = True
-
-        label_width = 60
-
-        self.lbl_bed = wx.StaticText(self, label="Bed",
-                                     size=wx.Size(label_width, -1))
-        self.txt_bed = DbRelationCtrl(self, self.session)
-
-        self.lbl_admitting_doctor = wx.StaticText(self, label="Doctor",
-                                                  size=wx.Size(label_width, -1))
-        self.txt_admitting_doctor = DbRelationCombo(self, self.session)
-
-        self.lbl_admitted_date = wx.StaticText(self, label="Admitted",
-                                               size=wx.Size(label_width, -1))
-        self.txt_admitted_date = DbDatePicker(self, self.session)
-        self.txt_admitted_date.Bind(events.EVT_AM_DB_CTRL_CHANGED, self._on_change_admission)
-
-        self.lbl_discharged_date = wx.StaticText(self, label="Discharged",
-                                                 size=wx.Size(label_width, -1))
-        self.txt_discharged_date = DbDatePicker(self, self.session)
-        self.txt_discharged_date.Bind(events.EVT_AM_DB_CTRL_CHANGED, self._on_change_admission)
-
-        self.notebook = wx.Notebook(self)
-        self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self._on_changing_notebook)
-        self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self._on_change_notebook)
-
-        self.problems_panel = ProblemPanel(self.notebook, self.session)
-        self.notebook.AddPage(self.problems_panel, "Diagnosis")
-
-        self.admission_note_panel = EncounterNote(self.notebook, self.session, 'admission_note')
-        self.notebook.AddPage(self.admission_note_panel, "Admission Note")
-
-        self.progress_notes_panel = EncounterNote(self.notebook, self.session, 'progress_note')
-        self.notebook.AddPage(self.progress_notes_panel, "Progress Notes")
-
-        self.measurements_panel = MeasurementsPanel(self.notebook, self.session)
-        self.notebook.AddPage(self.measurements_panel, "Measurements")
-
-        self.vitals_panel = VitalsPanel(self.notebook, self.session)
-        self.notebook.AddPage(self.vitals_panel, "Vitals")
-
-        self.discharge_note_panel = EncounterNote(self.notebook, self.session, 'discharge_note')
-        self.notebook.AddPage(self.discharge_note_panel, "Discharge Note")
-
-        self.prescription_panel = PrescriptionPanel(self.notebook, self.session)
-        self.notebook.AddPage(self.prescription_panel, "Prescription")
-
-        grid_sizer = wx.FlexGridSizer(2, 4, 2, 2)
-        grid_sizer.AddGrowableCol(1, 1)
-        grid_sizer.AddGrowableCol(3, 1)
-        lbl_flags = wx.SizerFlags(1).Align(wx.ALIGN_CENTER_VERTICAL)
-        txt_flags = wx.SizerFlags(1).Expand()
-        grid_sizer.AddF(self.lbl_bed, lbl_flags)
-        grid_sizer.AddF(self.txt_bed, txt_flags)
-        grid_sizer.AddF(self.lbl_admitting_doctor, lbl_flags)
-        grid_sizer.AddF(self.txt_admitting_doctor, txt_flags)
-        grid_sizer.AddF(self.lbl_admitted_date, lbl_flags)
-        grid_sizer.AddF(self.txt_admitted_date, txt_flags)
-        grid_sizer.AddF(self.lbl_discharged_date, lbl_flags)
-        grid_sizer.AddF(self.txt_discharged_date, txt_flags)
-
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(grid_sizer, 0, wx.EXPAND | wx.ALL, border=5)
-        sizer.Add(self.notebook, 1, wx.EXPAND | wx.ALL, border=5)
-        self.SetSizer(sizer)
-
-        self.Layout()
-
-        self.unset()
-
-
-    def _on_toggle_editable(self, event):
-        self.set_editable(not self.editable)
-
-
-    def _on_change_admission(self, event):
-        new_event = events.EncounterChangedEvent(events.ID_ENCOUNTER_CHANGED, object=event.object) 
-        wx.PostEvent(self, new_event)
-
-
-    def _on_change_notebook(self, event):
-        active_page = self.notebook.GetPage(event.GetSelection())
-        active_page.set_encounter(self.admission)
-        active_page.set_editable(self.editable)
-
-
-    def _on_changing_notebook(self, event):
-        active_page = self.notebook.GetPage(self.notebook.GetSelection())
-        if active_page.is_unsaved():
-            active_page.save_changes()
-            print "Changes saved"
-            #event.Veto() to cancel switch to new tab
-
-
-    def is_unsaved(self):
-        """Check to see if any changes have been saved, must do before closing"""
-        if self.admission is None:
-            return False
-
-        active_page = self.notebook.GetPage(self.notebook.GetSelection())
-        if active_page.is_unsaved():
-            return True
-        return False
-
-
-    def save_changes(self):
-        """Save changes"""
-        if self.admission is None:
-            return
-
-        active_page = self.notebook.GetPage(self.notebook.GetSelection())
-        active_page.save_changes()
-
-
-    def set_editable(self, editable):
-        """Set control to editable or not"""
-        self.editable = editable
-
-        active_page = self.notebook.GetPage(self.notebook.GetSelection())
-
-        if self.editable:
-            self.txt_admitted_date.Enable()
-            self.txt_discharged_date.Enable()
-            self.txt_admitting_doctor.Enable()
-            active_page.set_editable(True)
-        else:
-            self.txt_admitted_date.Disable()
-            self.txt_discharged_date.Disable()
-            self.txt_admitting_doctor.Disable()
-            active_page.set_editable(False)
-
-
-    def set(self, admission):
-        """Set the admission"""
-        self.admission = admission
-
-        if self.admission is None:
-            self.unset()
-            return
-
-        if self.admission.type != 'admission':
-            self.unset()
-            return
-
-        self.lbl_admitted_date.Show()
-        self.lbl_admitting_doctor.Show()
-        self.lbl_bed.Show()
-        self.lbl_discharged_date.Show()
-
-        self.txt_admitted_date.Show()
-        self.txt_admitting_doctor.Show()
-        self.txt_bed.Show()
-        self.txt_discharged_date.Show()
-
-        self.txt_admitted_date.set_dbobject_attr(admission, "start_time")
-        self.txt_discharged_date.set_dbobject_attr(admission, "end_time")
-
-        doctors = self.session.query(db.Doctor)
-        self.txt_admitting_doctor.set_dbobject_attr(admission, "personnel_id",
-                                                    "personnel", doctors, "id")
-
-        active_page = self.notebook.GetPage(self.notebook.GetSelection())
-        active_page.set_encounter(self.admission)
-        self.notebook.Show()
-
-        if self.admission.is_active():
-            """This is the current admission"""
-            self.set_editable(True)
-            self.lbl_discharged_date.Hide()
-            self.txt_discharged_date.Hide()
-            self.txt_bed.set_dbobject_attr(admission, "bed_id", "bed")
-        else:
-            """This is one of the previous admissions
-              These are not editable by default"""
-            self.set_editable(False)
-            self.txt_bed.set_dbobject_attr(admission, "discharged_bed_id", "discharged_bed")
-
-        self.Layout()
-
-
-    def unset(self):
-        """Clear the panel"""
-        self.admission = None
-
-        self.lbl_admitted_date.Hide()
-        self.lbl_admitting_doctor.Hide()
-        self.lbl_bed.Hide()
-        self.lbl_discharged_date.Hide()
-
-        self.txt_admitted_date.Hide()
-        self.txt_admitting_doctor.Hide()
-        self.txt_bed.Hide()
-        self.txt_discharged_date.Hide()
-
-        self.txt_bed.set_dbobject_attr(None, "", "")
-        self.txt_admitted_date.set_dbobject_attr(None, "")
-        self.txt_discharged_date.set_dbobject_attr(None, "")
-        self.txt_admitting_doctor.set_dbobject_attr(None, "", "", None, "")
 
         self.notebook.Hide()

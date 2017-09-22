@@ -70,6 +70,10 @@ class PatientSearchPanel(wx.Panel):
         self.patients_list.RefreshSelected()
 
 
+    def refresh_all(self):
+        self.patients_list.RefreshAll()
+
+
     def _on_change_filter(self, event):
         self._search(self.txt_search.GetValue())
 

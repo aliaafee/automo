@@ -190,7 +190,7 @@ class PatientPanel(wx.Panel):
             self.save_changes()
             print "Changes saved"
 
-        self.set(self.patient)
+        self.set(self.patient, refresh=True)
 
 
     def unset(self):
@@ -204,7 +204,7 @@ class PatientPanel(wx.Panel):
         self.encounters_panel.Hide()
 
 
-    def set(self, patient):
+    def set(self, patient, refresh=False):
         """Set selected patient"""
         if patient is None:
             self.unset()
@@ -228,4 +228,7 @@ class PatientPanel(wx.Panel):
 
         #active_page = self.notebook.GetPage(self.notebook.GetSelection())
         #active_page.set_patient(self.patient)
-        self.encounters_panel.set_patient(self.patient)
+        if refresh:
+            self.encounters_panel.refresh()
+        else:
+            self.encounters_panel.set_patient(self.patient)

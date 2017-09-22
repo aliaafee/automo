@@ -7,6 +7,7 @@ from . import images
 from .dbdatepicker import DbDatePicker
 from .dbrelationcombo import DbRelationCombo
 
+ID_LOCK = wx.NewId()
 
 class BaseClinicalEncounterPanel(wx.Panel):
     """Base Panel for Clinical Encounters"""
@@ -18,6 +19,9 @@ class BaseClinicalEncounterPanel(wx.Panel):
 
         self.editable = True
 
+        self.img_locked = images.get("locked_24")
+        self.img_unlocked = images.get("unlocked_24")
+        
         big_font = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.BOLD)
 
         self.info_panel = wx.Panel(self, style=wx.BORDER_THEME)
@@ -61,13 +65,14 @@ class BaseClinicalEncounterPanel(wx.Panel):
         self.SetSizer(self.sizer)
 
 
-    def create_toolbar(self):
-        self.img_locked = images.get("locked_24")
-        self.img_unlocked = images.get("unlocked_24")
+    def refresh(self):
+        self.set(self.encounter, refresh=True)
 
-        self.toolbar.AddLabelTool(wx.ID_EDIT, "Lock", self.img_unlocked, wx.NullBitmap, wx.ITEM_NORMAL, "Lock / Unlock Editing", "")
+
+    def create_toolbar(self):
+        self.toolbar.AddLabelTool(ID_LOCK, "Lock", self.img_unlocked, wx.NullBitmap, wx.ITEM_NORMAL, "Lock / Unlock Editing", "")
         
-        self.toolbar.Bind(wx.EVT_TOOL, self._on_toggle_edit, id=wx.ID_EDIT)
+        self.toolbar.Bind(wx.EVT_TOOL, self._on_toggle_edit, id=ID_LOCK)
 
 
     def _on_toggle_edit(self, event):
@@ -100,15 +105,15 @@ class BaseClinicalEncounterPanel(wx.Panel):
             self.txt_start_time.Enable()
             self.txt_end_time.Enable()
             self.txt_doctor.Enable()
-            self.toolbar.SetToolNormalBitmap(wx.ID_EDIT, self.img_unlocked)
+            self.toolbar.SetToolNormalBitmap(ID_LOCK, self.img_unlocked)
         else:
             self.txt_start_time.Disable()
             self.txt_end_time.Disable()
             self.txt_doctor.Disable()
-            self.toolbar.SetToolNormalBitmap(wx.ID_EDIT, self.img_locked)
+            self.toolbar.SetToolNormalBitmap(ID_LOCK, self.img_locked)
 
 
-    def set(self, encounter):
+    def set(self, encounter, refresh=False):
         """Set The encounter"""
         self.encounter = encounter
 
@@ -124,14 +129,23 @@ class BaseClinicalEncounterPanel(wx.Panel):
                                           "personnel",
                                           self.session.query(db.Doctor),
                                           "id")
-        if self.encounter.is_active():
-            self.set_editable(True)
+        is_active = self.encounter.is_active()
+        if is_active:
             self.txt_end_time.Hide()
             self.label_to.SetLabel(" ")
         else:
-            self.set_editable(False)
             self.txt_end_time.Show()
             self.label_to.SetLabel("To")
+
+        if not refresh:
+            if is_active:
+                self.set_editable(True)
+                self.txt_end_time.Hide()
+                self.label_to.SetLabel(" ")
+            else:
+                self.set_editable(False)
+                self.txt_end_time.Show()
+                self.label_to.SetLabel("To")
 
         self.label_to.SetSize(self.txt_start_time.GetSizeTuple())
         self.Layout()

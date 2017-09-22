@@ -110,7 +110,7 @@ class EncountersPanel(wx.Panel):
 
     def refresh(self):
         self.set_patient(self.patient)
-
+        
 
     def is_unsaved(self):
         if self.encounter_panel.is_unsaved():

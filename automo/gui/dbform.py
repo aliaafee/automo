@@ -210,11 +210,7 @@ class DbFormDialog(BaseDialog):
     def __init__(self, parent, db_object_class, fields,  **kwds):
         super(DbFormDialog, self).__init__(parent, **kwds)
         self.form = DbFormPanel(self, db_object_class, fields)
-        self.setup_sizers()
-
-
-    def setup_contents(self):
-        self.content_sizer.Add(self.form, 1, wx.EXPAND | wx.ALL, border=5)
+        self.add_to_sizer(self.form, 1, wx.EXPAND)
 
 
     def set_object(self, db_object):
