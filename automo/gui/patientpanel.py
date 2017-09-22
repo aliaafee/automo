@@ -10,6 +10,7 @@ from . import images
 from .patientinfo import PatientInfoPanelSmall, PatientForm
 from .encounterspanel import EncountersPanel
 from .newadmission import NewAdmissionDialog
+from .dischargedialog import DischargeDialog
 
 ID_ADMIT = wx.NewId()
 ID_DISCHARGE = wx.NewId()
@@ -74,21 +75,26 @@ class PatientPanel(wx.Panel):
 
 
     def _on_discharge(self, event):
-        try:
-            self.patient.discharge(self.session)
-        except Exception as e:
-            self.session.rollback()
-            with wx.MessageDialog(None,
-                "Error Occured. {}".format(e.message),
-                "Error",
-                wx.OK | wx.ICON_EXCLAMATION) as err_dlg:
-                err_dlg.ShowModal()
-        else:
-            self.session.commit()
-            event = events.PatientInfoChangedEvent(events.ID_PATIENT_INFO_CHANGED, object=self.patient)
-            wx.PostEvent(self, event)
-            new_event = events.EncounterChangedEvent(events.ID_ENCOUNTER_CHANGED, object=self.patient) 
-            wx.PostEvent(self.encounters_panel, new_event)
+        with DischargeDialog(self) as dlg:
+            dlg.CenterOnParent()
+            if dlg.ShowModal() == wx.ID_OK:
+                try:
+                    discharge_time = dlg.get_discharge_time()
+                    self.patient.discharge(self.session)
+                except Exception as e:
+                    self.session.rollback()
+                    with wx.MessageDialog(None,
+                        "Error Occured. {}".format(e.message),
+                        "Error",
+                        wx.OK | wx.ICON_EXCLAMATION) as err_dlg:
+                        err_dlg.ShowModal()
+                else:
+                    self.session.commit()
+                    event = events.PatientInfoChangedEvent(events.ID_PATIENT_INFO_CHANGED, object=self.patient)
+                    wx.PostEvent(self, event)
+                    new_event = events.EncounterChangedEvent(events.ID_ENCOUNTER_CHANGED, object=self.patient) 
+                    wx.PostEvent(self.encounters_panel, new_event)
+                    self.encounters_panel.refresh()
 
 
     def _on_admit(self, event):

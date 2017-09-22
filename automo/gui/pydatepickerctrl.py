@@ -5,8 +5,8 @@ import wx
 
 class PyDatePickerCtrl(wx.DatePickerCtrl):
     """Date picker that returns python datetime object"""
-    def __init__(self, parent, **kwds):
-        super(PyDatePickerCtrl, self).__init__(parent, **kwds)
+    def __init__(self, parent, style=wx.DP_DROPDOWN, **kwds):
+        super(PyDatePickerCtrl, self).__init__(parent, style=style, **kwds)
 
 
     def get_pydatetime(self):

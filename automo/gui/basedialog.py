@@ -37,6 +37,10 @@ class BaseDialog(wx.Dialog):
         self.footer_sizer.Add(control, **kwds)
 
 
+    def set_ok_label(self, label):
+        self.button_ok.SetLabel(label)
+
+
     def on_ok(self, event):
         """OK button pressed"""
         self.EndModal(wx.ID_OK)
