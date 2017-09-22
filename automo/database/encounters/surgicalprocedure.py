@@ -19,6 +19,10 @@ class SurgicalProcedure(Encounter):
 
     preoperative_diagnosis = Column(Text())
 
+    postoperative_diagnosis = Column(Text())
+
     procedure_name = Column(Text())
 
     findings = Column(Text())
+
+    steps = Column(Text())

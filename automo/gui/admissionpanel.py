@@ -13,6 +13,7 @@ from .measurementspanel import MeasurementsPanel
 from .vitalspanel import VitalsPanel
 from .prescriptionpanel import PrescriptionPanel
 from .bedselector import BedSelectorDialog
+from .surgerypanel import SurgeryPanel
 
 ID_TRANSFER_BED = wx.NewId()
 
@@ -37,6 +38,9 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
 
         self.progress_notes_panel = EncounterNote(self.notebook, self.session, 'progress_note')
         self.notebook.AddPage(self.progress_notes_panel, "Progress Notes")
+
+        self.surgery_panel = SurgeryPanel(self.notebook, self.session)
+        self.notebook.AddPage(self.surgery_panel, "Surgeries")
 
         self.measurements_panel = MeasurementsPanel(self.notebook, self.session)
         self.notebook.AddPage(self.measurements_panel, "Measurements")

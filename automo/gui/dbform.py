@@ -60,6 +60,19 @@ class DbStringField(DbFormFieldDefn):
         super(DbStringField, self).__init__(label, str_attr, required, editable)
 
 
+class DbMultilineStringField(DbFormFieldDefn):
+    def __init__(self, label, str_attr, lines=3, required=False, editable=True):
+        super(DbMultilineStringField, self).__init__(label, str_attr, required, editable)
+        self.lines = 3
+
+    def create_editor(self, parent):
+        self.editor = wx.TextCtrl(parent, style=wx.TE_MULTILINE, size=(-1, self.lines * 21))
+        if not self.editable:
+            self.editor.SetEditable(False)
+        return self.editor
+
+
+
 class DbFloatField(DbFormFieldDefn):
     def __init__(self, label, str_attr, required=False, editable=True):
         super(DbFloatField, self).__init__(label, str_attr, required, editable)
@@ -101,6 +114,44 @@ class DbEnumField(DbFormFieldDefn):
         if selection != -1:
             return self.choices[selection]
         return None
+
+
+class DbRelationField(DbEnumField):
+    def __init__(self, label, str_attr, db_choices_query, value_formatter=None, required=False, editable=True):
+        super(DbRelationField, self).__init__(label, str_attr, [], required, editable)
+        self.db_choices_query = db_choices_query
+        self.value_formatter = value_formatter
+        if value_formatter is None:
+            self.value_formatter = self._value_formatter
+        self.choices = []
+
+    def _value_formatter(self, value):
+        return unicode(value)
+
+    def _update_choices(self, value_search=None):
+        self.choices = self.db_choices_query.all()
+        choices_str = []
+        selection = -1
+        for index, choice in enumerate(self.choices):
+            choices_str.append(self.value_formatter(choice))
+            if choice == value_search:
+                selection = index
+        self.editor.SetItems(choices_str)
+        self.editor.SetSelection(selection)
+
+    def create_editor(self, parent):
+        editor = super(DbRelationField, self).create_editor(parent)
+        self._update_choices()
+        return editor
+
+    def set_editor_value(self, value):
+        self._update_choices(value)
+
+    def get_editor_value(self):
+        selection = self.editor.GetSelection()
+        if selection == -1:
+            return None
+        return self.choices(selection)
 
 
 class DbDateField(DbFormFieldDefn):
@@ -158,7 +209,7 @@ class DbFormPanel(wx.ScrolledWindow):
         for field in self.fields:
             label = field.create_label(self)
             editor = field.create_editor(self)
-            sizer.Add(label, 0, wx.ALIGN_CENTER_VERTICAL)
+            sizer.Add(label, 0)#, wx.ALIGN_CENTER_VERTICAL)
             sizer.Add(editor, 0, wx.EXPAND)
         sizer.AddGrowableCol(1)
 
@@ -166,6 +217,8 @@ class DbFormPanel(wx.ScrolledWindow):
 
         if scrollable:
             self.SetScrollbars(20,20,55,40)
+        else:
+            sizer.AddGrowableRow(len(self.fields) - 1)
 
 
     def set_object(self, db_object):
