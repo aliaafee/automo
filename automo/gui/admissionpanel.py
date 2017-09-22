@@ -154,7 +154,7 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
         active_page.save_changes()
 
 
-    def set_editable(self, editable):
+    def set_editable_TODELE(self, editable):
         """Set control to editable or not"""
         super(AdmissionPanel, self).set_editable(editable)
 
@@ -165,6 +165,20 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
         else:
             active_page.set_editable(False)
             self.toolbar.EnableTool(ID_TRANSFER_BED, False)
+
+
+    def editable_on(self):
+        super(AdmissionPanel, self).editable_on()
+        active_page = self.notebook.GetPage(self.notebook.GetSelection())
+        active_page.set_editable(True)
+        self.toolbar.EnableTool(ID_TRANSFER_BED, True)
+
+
+    def editable_off(self):
+        super(AdmissionPanel, self).editable_off()
+        active_page = self.notebook.GetPage(self.notebook.GetSelection())
+        active_page.set_editable(False)
+        self.toolbar.EnableTool(ID_TRANSFER_BED, False)
 
 
     def set(self, encounter, refresh=False):

@@ -102,15 +102,26 @@ class BaseClinicalEncounterPanel(wx.Panel):
         """Set control to editable or not"""
         self.editable = editable
         if self.editable:
-            self.txt_start_time.Enable()
-            self.txt_end_time.Enable()
-            self.txt_doctor.Enable()
-            self.toolbar.SetToolNormalBitmap(ID_LOCK, self.img_unlocked)
+            self.editable_on()
         else:
-            self.txt_start_time.Disable()
-            self.txt_end_time.Disable()
-            self.txt_doctor.Disable()
-            self.toolbar.SetToolNormalBitmap(ID_LOCK, self.img_locked)
+            self.editable_off()
+
+
+    def editable_on(self):
+        """Make controls editable"""
+        self.txt_start_time.Enable()
+        self.txt_end_time.Enable()
+        self.txt_doctor.Enable()
+        self.toolbar.SetToolNormalBitmap(ID_LOCK, self.img_unlocked)
+
+
+    def editable_off(self):
+        """Lock controls"""
+        self.txt_start_time.Disable()
+        self.txt_end_time.Disable()
+        self.txt_doctor.Disable()
+        self.toolbar.SetToolNormalBitmap(ID_LOCK, self.img_locked)
+        
 
 
     def set(self, encounter, refresh=False):
