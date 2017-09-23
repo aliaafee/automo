@@ -20,6 +20,7 @@ from .encounters import Encounter,\
                         Measurements,\
                         VitalSigns,\
                         VitalSignsExtended,\
+                        Progress,\
                         SurgicalProcedure,\
                         Investigation,\
                         Imaging,\
@@ -28,8 +29,7 @@ from .encounters import Encounter,\
                         RenalFunctionTest,\
                         LiverFunctionTest
 from .notes import Note,\
-                   History,\
-                   Progress
+                   History
 from .prescription import Prescription
 from .drug import Drug
 from .personnel import Personnel,\

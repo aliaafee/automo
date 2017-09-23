@@ -34,17 +34,3 @@ class History(Note):
     chief_complaints = Column(Text())
     presenting_illness = Column(Text())
     past = Column(Text())
-
-
-class Progress(Note):
-    """Patient Progress Notes. SOAP format."""
-    id = Column(Integer, ForeignKey('note.id'), primary_key=True)
-
-    __mapper_args__ = {
-        'polymorphic_identity':'progress',
-    }
-
-    subjective = Column(Text())
-    objective = Column(Text())
-    assesment = Column(Text())
-    plan = Column(Text())

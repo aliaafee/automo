@@ -14,3 +14,4 @@ from .investigation import Investigation,\
                            CompleteBloodCount,\
                            RenalFunctionTest,\
                            LiverFunctionTest
+from .progress import Progress
