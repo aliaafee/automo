@@ -79,7 +79,7 @@ class EncounterNotebookList(EncounterNotebookPage):
         self.encounter.add_child_encounter(new_subencounter)
         self.session.commit()
         self.set_encounter(self.encounter)
-        self.set_subencounter(new_subencounter)
+        self._set_subencounter(new_subencounter)
 
 
     def _on_save(self, event):
@@ -102,7 +102,7 @@ class EncounterNotebookList(EncounterNotebookPage):
         if self.encounter is not None and self.subencounter is not None:
             self.subencounter_form.update_object(self.subencounter)
             self.session.commit()
-            self.set_subencounter(self.subencounter)
+            self._set_subencounter(self.subencounter)
             self.subencounter_list.RefreshAll()
 
 
@@ -112,7 +112,7 @@ class EncounterNotebookList(EncounterNotebookPage):
             
         selected = self.subencounter_list.get_selected_object()
 
-        self.set_subencounter(selected)
+        self._set_subencounter(selected)
 
 
     def editable_on(self):
@@ -126,7 +126,7 @@ class EncounterNotebookList(EncounterNotebookPage):
 
 
 
-    def set_subencounter(self, subencounter):
+    def _set_subencounter(self, subencounter):
         self.subencounter = subencounter
 
         if subencounter is None:
@@ -156,7 +156,7 @@ class EncounterNotebookList(EncounterNotebookPage):
 
         if selection != -1:
             self.subencounter_list.SetSelection(selection)
-            self.set_subencounter(self.subencounter_list.get_selected_object())
+            self._set_subencounter(self.subencounter_list.get_selected_object())
             #self.subencounter_form.set_object(self.subencounter_list.get_selected_object())
         else:
             self.subencounter_form.Hide()

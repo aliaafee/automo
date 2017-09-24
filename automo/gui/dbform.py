@@ -82,10 +82,10 @@ class DbStringField(DbFormFieldDefn):
 class DbMultilineStringField(DbFormFieldDefn):
     def __init__(self, label, str_attr, lines=3, required=False, editable=True):
         super(DbMultilineStringField, self).__init__(label, str_attr, required, editable)
-        self.lines = 3
+        self.lines = lines
 
     def create_editor(self, parent):
-        self.editor = wx.TextCtrl(parent, style=wx.TE_MULTILINE, size=(-1, self.lines * 21))
+        self.editor = wx.TextCtrl(parent, style=wx.TE_MULTILINE, size=(-1, self.lines * 15))
         if not self.editable:
             self.editor.SetEditable(False)
         else:

@@ -15,6 +15,9 @@ from .prescriptionpanel import PrescriptionPanel
 from .bedselector import BedSelectorDialog
 from .surgerypanel import SurgeryPanel
 from .progresspanel import ProgressPanel
+from .encounternotebookform import EncounterNotebookForm
+from .encounternotebookpage import EncounterNotebookPage
+from .dbform import DbMultilineStringField
 
 ID_TRANSFER_BED = wx.NewId()
 
@@ -34,8 +37,13 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
         self.problems_panel = ProblemPanel(self.notebook, self.session)
         self.notebook.AddPage(self.problems_panel, "Diagnosis")
 
-        self.admission_note_panel = EncounterNote(self.notebook, self.session, 'admission_note')
-        self.notebook.AddPage(self.admission_note_panel, "Admission Note")
+        admission_note_fields = [
+            DbMultilineStringField("History", 'history', lines=8),
+            DbMultilineStringField("Examination", 'examination', lines=8)
+        ]
+        self.admission_note_panel = EncounterNotebookForm(self.notebook, self.session, db.Admission,
+                                                          admission_note_fields)
+        self.notebook.AddPage(self.admission_note_panel, "Admission Notes")
 
         self.progress_notes_panel = ProgressPanel(self.notebook, self.session)
         self.notebook.AddPage(self.progress_notes_panel, "Progress Notes")
@@ -49,8 +57,16 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
         self.vitals_panel = VitalsPanel(self.notebook, self.session)
         self.notebook.AddPage(self.vitals_panel, "Vitals")
 
-        self.discharge_note_panel = EncounterNote(self.notebook, self.session, 'discharge_note')
-        self.notebook.AddPage(self.discharge_note_panel, "Discharge Note")
+        self.investigation_panel = EncounterNotebookPage(self.notebook, self.session)
+        self.notebook.AddPage(self.investigation_panel, "Investigations")
+
+        discharge_note_fields = [
+            DbMultilineStringField("Discharge Advice", 'discharge_advice', lines=8),
+            DbMultilineStringField("Follow Up", 'follow_up', lines=8)
+        ]
+        self.discharge_note_panel = EncounterNotebookForm(self.notebook, self.session, db.Admission,
+                                                          discharge_note_fields)
+        self.notebook.AddPage(self.discharge_note_panel, "Discharge Notes")
 
         self.prescription_panel = PrescriptionPanel(self.notebook, self.session)
         self.notebook.AddPage(self.prescription_panel, "Prescription")

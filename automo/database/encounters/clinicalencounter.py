@@ -70,9 +70,11 @@ class Admission(ClinicalEncounter):
     discharged_bed = relationship("Bed", foreign_keys=[discharged_bed_id],
                                   back_populates="previous_admissions")
 
-    admission_note = Column(Text)
-    progress_note = Column(Text)
-    discharge_note = Column(Text)
+    #admission_note = Column(Text)
+    #progress_note = Column(Text)
+    #discharge_note = Column(Text)
+    discharge_advice = Column(Text)
+    follow_up = Column(Text)
 
 
     def end(self, end_time=None):
