@@ -8,7 +8,6 @@ from . import images
 from .dbrelationctrl import DbRelationCtrl
 from .baseclinicalencounterpanel import BaseClinicalEncounterPanel
 from .problempanel import ProblemPanel
-from .encounternote import EncounterNote
 from .measurementspanel import MeasurementsPanel
 from .vitalspanel import VitalsPanel
 from .prescriptionpanel import PrescriptionPanel
@@ -34,9 +33,6 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
         self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self._on_changing_notebook)
         self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self._on_change_notebook)
 
-        self.problems_panel = ProblemPanel(self.notebook, self.session)
-        self.notebook.AddPage(self.problems_panel, "Diagnosis")
-
         admission_note_fields = [
             DbMultilineStringField("History", 'history', lines=8),
             DbMultilineStringField("Examination", 'examination', lines=8)
@@ -44,6 +40,9 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
         self.admission_note_panel = EncounterNotebookForm(self.notebook, self.session, db.Admission,
                                                           admission_note_fields)
         self.notebook.AddPage(self.admission_note_panel, "Admission Notes")
+
+        self.problems_panel = ProblemPanel(self.notebook, self.session)
+        self.notebook.AddPage(self.problems_panel, "Diagnosis")
 
         self.progress_notes_panel = ProgressPanel(self.notebook, self.session)
         self.notebook.AddPage(self.progress_notes_panel, "Progress Notes")

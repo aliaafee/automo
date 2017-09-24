@@ -78,6 +78,14 @@ class Encounter(Base):
         self.children.append(encounter)
 
 
+    def remove_child_encounter(self, encounter):
+        """Remove a child encounter"""
+        if encounter in self.children:
+            self.children.remove(encounter)
+        if encounter in self.patient.encounters:
+            self.patient.encounters.remove(encounter)
+
+
     def end(self, end_time=None):
         if self.end_time is not None:
             raise dbexception.AutoMODatabaseError("This encounter has already ended")

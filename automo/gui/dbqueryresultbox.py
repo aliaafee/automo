@@ -93,13 +93,16 @@ class DbQueryResultBox(wx.HtmlListBox):
 
     def get_selected_object(self):
         """Return the selected database object, or the first one if multiple selected"""
-        return self.get_object(self.GetSelection())
+        if not self.HasMultipleSelection():
+            return self.get_object(self.GetSelection())
+        index, cookie = self.GetFirstSelected()
+        return self.get_object(index)
 
 
     def get_all_selected_object(self):
         """Return all selected database objects"""
         if not self.HasMultipleSelection():
-            return self.get_selected_object()
+            return [self.get_selected_object()]
 
         selected_items = []
         current_index, cookie = self.GetFirstSelected()

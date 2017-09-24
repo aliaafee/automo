@@ -31,8 +31,9 @@ class EncounterNotebookList(EncounterNotebookPage):
 
         splitter = wx.SplitterWindow(self, style=wx.SP_LIVE_UPDATE)
 
-        self.subencounter_list = DbQueryResultBox(splitter, self.subencounter_list_decorator)
+        self.subencounter_list = DbQueryResultBox(splitter, self.subencounter_list_decorator, style=wx.LB_MULTIPLE)
         self.subencounter_list.Bind(wx.EVT_LISTBOX, self._on_subencounter_selected)
+        self.subencounter_list.Bind(wx.EVT_RIGHT_DOWN, self._on_subencounter_context)
 
         self._left_panel = wx.Panel(splitter, style=wx.BORDER_THEME)
 
@@ -44,6 +45,10 @@ class EncounterNotebookList(EncounterNotebookPage):
         self._left_panel.SetSizer(sizer)
         splitter.SplitVertically(self.subencounter_list, self._left_panel, 200)
         self.sizer.Add(splitter, 1, wx.EXPAND | wx.ALL, border=5)
+
+        self.subencounter_menu = wx.Menu()
+        self.subencounter_menu.Append(wx.ID_REMOVE, "Remove", "Remove Selected Subencounter.")
+        self.subencounter_menu.Bind(wx.EVT_MENU, self._on_remove_subencounter, id=wx.ID_REMOVE)
 
         self.subencounter_form.Hide()
 
@@ -85,11 +90,33 @@ class EncounterNotebookList(EncounterNotebookPage):
     def _on_save(self, event):
         self.save_changes()
 
+
     def _update_toolbar(self):
         if self.changed:
             self.toolbar.EnableTool(wx.ID_SAVE, True)
         else:
             self.toolbar.EnableTool(wx.ID_SAVE, False)
+
+
+    def _on_subencounter_context(self, event):
+        if not self.editable:
+            return
+
+        self.PopupMenu(self.subencounter_menu)
+
+
+    def _on_remove_subencounter(self, event):
+        with wx.MessageDialog(self, 'Remove selected item(s)?', 'Remove Subencounter',
+                              wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION) as dlg:
+            dlg.CenterOnParent()
+            if dlg.ShowModal() == wx.ID_YES:
+                selected = self.subencounter_list.get_all_selected_object()
+                for subencounter in selected:
+                    self.encounter.remove_child_encounter(subencounter)
+                self.session.commit()
+
+                self.set_encounter(self.encounter, preserve_selection=False)
+
 
     def is_unsaved(self):
         if self.encounter is not None and self.subencounter is not None:
@@ -141,10 +168,10 @@ class EncounterNotebookList(EncounterNotebookPage):
         self._left_panel.Layout()
 
 
-    def set_encounter(self, encounter):
+    def set_encounter(self, encounter, preserve_selection=True):
         selection = -1
-        if self.encounter is not None and self.encounter == encounter:
-            selection = self.subencounter_list.GetSelection()
+        if self.encounter is not None and self.encounter == encounter and preserve_selection:
+            selection, cookie = self.subencounter_list.GetFirstSelected()
 
         super(EncounterNotebookList, self).set_encounter(encounter)
 
@@ -160,6 +187,7 @@ class EncounterNotebookList(EncounterNotebookPage):
             #self.subencounter_form.set_object(self.subencounter_list.get_selected_object())
         else:
             self.subencounter_form.Hide()
+
 
         self.changed = False
         self._update_toolbar()
