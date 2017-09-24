@@ -8,8 +8,7 @@ class ProgressPanel(EncounterNotebookList):
     """Surgical Procedures Notebook Page"""
     def __init__(self, parent, session, **kwds):
         self.fields = [
-            DbDateField("Time Started", 'start_time', required=True),
-            DbDateField("Time Completed", 'end_time', required=True),
+            DbDateField("Time", 'examination_time', required=True),
             DbRelationField("Doctor", 'personnel', session.query(db.Doctor)),
             DbMultilineStringField("Subjective", 'subjective'),
             DbMultilineStringField("Objective", 'objective'),

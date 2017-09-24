@@ -7,6 +7,9 @@ DbCtrlChangedEvent, EVT_AM_DB_CTRL_CHANGED = wx.lib.newevent.NewEvent()
 """Emitted when DbQueryResultGrid cell is changed, contains the object that was changed"""
 DbGridCellChangedEvent, EVT_AM_DB_GRID_CELL_CHANGED = wx.lib.newevent.NewEvent()
 
+"""Emitted when field is DbForm changed, returned object is the field class"""
+DbFormChangedEvent, EVT_AM_DB_FORM_CHANGED = wx.lib.newevent.NewEvent()
+
 """Emitted by Encounter Panel when encounter is changed"""
 EncounterChangedEvent, EVT_AM_ENCOUNTER_CHANGED = wx.lib.newevent.NewCommandEvent()
 ID_ENCOUNTER_CHANGED = wx.NewId()

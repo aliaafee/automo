@@ -74,6 +74,9 @@ class EncountersPanel(wx.Panel):
 
 
     def _on_encounter_selected(self, event):
+        if self.encounter_panel.is_unsaved():
+            self.encounter_panel.save_changes()
+
         selected_encounter = self.encounters_list.get_selected_object()
         if selected_encounter is not None:
             self.encounter_panel.set(selected_encounter)

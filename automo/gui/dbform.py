@@ -1,9 +1,11 @@
 """Database Form for Data Input/Modification"""
 import wx
 
+from .. import database as db
+from . import events
 from .basedialog import BaseDialog
 from .pydatepickerctrl import PyDatePickerCtrl
-from .. import database as db
+
 
 
 class DbFormFieldDefn(object):
@@ -19,7 +21,23 @@ class DbFormFieldDefn(object):
         self.editor = wx.TextCtrl(parent)
         if not self.editable:
             self.editor.SetEditable(False)
+        else:
+            self.editor.Bind(wx.EVT_TEXT, self.on_editor_changed)
         return self.editor
+
+    def lock_editor(self):
+        self.editor.SetEditable(False)
+
+    def unlock_editor(self):
+        self.editor.SetEditable(True)
+
+    #def bind_editor_onchange(self, callable_function):
+    #    self.editor.Bind(wx.EVT_TEXT, callable_function)
+
+    def on_editor_changed(self, event):
+        """Editor changed"""
+        changed_event = events.DbFormChangedEvent(object=self)
+        wx.PostEvent(self.editor.GetParent(), changed_event)
 
     def create_label(self, parent):
         if self.required:
@@ -30,9 +48,9 @@ class DbFormFieldDefn(object):
 
     def set_editor_value(self, value):
         if value is None:
-            self.editor.SetValue("")
+            self.editor.ChangeValue("")
             return
-        self.editor.SetValue(value)
+        self.editor.ChangeValue(value)
 
     def get_editor_value(self):
         value_str = self.editor.GetValue()
@@ -69,8 +87,9 @@ class DbMultilineStringField(DbFormFieldDefn):
         self.editor = wx.TextCtrl(parent, style=wx.TE_MULTILINE, size=(-1, self.lines * 21))
         if not self.editable:
             self.editor.SetEditable(False)
+        else:
+            self.editor.Bind(wx.EVT_TEXT, self.on_editor_changed)
         return self.editor
-
 
 
 class DbFloatField(DbFormFieldDefn):
@@ -100,7 +119,15 @@ class DbEnumField(DbFormFieldDefn):
         self.editor.SetItems(self.choices)
         if not self.editable:
             self.editor.Disable()
+        else:
+            self.editor.Bind(wx.EVT_CHOICE, self.on_editor_changed)
         return self.editor
+
+    def lock_editor(self):
+        self.editor.Disable()
+
+    def unlock_editor(self):
+        self.editor.Enable()
 
     def set_editor_value(self, value):
         if value in self.choices:
@@ -151,7 +178,7 @@ class DbRelationField(DbEnumField):
         selection = self.editor.GetSelection()
         if selection == -1:
             return None
-        return self.choices(selection)
+        return self.choices[selection]
 
 
 class DbDateField(DbFormFieldDefn):
@@ -162,7 +189,15 @@ class DbDateField(DbFormFieldDefn):
         self.editor = PyDatePickerCtrl(parent, style=wx.DP_DROPDOWN | wx.DP_ALLOWNONE)
         if not self.editable:
             self.editor.Disable()
+        else:
+            self.editor.Bind(wx.EVT_DATE_CHANGED, self.on_editor_changed)
         return self.editor
+
+    def lock_editor(self):
+        self.editor.Disable()
+
+    def unlock_editor(self):
+        self.editor.Enable()
 
     def set_editor_value(self, value):
         self.editor.set_pydatetime(value)
@@ -187,7 +222,15 @@ class DbAddressField(DbFormFieldDefn):
         self.editor = DbFormPanel(parent, db.Address, self.fields, scrollable=False, style=wx.BORDER_THEME)
         if self.editable:
             self.editor.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_LISTBOX))
+        else:
+            self.editor.Bind(events.EVT_AM_DB_FORM_CHANGED, self.on_editor_changed)
         return self.editor
+
+    def lock_editor(self):
+        self.editor.lock()
+
+    def unlock_editor(self):
+        self.editor.unlock()
 
     def set_editor_value(self, value):
         self.editor.set_object(value)
@@ -231,6 +274,16 @@ class DbFormPanel(wx.ScrolledWindow):
 
         for field in self.fields:
             field.set_object(db_object)
+
+
+    def lock(self):
+        for field in self.fields:
+            field.lock_editor()
+
+
+    def unlock(self):
+        for field in self.fields:
+            field.unlock_editor()
 
 
     def check(self):
