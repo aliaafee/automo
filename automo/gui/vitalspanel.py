@@ -4,7 +4,7 @@ import wx
 from .. import database as db
 from . import images
 from .dbqueryresultgrid import DbQueryResultGrid, GridColumnDateTime, GridColumnFloat
-from .dbform import DbFormDialog, DbDateField, DbFloatField
+from .dbform import DbFormDialog, DbDateTimeField, DbFloatField
 
 
 class VitalsPanel(wx.Panel):
@@ -40,7 +40,7 @@ class VitalsPanel(wx.Panel):
 
     def _on_add(self, event):
         fields = [
-            DbDateField("Time", 'record_time', required=True),
+            DbDateTimeField("Time", 'record_time', required=True),
             DbFloatField("Pulse (bmp)", 'pulse_rate'),
             DbFloatField("Resp (bmp)", 'respiratory_rate'),
             DbFloatField("SBP (mmHg)", 'systolic_bp'),

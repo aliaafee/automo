@@ -1,24 +1,22 @@
-"""
-DbDatePicker
-"""
+"""DbDateTimePicker"""
 import datetime
 import wx
 
-from .pydatepickerctrl import PyDatePickerCtrl
+from .pydatetimepickerctrl import PyDateTimePickerCtrl, EVT_DATETIME_CHANGED
 from .events import DbCtrlChangedEvent
 
 
-class DbDatePicker(PyDatePickerCtrl):
+class DbDateTimePicker(PyDateTimePickerCtrl):
     """Date picker ctrl that automatically updates database entry, on text change"""
-    def __init__(self, parent, session, style=wx.DP_DROPDOWN, **kwds):
-        super(DbDatePicker, self).__init__(parent, style=style, **kwds)
+    def __init__(self, parent, session, **kwds):
+        super(DbDateTimePicker, self).__init__(parent, show_checkbox=False, **kwds)
 
         self.session = session
 
         self.db_object = None
         self.db_str_attr = None
 
-        self.Bind(wx.EVT_DATE_CHANGED, self._on_change)
+        self.Bind(EVT_DATETIME_CHANGED, self._on_change)
 
 
     def set_dbobject_attr(self, db_object, str_attr):

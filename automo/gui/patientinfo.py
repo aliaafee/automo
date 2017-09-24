@@ -4,7 +4,7 @@ import wx
 from .. import config
 from .. import database as db
 from . import images
-from .dbform import DbFormPanel, DbFormDialog, DbStringField, DbDateField, DbAddressField, DbEnumField
+from .dbform import DbFormPanel, DbFormDialog, DbStringField, DbDateTimeField, DbAddressField, DbEnumField
 
 
 class PatientInfoPanelSmall(wx.Panel):
@@ -144,7 +144,7 @@ class PatientForm(DbFormDialog):
             DbStringField("Hospital No.", "hospital_no", required=True),
             DbStringField("National Id No.", "national_id_no", required=True),
             DbStringField("Name", "name", required=True),
-            DbDateField("Date of Birth", "time_of_birth", required=True),
+            DbDateTimeField("Date of Birth", "time_of_birth", required=True),
             DbEnumField("Sex", "sex", ["M", "F"], required=True),
             DbStringField("Phone No.", "phone_no"),
             DbAddressField("Current Address", "current_address"),
@@ -161,7 +161,7 @@ class PatientFormPanel(DbFormPanel):
             DbStringField("Hospital No.", "hospital_no", required=True),
             DbStringField("National Id No.", "national_id_no", required=True),
             DbStringField("Name", "name", required=True),
-            DbDateField("Date of Birth", "time_of_birth", required=True),
+            DbDateTimeField("Date of Birth", "time_of_birth", required=True),
             DbEnumField("Sex", "sex", ["M", "F"], required=True),
             DbStringField("Phone No.", "phone_no"),
             DbAddressField("Current Address", "current_address"),

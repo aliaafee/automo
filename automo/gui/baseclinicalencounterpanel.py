@@ -4,7 +4,7 @@ import wx
 from .. import database as db
 from . import events
 from . import images
-from .dbdatepicker import DbDatePicker
+from .dbdatetimepicker import DbDateTimePicker
 from .dbrelationcombo import DbRelationCombo
 
 ID_LOCK = wx.NewId()
@@ -33,10 +33,10 @@ class BaseClinicalEncounterPanel(wx.Panel):
         self.create_toolbar()
         self.toolbar.Realize()
 
-        self.txt_start_time = DbDatePicker(self.info_panel, self.session)
+        self.txt_start_time = DbDateTimePicker(self.info_panel, self.session)
         self.txt_start_time.Bind(events.EVT_AM_DB_CTRL_CHANGED, self._on_change_encounter)
 
-        self.txt_end_time = DbDatePicker(self.info_panel, self.session)
+        self.txt_end_time = DbDateTimePicker(self.info_panel, self.session)
         self.txt_end_time.Bind(events.EVT_AM_DB_CTRL_CHANGED, self._on_change_encounter)
 
         self.label_to = wx.StaticText(self.info_panel)

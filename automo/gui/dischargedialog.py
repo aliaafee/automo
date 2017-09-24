@@ -1,8 +1,9 @@
 """Discharge Dialog"""
+import datetime
 import wx
 
 from .basedialog import BaseDialog
-from .pydatepickerctrl import PyDatePickerCtrl
+from .pydatetimepickerctrl import PyDateTimePickerCtrl
 
 
 class DischargeDialog(BaseDialog):
@@ -12,7 +13,8 @@ class DischargeDialog(BaseDialog):
 
         self.set_ok_label("Discharge")
 
-        self.txt_discharge_time = PyDatePickerCtrl(self)
+        self.txt_discharge_time = PyDateTimePickerCtrl(self)
+        self.txt_discharge_time.set_pydatetime(datetime.datetime.now())
 
         grid_sizer = wx.FlexGridSizer(2, 2, 5, 5)
         grid_sizer.AddMany([

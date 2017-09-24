@@ -2,15 +2,15 @@
 from .. import config
 from .. import database as db
 from .encounternotebooklist import EncounterNotebookList
-from .dbform import DbDateField, DbStringField, DbMultilineStringField, DbRelationField
+from .dbform import DbDateTimeField, DbStringField, DbMultilineStringField, DbRelationField
 
 
 class SurgeryPanel(EncounterNotebookList):
     """Surgical Procedures Notebook Page"""
     def __init__(self, parent, session, **kwds):
         self.fields = [
-            DbDateField("Time Started", 'start_time', required=True),
-            DbDateField("Time Completed", 'end_time', required=True),
+            DbDateTimeField("Time Started", 'start_time', required=True),
+            DbDateTimeField("Time Completed", 'end_time', required=True),
             DbRelationField("Surgeon", 'personnel', session.query(db.Doctor)),
             DbStringField("Preop Diagnosis", 'preoperative_diagnosis'),
             DbStringField("Postop Diagnosis", 'postoperative_diagnosis'),

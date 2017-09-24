@@ -5,7 +5,7 @@ from .. import database as db
 from . import images
 from . import events
 from .dbqueryresultgrid import DbQueryResultGrid, GridColumnDateTime, GridColumnFloat
-from .dbform import DbFormDialog, DbDateField, DbFloatField
+from .dbform import DbFormDialog, DbDateTimeField, DbFloatField
 
 
 class MeasurementsPanel(wx.Panel):
@@ -40,7 +40,7 @@ class MeasurementsPanel(wx.Panel):
 
     def _on_add(self, event):
         fields = [
-            DbDateField("Time", 'record_time', required=True),
+            DbDateTimeField("Time", 'record_time', required=True),
             DbFloatField("Weight (kg)", 'weight'),
             DbFloatField("Height (m)", 'height')
         ]

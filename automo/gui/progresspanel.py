@@ -1,14 +1,14 @@
 """Progress Notes Panel"""
 from .. import database as db
 from .encounternotebooklist import EncounterNotebookList
-from .dbform import DbDateField, DbMultilineStringField, DbRelationField
+from .dbform import DbDateTimeField, DbMultilineStringField, DbRelationField
 
 
 class ProgressPanel(EncounterNotebookList):
     """Surgical Procedures Notebook Page"""
     def __init__(self, parent, session, **kwds):
         self.fields = [
-            DbDateField("Time", 'examination_time', required=True),
+            DbDateTimeField("Time", 'examination_time', required=True),
             DbRelationField("Doctor", 'personnel', session.query(db.Doctor)),
             DbMultilineStringField("Subjective", 'subjective'),
             DbMultilineStringField("Objective", 'objective'),
