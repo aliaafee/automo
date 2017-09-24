@@ -2,7 +2,6 @@
 import wx
 
 from .. import config
-from .. import database as db
 from . import events
 from . import images
 from .icd10coder import Icd10Coder
@@ -39,7 +38,7 @@ def problems_decorator(problem_object):
 
     return html.format(
         config.format_date(problem_object.start_time),
-        problem_object.icd10class_code,
+        problem_object.icd10class.code,
         problem_object.icd10class.preferred_plain,
         comment,
         modifer_str

@@ -506,32 +506,28 @@ class Icd10Coder(wx.Dialog):
 
     def get_problem(self):
         new_problem = db.Problem()
-        new_problem.icd10class = self.selected_icd10class
-        new_problem.icd10modifier_class = self.selected_modifier_class
-        new_problem.icd10modifier_extra_class = self.selected_modifier_extra_class
-        new_problem.comment = self.selected_comment
-        new_problem.start_time = self.selected_start_time
+        new_problem.icd10class = self.category_list.get_selected_category()
+        new_problem.icd10modifier_class = self.cmb_modifier.get_selected_item()
+        new_problem.icd10modifier_extra_class = self.cmb_modifier_extra.get_selected_item()
+        new_problem.comment = self.txt_comment.GetValue()
+        new_problem.start_time = self.date_picker.get_pydatetime()
+        if new_problem.comment == "":
+            new_problem.comment = None
         return new_problem
 
 
     def update_problem(self, problem):
-        problem.icd10class = self.selected_icd10class
-        problem.icd10modifier_class = self.selected_modifier_class
-        problem.icd10modifier_extra_class = self.selected_modifier_extra_class
-        problem.comment = self.selected_comment
-        problem.start_time = self.selected_start_time
+        problem.icd10class = self.category_list.get_selected_category()
+        problem.icd10modifier_class = self.cmb_modifier.get_selected_item()
+        problem.icd10modifier_extra_class = self.cmb_modifier_extra.get_selected_item()
+        problem.comment = self.txt_comment.GetValue()
+        problem.start_time = self.date_picker.get_pydatetime()
+        if problem.comment == "":
+            problem.comment = None
 
 
     def _on_ok(self, event):
-        self.selected_icd10class = self.category_list.get_selected_category()
-        self.selected_modifier_class = self.cmb_modifier.get_selected_item()
-        self.selected_modifier_extra_class = self.cmb_modifier_extra.get_selected_item()
-        self.selected_start_time = self.date_picker.get_pydatetime()
-        self.selected_comment = self.txt_comment.GetValue()
-        if self.selected_comment == "":
-            self.selected_comment = None
-
-        if self.selected_icd10class is None:
+        if self.category_list.get_selected_category() is None:
             print "TODO: Error message nothing selected"
             self.EndModal(wx.ID_CANCEL)
             return
