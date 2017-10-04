@@ -26,6 +26,9 @@ def format_duration(duration): #from_date, to_date):
 def parse_duration(duration_str):
     """Parse duration in the form _y _m _d to relativedelta.
       if string contains only a number it is interpreted as years"""
+
+    duration_str = duration_str.lower()
+
     if re.match("^[0-9]+$", duration_str) is not None:
         return relativedelta(years=int(duration_str))
 
