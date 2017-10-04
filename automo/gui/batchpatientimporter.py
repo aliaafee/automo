@@ -1,10 +1,12 @@
 """Batch import patients"""
+import datetime
 import csv
 import wx
 import wx.grid
 
 from .. import config
 from .. import database as db
+from . import images
 from .dbcombobox import DbComboBox
 
 COL_INT = 0
@@ -24,6 +26,17 @@ class BatchPatientImporter(wx.Dialog):
         
         self.session = session
 
+        self.toolbar = wx.ToolBar(self, style=wx.TB_FLAT | wx.TB_NODIVIDER)
+
+        self.toolbar.AddLabelTool(wx.ID_PASTE, "Paste", images.get("paste"), wx.NullBitmap, wx.ITEM_NORMAL, "Paste List", "")
+        self.toolbar.AddSeparator()
+        self.toolbar.AddLabelTool(wx.ID_ADD, "Insert Row", images.get("add"), wx.NullBitmap, wx.ITEM_NORMAL, "Insert Row", "")
+        self.toolbar.AddLabelTool(wx.ID_DELETE, "Delete Row", images.get("remove"), wx.NullBitmap, wx.ITEM_NORMAL, "Delete Row", "")
+        self.toolbar.Realize()
+        self.toolbar.Bind(wx.EVT_TOOL, self._on_paste, id=wx.ID_PASTE)
+        self.toolbar.Bind(wx.EVT_TOOL, self._on_row_insert, id=wx.ID_ADD)
+        self.toolbar.Bind(wx.EVT_TOOL, self._on_row_delete, id=wx.ID_DELETE)
+
         self.col_definition = [
             ("ID Number", COL_STR),
             ("Hospital Number", COL_STR),
@@ -36,8 +49,8 @@ class BatchPatientImporter(wx.Dialog):
         self.col_count = len(self.col_definition)
         self.validation_errors = []
 
-        self.cmd_paste = wx.Button(self, label="Paste")
-        self.cmd_paste.Bind(wx.EVT_BUTTON, self._on_paste)
+        #self.cmd_paste = wx.Button(self, label="Paste")
+        #self.cmd_paste.Bind(wx.EVT_BUTTON, self._on_paste)
 
         self.cmd_save = wx.Button(self, label="Import and Admit")
         self.cmd_save.Bind(wx.EVT_BUTTON, self._on_save)
@@ -61,13 +74,17 @@ class BatchPatientImporter(wx.Dialog):
         foot_sizer.Add(self.cmb_doctor, 0 , wx.EXPAND | wx.BOTTOM | wx.RIGHT | wx.LEFT, border=5)
         foot_sizer.Add(self.lbl_ward, 0 , wx.EXPAND | wx.TOP | wx.RIGHT | wx.LEFT, border=5)
         foot_sizer.Add(self.cmb_ward, 0 , wx.EXPAND | wx.BOTTOM | wx.RIGHT | wx.LEFT, border=5)
-        foot_sizer.Add(self.cmd_paste, 0 , wx.EXPAND | wx.ALL, border=5)
+        #foot_sizer.Add(self.cmd_paste, 0 , wx.EXPAND | wx.ALL, border=5)
         foot_sizer.AddStretchSpacer()
         foot_sizer.Add(self.cmd_save, 0 , wx.EXPAND | wx.ALL, border=5)
         foot_sizer.Add(self.cmd_cancel, 0 , wx.EXPAND | wx.ALL, border=5)
 
+        hsizer = wx.BoxSizer(wx.VERTICAL)
+        hsizer.Add(self.toolbar, 0, wx.EXPAND | wx.BOTTOM, border=5)
+        hsizer.Add(self.patient_grid, 1, wx.EXPAND)
+
         sizer = wx.BoxSizer(wx.HORIZONTAL)
-        sizer.Add(self.patient_grid, 1, wx.EXPAND | wx.ALL, border=5)
+        sizer.Add(hsizer, 1, wx.EXPAND | wx.ALL, border=5)
         sizer.Add(foot_sizer, 0, wx.EXPAND | wx.ALL, border=5)
         self.SetSizer(sizer)
 
@@ -106,6 +123,17 @@ class BatchPatientImporter(wx.Dialog):
             for col, value in enumerate(patient):
                 if col < self.col_count:
                     self.patient_grid.SetCellValue(row, col, value)
+
+
+    def _on_row_insert(self, event):
+        current_row = self.patient_grid.GetGridCursorRow()
+        self.patient_grid.InsertRows(current_row, 1)
+
+
+    def _on_row_delete(self, event):
+        selected_rows = self.patient_grid.GetSelectedRows()
+        if selected_rows:
+            self.patient_grid.DeleteRows(selected_rows[0])
 
 
     def _on_cancel(self, event):
@@ -291,6 +319,16 @@ class BatchPatientImporter(wx.Dialog):
                 measurement.weight = self._get_cell_value(row, 5)
                 measurement.record_time = admission.start_time
                 admission.add_child_encounter(measurement)
+
+                surgery = db.SurgicalProcedure()
+                surgery.personnel = admission.personnel
+                surgery.start_time = admission.start_time + datetime.timedelta(days=1)
+                surgery.preoperative_diagnosis = "Circumcision"
+                surgery.postoperative_diagnosis = "Circumcision"
+                surgery.procedure_name = "Circumcision"
+                surgery.findings = ""
+                surgery.steps = ""
+                admission.add_child_encounter(surgery)
 
                 #cefixime_dose = self.cefixime_dose(new_patient.age_td, measurement.weight)
                 #if cefixime_dose is not None:
