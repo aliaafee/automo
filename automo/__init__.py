@@ -15,6 +15,7 @@ from ._version import __version__
 from . import icd10claml
 from . import database as db
 from . import gui
+from . import report
 
 DEFAULT_DB_URI = "sqlite:///patient-data.db"
 

@@ -73,6 +73,7 @@ class Admission(ClinicalEncounter):
     #admission_note = Column(Text)
     #progress_note = Column(Text)
     #discharge_note = Column(Text)
+    hospital_course = Column(Text)
     discharge_advice = Column(Text)
     follow_up = Column(Text)
 

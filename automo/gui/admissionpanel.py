@@ -17,8 +17,12 @@ from .progresspanel import ProgressPanel
 from .encounternotebookform import EncounterNotebookForm
 from .encounternotebookpage import EncounterNotebookPage
 from .dbform import DbMultilineStringField
+from .pdfviewer import PDFViewer
 
 ID_TRANSFER_BED = wx.NewId()
+ID_PRINT_DISCHARGE = wx.NewId()
+ID_PRINT_PRESCRIPTION = wx.NewId()
+
 
 class AdmissionPanel(BaseClinicalEncounterPanel):
     """Admission Panel"""
@@ -60,6 +64,7 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
         self.notebook.AddPage(self.investigation_panel, "Investigations")
 
         discharge_note_fields = [
+            DbMultilineStringField("Hospital Course Summary", 'hospital_course', lines=8),
             DbMultilineStringField("Discharge Advice", 'discharge_advice', lines=8),
             DbMultilineStringField("Follow Up", 'follow_up', lines=8)
         ]
@@ -79,12 +84,21 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
         self.info_panel_sizer.Add(bed_sizer, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, border=5)
         self.sizer.Add(self.notebook, 1, wx.EXPAND)
 
+        self.print_menu = wx.Menu()
+        self.print_menu.Append(ID_PRINT_PRESCRIPTION, "Precription", "Print Prescription")
+        self.print_menu.Append(ID_PRINT_DISCHARGE, "Discharge", "Print Discharge")
+
+        self.print_menu.Bind(wx.EVT_MENU, self._on_print_prescription, id=ID_PRINT_PRESCRIPTION)
+        self.print_menu.Bind(wx.EVT_MENU, self._on_print_discharge, id=ID_PRINT_DISCHARGE)
+
 
     def create_toolbar(self):
+        self.toolbar.AddLabelTool(wx.ID_PRINT, "Print", images.get("print_24"), wx.NullBitmap, wx.ITEM_NORMAL, "Print", "")
         self.toolbar.AddLabelTool(ID_TRANSFER_BED, "Transfer", images.get("bed_transfer"), wx.NullBitmap, wx.ITEM_NORMAL, "Transfer Bed", "")
-        self.toolbar.Bind(wx.EVT_TOOL, self._on_transfer_bed, id=ID_TRANSFER_BED)
-
         self.toolbar.AddSeparator()
+
+        self.toolbar.Bind(wx.EVT_TOOL, self._on_print, id=wx.ID_PRINT)
+        self.toolbar.Bind(wx.EVT_TOOL, self._on_transfer_bed, id=ID_TRANSFER_BED)
 
         super(AdmissionPanel, self).create_toolbar()
 
@@ -138,6 +152,23 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
                                 wx.PostEvent(self, new_event)
                                 new_event = events.EncounterChangedEvent(events.ID_ENCOUNTER_CHANGED, object=new_bed) 
                                 wx.PostEvent(self, new_event)
+
+
+    def _on_print(self, event):
+        self.PopupMenu(self.print_menu)
+
+
+    def _on_print_prescription(self, event):
+        print "Print prescription"
+
+
+    def _on_print_discharge(self, event):
+        filename = self.encounter.generate_discharge_summary(self.session)
+
+        pdf_view = PDFViewer(None, title="Print Preview")
+        pdf_view.viewer.UsePrintDirect = ``False``
+        pdf_view.viewer.LoadFile(filename)
+        pdf_view.Show()
 
 
     def _on_change_notebook(self, event):
