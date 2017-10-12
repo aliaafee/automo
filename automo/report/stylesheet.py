@@ -22,24 +22,24 @@ def get_stylesheet():
         bulletFontName='Times-Roman',
         bulletFontSize=10,
         bulletIndent=0,
-        textColor= black,
+        textColor=black,
         backColor=None,
         wordWrap=None,
-        borderWidth= 0,
-        borderPadding= 0,
-        borderColor= None,
-        borderRadius= None,
-        allowWidows= 1,
-        allowOrphans= 0,
+        borderWidth=0,
+        borderPadding=0,
+        borderColor=None,
+        borderRadius=None,
+        allowWidows=1,
+        allowOrphans=0,
         textTransform=None,  # 'uppercase' | 'lowercase' | None
-        endDots=None,         
+        endDots=None,
         splitLongWords=1,
     )
 
     styles['text'] = ParagraphStyle(
         'text',
         parent=styles['default'],
-        spaceBefore=10
+        spaceAfter=10
     )
 
     styles['header'] = ParagraphStyle(
@@ -48,7 +48,8 @@ def get_stylesheet():
         fontName='Helvetica-Bold',
         fontSize=12,
         leading=14,
-        alignment=TA_CENTER
+        alignment=TA_CENTER,
+        textTransform='uppercase'
     )
 
     styles['header-subscript'] = ParagraphStyle(
@@ -101,6 +102,10 @@ def get_stylesheet():
         bulletFontSize=10
     )
 
-    w = TableStyle()
+    styles['prescription-item'] = ParagraphStyle(
+        'prescription-item',
+        parent=styles['default'],
+        spaceAfter=10
+    )
 
     return styles

@@ -1,8 +1,37 @@
 """Base Document Template"""
-from reportlab.platypus import SimpleDocTemplate
+from reportlab.platypus import SimpleDocTemplate, Image
 from reportlab.lib.units import mm
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+from reportlab.platypus.flowables import Flowable
+
+from .. import config
+
+
+class DefaultHeader(Flowable):
+    def __init__(self, title="HEADER", xoffset=0):
+        self.xoffset = xoffset
+        self.size = 16*mm
+        self.width = 0
+        self.height = 0
+        self.logo1 = canvas.ImageReader("tmp/logo1.png")
+        self.logo2 = canvas.ImageReader("tmp/logo2.png")
+        self.title = title
+
+    def wrap(self, availWidth, availHeight):
+        self.width = availWidth
+        return (self.xoffset, self.size)
+
+    def draw(self):
+        this_canvas = self.canv
+        this_canvas.setFont('Helvetica-Bold', 12)
+        this_canvas.drawCentredString(self.width / 2.0, 11*mm, config.REPORT_HEAD_TITLE)
+        this_canvas.setFont('Helvetica', 8)
+        this_canvas.drawCentredString(self.width / 2.0, 7*mm, config.REPORT_HEAD_SUBTITLE)
+        this_canvas.setFont('Helvetica-Bold', 12)
+        this_canvas.drawCentredString(self.width / 2.0, 0*mm, self.title)
+        this_canvas.drawImage(self.logo1, 0, 1*mm, width=15*mm, height=15*mm)
+        this_canvas.drawImage(self.logo2, ((self.width/mm) - 15)*mm, 1*mm, width=15*mm, height=15*mm)
 
 
 class PageNumberCanvasMakerA4(canvas.Canvas):
@@ -38,14 +67,16 @@ class PageNumberCanvasMakerA4(canvas.Canvas):
 
     def draw_page_number(self, page_count):
         """Add the page number, dont draw page number if only one page"""
-        if page_count == 1:
-            return
-
-        page = "Page {0} of {1}".format(self._pageNumber, page_count)
-        self.line(10*mm, 15*mm, self.page_number_position[0], 15*mm)
         self.saveState()
-        self.setFont('Times-Roman', 9)
-        self.drawRightString(self.page_number_position[0], self.page_number_position[1], page)
+
+        self.line(10*mm, 15*mm, self.page_number_position[0], 15*mm)
+
+        if page_count > 1:
+            page = "Page {0} of {1}".format(self._pageNumber, page_count)
+            
+            self.setFont('Times-Roman', 9)
+            self.drawRightString(self.page_number_position[0], self.page_number_position[1], page)
+
         self.restoreState()
 
 

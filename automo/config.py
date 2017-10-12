@@ -6,6 +6,9 @@ from dateutil.relativedelta import relativedelta
 DATE_FORMAT = "%d/%m/%Y"
 DATETIME_FORMAT = "%d/%m/%Y %H:%M:%S"
 
+REPORT_HEAD_TITLE = "SOME HOSPITAL"
+REPORT_HEAD_SUBTITLE = "Street Address of Hospital, City, 20041, Country"
+
 def format_duration(duration): #from_date, to_date):
     """Format python relative delta duration to human readable form."""
     if duration is None:

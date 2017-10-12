@@ -1,13 +1,14 @@
 """Discharge Summary Report"""
 import tempfile
 from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Paragraph, PageBreak, Table, TableStyle, ListFlowable
+from reportlab.platypus import SimpleDocTemplate, Paragraph, PageBreak, Table, TableStyle, ListFlowable, Image
+from reportlab.platypus.flowables import HRFlowable
 from reportlab.lib.pagesizes import A5, A4, cm
 from reportlab.lib.units import mm
 
 from .. import database as db
 from .. import config
-from .doctemplate import DocTemplate
+from .doctemplate import DocTemplate, DefaultHeader
 from .stylesheet import get_stylesheet
 
 
@@ -16,9 +17,7 @@ def get_discharge_summary_elements(admission, session):
 
     stylesheet = get_stylesheet()
     elements = [
-        Paragraph("INDIRA GANDHI MEMORIAL HOSPITAL", stylesheet["header"]),
-        Paragraph("Kan'baa Aisaarani Hingun, Male', 20402, Republic of Maldives", stylesheet["header-subscript"]),
-        Paragraph("CIRCUMCISION DISCHARGE SUMMARY", stylesheet["title"])
+        DefaultHeader(title="CIRCUMCISION DISCHARGE SUMMARY")
     ]
 
     elements.append(Paragraph("Patient Details", stylesheet['heading_1']))
@@ -49,6 +48,7 @@ def get_discharge_summary_elements(admission, session):
     demography_table.setStyle(stylesheet['table-default'])
 
     elements.append(demography_table)
+    elements.append(HRFlowable(width="100%"))
 
     elements.append(Paragraph("Procedure Details", stylesheet['heading_1']))
 
@@ -67,27 +67,47 @@ def get_discharge_summary_elements(admission, session):
             colWidths=[18*mm, 110*mm],
             style=stylesheet['table-default'])
         elements.append(procedure_table)
+        elements.append(HRFlowable(width="100%"))
 
 
     elements.append(Paragraph("Hospital Course", stylesheet['heading_1']))
-    elements.append(Paragraph(admission.hospital_course, stylesheet['default']))
+    elements.append(Paragraph(admission.hospital_course, stylesheet['text']))
+    elements.append(HRFlowable(width="100%"))
 
     elements.append(Paragraph("Discharge Advice", stylesheet['heading_1']))
-    elements.append(Paragraph(admission.discharge_advice, stylesheet['default']))
+    elements.append(Paragraph(admission.discharge_advice, stylesheet['text']))
+    elements.append(HRFlowable(width="100%"))
 
     elements.append(Paragraph("Prescription", stylesheet['heading_1']))
     prescription = []
     for item in admission.prescription:
         prescription.append(Paragraph(
             "{0} {1}".format(item.drug.name, item.drug_order),
-            stylesheet['default']
+            stylesheet['prescription-item']
         ))
     elements.append(ListFlowable(prescription, style=stylesheet['list-default']))
+    elements.append(HRFlowable(width="100%"))
 
     elements.append(Paragraph("Follow up", stylesheet['heading_1']))
-    elements.append(Paragraph(admission.follow_up, stylesheet['default']))
+    elements.append(Paragraph(admission.follow_up, stylesheet['text']))
+    elements.append(HRFlowable(width="100%"))
 
-    elements.append(Paragraph("Admitting Surgeon: {}".format(unicode(admission.personnel)), stylesheet['heading_2']))
+    signature = [
+        [
+            "Doctor:",
+            Paragraph(unicode(admission.personnel), stylesheet['default']),
+            "Signature:",
+            ""
+        ]
+    ]
+
+    signature_table = Table(
+        signature,
+        colWidths=[15*mm, 49*mm, 15*mm, 49*mm],
+        style=stylesheet['table-default'])
+    elements.append(signature_table)
+
+    elements.append(PageBreak())
     
     return elements
 
