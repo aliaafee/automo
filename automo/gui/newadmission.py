@@ -1,6 +1,6 @@
 """New Admission Wizard"""
 import wx
-import wx.wizard
+import wx.adv
 
 from .. import database as db
 from . import images
@@ -13,7 +13,7 @@ from .problempanel import problems_decorator
 from .icd10coder import Icd10Coder
 
 
-class BasePage(wx.wizard.PyWizardPage):
+class BasePage(wx.adv.WizardPage):
     """Base for all Wizard Pages"""
     def __init__(self, parent, session, title):
         super(BasePage, self).__init__(parent)
@@ -182,9 +182,9 @@ class ProblemSelectorPage(BasePage):
         self.blank = images.get("blank")
 
         self.toolbar = wx.ToolBar(self, style=wx.TB_VERTICAL | wx.TB_NODIVIDER)
-        self.toolbar.AddLabelTool(ID_ADD_NEW, "Add New", images.get("add_condition"), wx.NullBitmap, wx.ITEM_NORMAL, "Add New Problem", "")
-        self.toolbar.AddLabelTool(ID_ADD_EXISTING, "Add Existing", self.left_arrow, wx.NullBitmap, wx.ITEM_NORMAL, "Add Existing Problem", "")
-        self.toolbar.AddLabelTool(ID_REMOVE, "Remove", self.right_arrow, wx.NullBitmap, wx.ITEM_NORMAL, "Remove Problem", "")
+        self.toolbar.AddTool(ID_ADD_NEW, "Add New", images.get("add_condition"), wx.NullBitmap, wx.ITEM_NORMAL, "Add New Problem", "")
+        self.toolbar.AddTool(ID_ADD_EXISTING, "Add Existing", self.left_arrow, wx.NullBitmap, wx.ITEM_NORMAL, "Add Existing Problem", "")
+        self.toolbar.AddTool(ID_REMOVE, "Remove", self.right_arrow, wx.NullBitmap, wx.ITEM_NORMAL, "Remove Problem", "")
         self.toolbar.Realize()
 
         self.toolbar.Bind(wx.EVT_TOOL, self._on_add_new, id=ID_ADD_NEW)
@@ -199,7 +199,7 @@ class ProblemSelectorPage(BasePage):
 
         gridsizer = wx.FlexGridSizer(2, 3, 2, 2)
         gridsizer.Add(self.lbl_existing, 1, wx.ALIGN_CENTER_HORIZONTAL)
-        gridsizer.AddSpacer(1, 2)
+        gridsizer.AddSpacer(2)
         gridsizer.Add(self.lbl_selected, 1, wx.ALIGN_CENTER_HORIZONTAL)
         gridsizer.AddMany([
             (self.all_problems_list, 1, wx.EXPAND),
@@ -272,7 +272,7 @@ class ProblemSelectorPage(BasePage):
         return self.selected_problems
 
 
-class NewAdmissionDialog(wx.wizard.Wizard):
+class NewAdmissionDialog(wx.adv.Wizard):
     """New Admission Wizard"""
     def __init__(self, parent, session, patient=None, **kwds):
         super(NewAdmissionDialog, self).__init__(parent, **kwds)
@@ -296,9 +296,9 @@ class NewAdmissionDialog(wx.wizard.Wizard):
         self.problem_selector = ProblemSelectorPage(self, session)
         self.add_page(self.problem_selector)
 
-        self.Bind(wx.wizard.EVT_WIZARD_PAGE_CHANGING, self._on_page_changing)
-        self.Bind(wx.wizard.EVT_WIZARD_PAGE_CHANGED, self._on_page_changed)
-        self.Bind(wx.wizard.EVT_WIZARD_FINISHED, self._on_finish)
+        self.Bind(wx.adv.EVT_WIZARD_PAGE_CHANGING, self._on_page_changing)
+        self.Bind(wx.adv.EVT_WIZARD_PAGE_CHANGED, self._on_page_changed)
+        self.Bind(wx.adv.EVT_WIZARD_FINISHED, self._on_finish)
 
 
     def add_page(self, page):

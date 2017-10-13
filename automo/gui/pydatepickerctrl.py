@@ -1,18 +1,19 @@
 """PyDatePickerCtrl"""
 import datetime
 import wx
+import wx.adv
 
 
-class PyDatePickerCtrl(wx.DatePickerCtrl):
+class PyDatePickerCtrl(wx.adv.DatePickerCtrl):
     """Date picker that returns python datetime object"""
-    def __init__(self, parent, style=wx.DP_DROPDOWN, **kwds):
+    def __init__(self, parent, style=wx.adv.DP_DROPDOWN, **kwds):
         super(PyDatePickerCtrl, self).__init__(parent, style=style, **kwds)
 
 
     def get_pydatetime(self):
         """Returns value as python datetime object"""
         wxdate = self.GetValue()
-        if wxdate.IsOk():
+        if wxdate.IsValid():
             new_date = datetime.date(
                 wxdate.GetYear(),
                 wxdate.GetMonth() + 1,

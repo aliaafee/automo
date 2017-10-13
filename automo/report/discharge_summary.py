@@ -3,16 +3,16 @@ import tempfile
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Paragraph, PageBreak, Table, TableStyle, ListFlowable, Image
 from reportlab.platypus.flowables import HRFlowable
-from reportlab.lib.pagesizes import A5, A4, cm
+from reportlab.lib.pagesizes import A5, A4, cm, A3
 from reportlab.lib.units import mm
 
 from .. import database as db
 from .. import config
-from .doctemplate import DocTemplate, DefaultHeader
+from .doctemplate import DocTemplate, DefaultHeader, TableExpandable
 from .stylesheet import get_stylesheet
 
 
-def get_discharge_summary_elements(admission, session):
+def get_discharge_summary_elements(admission, session, pagesize=A5):
     patient = admission.patient
 
     stylesheet = get_stylesheet()
@@ -24,7 +24,7 @@ def get_discharge_summary_elements(admission, session):
 
     address = ""
     if patient.permanent_address:
-        address = patient.permanent_address.line_1
+        address = unicode(patient.permanent_address.line_1)
 
     demography = [
         [
@@ -41,11 +41,13 @@ def get_discharge_summary_elements(admission, session):
         ]
     ]
 
-    demography_table = Table(
+    demography_table = TableExpandable(
         demography,
-        colWidths=[18*mm, 60*mm, 22*mm, 28*mm])
+        colWidths=[18*mm, None, 22*mm, 28*mm],
+        pagesize=pagesize, rightMargin=10*mm, leftMargin=10*mm,
+        style=stylesheet['table-default'])
 
-    demography_table.setStyle(stylesheet['table-default'])
+    #demography_table.setStyle(stylesheet['table-default'])
 
     elements.append(demography_table)
     elements.append(HRFlowable(width="100%"))
@@ -57,25 +59,26 @@ def get_discharge_summary_elements(admission, session):
 
     for procedure in procedures:
         procedure_data = [
-            ["Procedure:", procedure.procedure_name],
-            ["Surgeon:", unicode(procedure.personnel)],
-            ["Time:", config.format_datetime(procedure.start_time)],
-            ["Findings", procedure.findings]
+            ["Procedure:", Paragraph(procedure.procedure_name, stylesheet['default'])],
+            ["Surgeon:", Paragraph(unicode(procedure.personnel), stylesheet['default'])],
+            ["Time:", Paragraph(config.format_datetime(procedure.start_time), stylesheet['default'])],
+            ["Findings:", Paragraph(procedure.findings, stylesheet['default'])]
         ]
-        procedure_table = Table(
+        procedure_table = TableExpandable(
             procedure_data,
-            colWidths=[18*mm, 110*mm],
+            colWidths=[20*mm, None],
+            pagesize=pagesize, rightMargin=10*mm, leftMargin=10*mm,
             style=stylesheet['table-default'])
         elements.append(procedure_table)
         elements.append(HRFlowable(width="100%"))
 
 
     elements.append(Paragraph("Hospital Course", stylesheet['heading_1']))
-    elements.append(Paragraph(admission.hospital_course, stylesheet['text']))
+    elements.append(Paragraph(unicode(admission.hospital_course), stylesheet['text']))
     elements.append(HRFlowable(width="100%"))
 
     elements.append(Paragraph("Discharge Advice", stylesheet['heading_1']))
-    elements.append(Paragraph(admission.discharge_advice, stylesheet['text']))
+    elements.append(Paragraph(unicode(admission.discharge_advice), stylesheet['text']))
     elements.append(HRFlowable(width="100%"))
 
     elements.append(Paragraph("Prescription", stylesheet['heading_1']))
@@ -89,7 +92,7 @@ def get_discharge_summary_elements(admission, session):
     elements.append(HRFlowable(width="100%"))
 
     elements.append(Paragraph("Follow up", stylesheet['heading_1']))
-    elements.append(Paragraph(admission.follow_up, stylesheet['text']))
+    elements.append(Paragraph(unicode(admission.follow_up), stylesheet['text']))
     elements.append(HRFlowable(width="100%"))
 
     signature = [
@@ -101,9 +104,10 @@ def get_discharge_summary_elements(admission, session):
         ]
     ]
 
-    signature_table = Table(
+    signature_table = TableExpandable(
         signature,
-        colWidths=[15*mm, 49*mm, 15*mm, 49*mm],
+        colWidths=[None, None],
+        pagesize=pagesize, rightMargin=10*mm, leftMargin=10*mm,
         style=stylesheet['table-default'])
     elements.append(signature_table)
 
@@ -112,7 +116,7 @@ def get_discharge_summary_elements(admission, session):
     return elements
 
 
-def generate_discharge_summary(admission, session):
+def generate_discharge_summary(admission, session, pagesize=A5):
     filename = tempfile.mktemp(".pdf")
 
     patient_name = admission.patient.name
@@ -128,12 +132,12 @@ def generate_discharge_summary(admission, session):
     doc = DocTemplate(
         filename,
         page_footer=page_footer,
-        pagesize=A5,
+        pagesize=pagesize,
         rightMargin=10*mm,
         leftMargin=10*mm,
         topMargin=10*mm,
         bottomMargin=15*mm
     )
-    doc.build(admission.get_discharge_summary_elements(session))
+    doc.build(admission.get_discharge_summary_elements(session, pagesize))
 
     return filename

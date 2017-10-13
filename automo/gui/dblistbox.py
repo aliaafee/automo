@@ -2,9 +2,10 @@
 import re
 import string
 import wx
+import wx.html
 
 
-class DbListBox(wx.HtmlListBox):
+class DbListBox(wx.html.HtmlListBox):
     """Display iterable list of objects with formatting"""
     def __init__(self, parent, html_decorator=None, **kwds):
         super(DbListBox, self).__init__(
@@ -22,9 +23,9 @@ class DbListBox(wx.HtmlListBox):
             self.html_decorator = self._html_decorator
 
         if wx.Platform == "__WXMSW__":
-            self.SetSelectionBackground(wx.SystemSettings_GetColour(wx.SYS_COLOUR_MENUHILIGHT))
+            self.SetSelectionBackground(wx.SystemSettings.GetColour(wx.SYS_COLOUR_MENUHILIGHT))
         else:
-            self.SetSelectionBackground(wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHT))
+            self.SetSelectionBackground(wx.SystemSettings.GetColour(wx.SYS_COLOUR_HIGHLIGHT))
 
 
     def _html_decorator(self, item):

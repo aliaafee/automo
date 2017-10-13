@@ -17,7 +17,7 @@ class BaseInterface(wx.Frame):
             size=wx.Size(800, 600)
             )
 
-        _icon = wx.EmptyIcon()
+        _icon = wx.Icon()
         _icon.CopyFromBitmap(images.get('icon_16'))
         self.SetIcon(_icon)
 
@@ -49,7 +49,7 @@ class BaseInterface(wx.Frame):
 
     def create_file_menu(self):
         self.file_menu.Append(wx.ID_EXIT, "Exit", "Exit the program")
-        wx.EVT_MENU(self, wx.ID_EXIT, self._on_exit)
+        self.Bind(wx.EVT_MENU, self._on_exit, id=wx.ID_EXIT)
 
 
     def create_tool_menu(self):
@@ -58,7 +58,7 @@ class BaseInterface(wx.Frame):
 
     def create_help_menu(self):
         self.help_menu.Append(wx.ID_ABOUT, "&About", "About this software")
-        wx.EVT_MENU(self, wx.ID_ABOUT, self._on_about)
+        self.Bind(wx.EVT_MENU, self._on_about, id=wx.ID_ABOUT)
 
 
     def refresh(self):

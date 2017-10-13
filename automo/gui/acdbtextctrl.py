@@ -100,7 +100,7 @@ class AcDbTextCtrl(DbTextCtrl):
             self.select_candidates.append(candidate.name)
 
         self.popup.show_candidates(result, txt,
-                                   self.GetScreenPositionTuple(), self.GetSizeTuple())
+                                   self.GetScreenPosition(), self.GetSize())
 
 
     def _on_focus_loss(self, event):

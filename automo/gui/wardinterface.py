@@ -50,12 +50,12 @@ class WardInterface(BaseInterface):
 
 
     def create_toolbar(self):
-        self.toolbar.AddLabelTool(wx.ID_REFRESH, "Refresh", images.get("refresh_24"),
+        self.toolbar.AddTool(wx.ID_REFRESH, "Refresh", images.get("refresh_24"),
                                   wx.NullBitmap, wx.ITEM_NORMAL, "Refresh", "")
         self.toolbar.AddSeparator()
-        self.toolbar.AddLabelTool(ID_NEW_PATIENT, "New Patient", images.get("new_patient"),
+        self.toolbar.AddTool(ID_NEW_PATIENT, "New Patient", images.get("new_patient"),
                                   wx.NullBitmap, wx.ITEM_NORMAL, "New Patient", "")
-        self.toolbar.AddLabelTool(ID_NEW_ADMISSION, "New Admission", images.get("admit"),
+        self.toolbar.AddTool(ID_NEW_ADMISSION, "New Admission", images.get("admit"),
                                   wx.NullBitmap, wx.ITEM_NORMAL, "New Admission", "")
 
         self.toolbar.Bind(wx.EVT_TOOL, self._on_refresh, id=wx.ID_REFRESH)
@@ -66,8 +66,8 @@ class WardInterface(BaseInterface):
         self.file_menu.Append(ID_NEW_ADMISSION, "New Admission", "Create New Admission")
         self.file_menu.AppendSeparator()
 
-        wx.EVT_MENU(self, ID_NEW_PATIENT, self._on_new_patient)
-        wx.EVT_MENU(self, ID_NEW_ADMISSION, self._on_new_admission)
+        self.Bind(wx.EVT_MENU, self._on_new_patient, id=ID_NEW_PATIENT)
+        self.Bind(wx.EVT_MENU, self._on_new_admission, id=ID_NEW_ADMISSION)
 
         super(WardInterface, self).create_file_menu()
 
@@ -75,7 +75,7 @@ class WardInterface(BaseInterface):
     def create_tool_menu(self):
         super(WardInterface, self).create_tool_menu()
         self.tool_menu.Append(ID_SHELL, "Python Shell", "AutoMO Python Shell")
-        wx.EVT_MENU(self, ID_SHELL, self._on_python_shell)
+        self.Bind(wx.EVT_MENU, self._on_python_shell, id=ID_SHELL)
 
 
     def refresh(self):

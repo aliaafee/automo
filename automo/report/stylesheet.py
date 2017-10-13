@@ -10,7 +10,7 @@ def get_stylesheet():
 
     styles['default'] = ParagraphStyle(
         'default',
-        fontName='Times-Roman',
+        fontName='Helvetica',
         fontSize=10,
         leading=12,
         leftIndent=0,
@@ -19,7 +19,7 @@ def get_stylesheet():
         alignment=TA_LEFT,
         spaceBefore=0,
         spaceAfter=0,
-        bulletFontName='Times-Roman',
+        bulletFontName='Helvetica',
         bulletFontSize=10,
         bulletIndent=0,
         textColor=black,
@@ -91,14 +91,14 @@ def get_stylesheet():
     )
 
     styles['table-default'] = TableStyle([
-        ('FONT', (0, 0), (-1, -1), 'Times-Roman'),
+        ('FONT', (0, 0), (-1, -1), 'Helvetica'),
         ('FONTSIZE', (0, 0), (-1, -1), 10),
         ('VALIGN', (0, 0), (-1, -1), 'TOP')
     ])
 
     styles['list-default'] = ListStyle(
         name='list-style',
-        bulletFontName='Times-Roman',
+        bulletFontName='Helvetica',
         bulletFontSize=10
     )
 

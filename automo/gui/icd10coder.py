@@ -24,7 +24,7 @@ class Icd10ChapterTree(wx.TreeCtrl):
 
         self.session = session
 
-        wx.EVT_TREE_ITEM_EXPANDING(self, self.GetId(), self._on_expand)
+        self.Bind(wx.EVT_TREE_ITEM_EXPANDING, self._on_expand)
 
         self._initialized = False
 
@@ -120,7 +120,7 @@ class Icd10ChapterTree(wx.TreeCtrl):
             self.SetPyData(expanded_id, (expanded_class, True))
 
 
-class Icd10CategoryList(wx.SimpleHtmlListBox):
+class Icd10CategoryList(wx.html.SimpleHtmlListBox):
     """List of Icd10 Categories in a block"""
     def __init__(self, parent, session, style=wx.BORDER_THEME, **kwds):
         super(Icd10CategoryList, self).__init__(
@@ -132,9 +132,9 @@ class Icd10CategoryList(wx.SimpleHtmlListBox):
         self.categories = []
 
         if wx.Platform == "__WXMSW__":
-            self.SetSelectionBackground(wx.SystemSettings_GetColour(wx.SYS_COLOUR_MENUHILIGHT))
+            self.SetSelectionBackground(wx.SystemSettings.GetColour(wx.SYS_COLOUR_MENUHILIGHT))
         else:
-            self.SetSelectionBackground(wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHT))
+            self.SetSelectionBackground(wx.SystemSettings.GetColour(wx.SYS_COLOUR_HIGHLIGHT))
 
 
     def get_selected_category(self):
@@ -359,7 +359,7 @@ class Icd10Coder(wx.Dialog):
         sizer.Add(splitter, 1, wx.EXPAND)
 
         foot_sizer = wx.BoxSizer(wx.VERTICAL)
-        foot_sizer.AddSpacer((-1, 75))
+        foot_sizer.AddSpacer(75)
 
         self.lbl_modifier = wx.StaticText(self, label="Modifier")
         self.lbl_modifier.Hide()
@@ -383,7 +383,7 @@ class Icd10Coder(wx.Dialog):
         self.lbl_date = wx.StaticText(self, label="Date")
         foot_sizer.Add(self.lbl_date, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx. LEFT,
                        border=5)
-        self.date_picker = PyDatePickerCtrl(self, style=wx.DP_DROPDOWN)
+        self.date_picker = PyDatePickerCtrl(self, style=wx.adv.DP_DROPDOWN)
         foot_sizer.Add(self.date_picker, 0,
                        wx.EXPAND | wx.BOTTOM | wx.RIGHT | wx. LEFT, border=5)
 

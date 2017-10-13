@@ -93,8 +93,8 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
 
 
     def create_toolbar(self):
-        self.toolbar.AddLabelTool(wx.ID_PRINT, "Print", images.get("print_24"), wx.NullBitmap, wx.ITEM_NORMAL, "Print", "")
-        self.toolbar.AddLabelTool(ID_TRANSFER_BED, "Transfer", images.get("bed_transfer"), wx.NullBitmap, wx.ITEM_NORMAL, "Transfer Bed", "")
+        self.toolbar.AddTool(wx.ID_PRINT, "Print", images.get("print_24"), wx.NullBitmap, wx.ITEM_NORMAL, "Print", "")
+        self.toolbar.AddTool(ID_TRANSFER_BED, "Transfer", images.get("bed_transfer"), wx.NullBitmap, wx.ITEM_NORMAL, "Transfer Bed", "")
         self.toolbar.AddSeparator()
 
         self.toolbar.Bind(wx.EVT_TOOL, self._on_print, id=wx.ID_PRINT)
@@ -159,13 +159,18 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
 
 
     def _on_print_prescription(self, event):
-        print "Print prescription"
+        filename = self.encounter.get_prescription_pdf(self.session)
+
+        pdf_view = PDFViewer(None, title="Print Preview - Prescription")
+        pdf_view.viewer.UsePrintDirect = ``False``
+        pdf_view.viewer.LoadFile(filename)
+        pdf_view.Show()
 
 
     def _on_print_discharge(self, event):
         filename = self.encounter.generate_discharge_summary(self.session)
 
-        pdf_view = PDFViewer(None, title="Print Preview")
+        pdf_view = PDFViewer(None, title="Print Preview - Discharge Summary")
         pdf_view.viewer.UsePrintDirect = ``False``
         pdf_view.viewer.LoadFile(filename)
         pdf_view.Show()

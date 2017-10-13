@@ -31,11 +31,11 @@ class PrescriptionPanel(wx.Panel):
 
         self.btn_add = wx.BitmapButton(self.drug_add_panel, bitmap=images.get('add'),
                                        style=wx.BU_AUTODRAW, size=wx.Size(24, 24))
-        self.btn_add.SetToolTipString("Add Medication")
+        self.btn_add.SetToolTip("Add Medication")
         self.btn_add.Bind(wx.EVT_BUTTON, self._on_add_drug)
 
         self.btn_preset = wx.Button(self.drug_add_panel, label="...", size=wx.Size(24, 24))
-        self.btn_preset.SetToolTipString("Add Preset")
+        self.btn_preset.SetToolTip("Add Preset")
         self.btn_preset.Bind(wx.EVT_BUTTON, self._on_add_preset)
 
         grid_sizer = wx.FlexGridSizer(2, 4, 2, 2)

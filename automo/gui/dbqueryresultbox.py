@@ -2,9 +2,10 @@
 import re
 import string
 import wx
+import wx.html
 
 
-class DbQueryResultBox(wx.HtmlListBox):
+class DbQueryResultBox(wx.html.HtmlListBox):
     """Display results of sqlalchemy query, formated in HTML.
       Results are displayed in a virtual list so very large
       query results are supported without slowdown"""
@@ -29,9 +30,9 @@ class DbQueryResultBox(wx.HtmlListBox):
             self.html_decorator = self._html_decorator
 
         if wx.Platform == "__WXMSW__":
-            self.SetSelectionBackground(wx.SystemSettings_GetColour(wx.SYS_COLOUR_MENUHILIGHT))
+            self.SetSelectionBackground(wx.SystemSettings.GetColour(wx.SYS_COLOUR_MENUHILIGHT))
         else:
-            self.SetSelectionBackground(wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHT))
+            self.SetSelectionBackground(wx.SystemSettings.GetColour(wx.SYS_COLOUR_HIGHLIGHT))
 
 
     def _html_decorator(self, item, query_string):

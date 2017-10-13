@@ -70,7 +70,7 @@ class BaseClinicalEncounterPanel(wx.Panel):
 
 
     def create_toolbar(self):
-        self.toolbar.AddLabelTool(ID_LOCK, "Lock", self.img_unlocked, wx.NullBitmap, wx.ITEM_NORMAL, "Lock / Unlock Editing", "")
+        self.toolbar.AddTool(ID_LOCK, "Lock", self.img_unlocked, wx.NullBitmap, wx.ITEM_NORMAL, "Lock / Unlock Editing", "")
         
         self.toolbar.Bind(wx.EVT_TOOL, self._on_toggle_edit, id=ID_LOCK)
 
@@ -158,7 +158,7 @@ class BaseClinicalEncounterPanel(wx.Panel):
                 self.txt_end_time.Show()
                 self.label_to.SetLabel("To")
 
-        self.label_to.SetSize(self.txt_start_time.GetSizeTuple())
+        self.label_to.SetSize(self.txt_start_time.GetSize())
         self.Layout()
 
 

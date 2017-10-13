@@ -7,9 +7,9 @@ from .. import config
 from . import events
 
 
-class StringRenderer(wx.grid.PyGridCellRenderer):
+class StringRenderer(wx.grid.GridCellRenderer):
     def __init__(self):
-        wx.grid.PyGridCellRenderer.__init__(self)
+        wx.grid.GridCellRenderer.__init__(self)
 
 
     def Draw(self, grid, attr, dc, rect, row, col, isSelected):
@@ -24,7 +24,7 @@ class StringRenderer(wx.grid.PyGridCellRenderer):
         else:
             dc.SetBrush(wx.Brush(wx.SystemSettings.GetColour(wx.SYS_COLOUR_HIGHLIGHT), wx.SOLID))
         dc.SetPen(wx.TRANSPARENT_PEN)
-        dc.DrawRectangleRect(rect)
+        dc.DrawRectangle(rect)
         dc.SetBackgroundMode(wx.TRANSPARENT)
         dc.SetFont(attr.GetFont())
 
@@ -288,7 +288,7 @@ class DbQueryResultGrid(wx.grid.Grid):
         self.SetRowLabelSize(1)
 
         self.Bind(wx.grid.EVT_GRID_EDITOR_SHOWN, self._on_editor_shown)
-        self.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self._on_cell_change)
+        self.Bind(wx.grid.EVT_GRID_CELL_CHANGED, self._on_cell_change)
 
 
     def add_column(self, column_defn):

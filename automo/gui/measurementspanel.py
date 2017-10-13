@@ -20,7 +20,7 @@ class MeasurementsPanel(wx.Panel):
 
         self.toolbar = wx.ToolBar(self, style=wx.TB_FLAT | wx.TB_NODIVIDER)
 
-        self.toolbar.AddLabelTool(wx.ID_ADD, "Add", images.get("add"), wx.NullBitmap, wx.ITEM_NORMAL, "Add", "")
+        self.toolbar.AddTool(wx.ID_ADD, "Add", images.get("add"), wx.NullBitmap, wx.ITEM_NORMAL, "Add", "")
         self.toolbar.Bind(wx.EVT_TOOL, self._on_add, id=wx.ID_ADD)
 
         self.toolbar.Realize()

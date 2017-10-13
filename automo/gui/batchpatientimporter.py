@@ -28,10 +28,10 @@ class BatchPatientImporter(wx.Dialog):
 
         self.toolbar = wx.ToolBar(self, style=wx.TB_FLAT | wx.TB_NODIVIDER)
 
-        self.toolbar.AddLabelTool(wx.ID_PASTE, "Paste", images.get("paste"), wx.NullBitmap, wx.ITEM_NORMAL, "Paste List", "")
+        self.toolbar.AddTool(wx.ID_PASTE, "Paste", images.get("paste"), wx.NullBitmap, wx.ITEM_NORMAL, "Paste List", "")
         self.toolbar.AddSeparator()
-        self.toolbar.AddLabelTool(wx.ID_ADD, "Insert Row", images.get("add"), wx.NullBitmap, wx.ITEM_NORMAL, "Insert Row", "")
-        self.toolbar.AddLabelTool(wx.ID_DELETE, "Delete Row", images.get("remove"), wx.NullBitmap, wx.ITEM_NORMAL, "Delete Row", "")
+        self.toolbar.AddTool(wx.ID_ADD, "Insert Row", images.get("add"), wx.NullBitmap, wx.ITEM_NORMAL, "Insert Row", "")
+        self.toolbar.AddTool(wx.ID_DELETE, "Delete Row", images.get("remove"), wx.NullBitmap, wx.ITEM_NORMAL, "Delete Row", "")
         self.toolbar.Realize()
         self.toolbar.Bind(wx.EVT_TOOL, self._on_paste, id=wx.ID_PASTE)
         self.toolbar.Bind(wx.EVT_TOOL, self._on_row_insert, id=wx.ID_ADD)

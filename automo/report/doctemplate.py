@@ -1,5 +1,5 @@
 """Base Document Template"""
-from reportlab.platypus import SimpleDocTemplate, Image
+from reportlab.platypus import SimpleDocTemplate, Image, Table
 from reportlab.lib.units import mm
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
@@ -11,11 +11,18 @@ from .. import config
 class DefaultHeader(Flowable):
     def __init__(self, title="HEADER", xoffset=0):
         self.xoffset = xoffset
-        self.size = 16*mm
+        self.size = 17*mm
         self.width = 0
         self.height = 0
-        self.logo1 = canvas.ImageReader("tmp/logo1.png")
-        self.logo2 = canvas.ImageReader("tmp/logo2.png")
+
+        self.logo_left = None
+        if config.REPORT_HEAD_LOGO_LEFT != "":
+            self.logo_left = canvas.ImageReader(config.REPORT_HEAD_LOGO_LEFT)
+
+        self.logo_right = None
+        if config.REPORT_HEAD_LOGO_RIGHT != "":
+            self.logo_right = canvas.ImageReader(config.REPORT_HEAD_LOGO_RIGHT)
+
         self.title = title
 
     def wrap(self, availWidth, availHeight):
@@ -25,16 +32,47 @@ class DefaultHeader(Flowable):
     def draw(self):
         this_canvas = self.canv
         this_canvas.setFont('Helvetica-Bold', 12)
-        this_canvas.drawCentredString(self.width / 2.0, 11*mm, config.REPORT_HEAD_TITLE)
-        this_canvas.setFont('Helvetica', 8)
-        this_canvas.drawCentredString(self.width / 2.0, 7*mm, config.REPORT_HEAD_SUBTITLE)
+        this_canvas.drawCentredString(self.width / 2.0, 12*mm, config.REPORT_HEAD_TITLE)
+        this_canvas.setFont('Helvetica', 7)
+        this_canvas.drawCentredString(self.width / 2.0, 9*mm, config.REPORT_HEAD_SUBTITLE1)
+        this_canvas.drawCentredString(self.width / 2.0, 6*mm, config.REPORT_HEAD_SUBTITLE2)
         this_canvas.setFont('Helvetica-Bold', 12)
         this_canvas.drawCentredString(self.width / 2.0, 0*mm, self.title)
-        this_canvas.drawImage(self.logo1, 0, 1*mm, width=15*mm, height=15*mm)
-        this_canvas.drawImage(self.logo2, ((self.width/mm) - 15)*mm, 1*mm, width=15*mm, height=15*mm)
+
+        if self.logo_left is not None:
+            this_canvas.drawImage(self.logo_left, 0, 1*mm, width=15*mm, height=15*mm)
+
+        if self.logo_right is not None:
+            this_canvas.drawImage(self.logo_right, ((self.width/mm) - 15)*mm, 1*mm, width=15*mm, height=15*mm)
 
 
-class PageNumberCanvasMakerA4(canvas.Canvas):
+class TableExpandable(Table):
+    def __init__(self, data, colWidths, pagesize, rightMargin, leftMargin, *args, **kwargs):
+        exp_columns_count = 0
+        total_width = 0
+        for colWidth in colWidths:
+            if colWidth is None:
+                exp_columns_count += 1
+            else:
+                total_width += colWidth
+
+        if exp_columns_count > 0:
+            w, h = pagesize
+            exp_col_width = (w - rightMargin - leftMargin - total_width) / exp_columns_count
+            newColWidths = []
+            for colWidth in colWidths:
+                if colWidth is None:
+                    newColWidths.append(exp_col_width)
+                else:
+                    newColWidths.append(colWidth)
+            Table.__init__(self, data, colWidths=newColWidths, *args, **kwargs)
+            return
+
+        Table.__init__(self, data, colWidths=colWidths, *args, **kwargs)
+        
+
+
+class PageNumberCanvasMaker(canvas.Canvas):
     """
     Page number code from:
     http://code.activestate.com/recipes/546511-page-x-of-y-with-reportlab/
@@ -44,7 +82,10 @@ class PageNumberCanvasMakerA4(canvas.Canvas):
         """Constructor"""
         canvas.Canvas.__init__(self, *args, **kwargs)
         self.pages = []
-        self.page_number_position = (195*mm, 20*mm)
+        self.pagesize = kwargs['pagesize']
+
+        w, h = self.pagesize
+        self.page_number_position = (w - 10*mm, 10*mm)
 
 
     def showPage(self):
@@ -74,17 +115,11 @@ class PageNumberCanvasMakerA4(canvas.Canvas):
         if page_count > 1:
             page = "Page {0} of {1}".format(self._pageNumber, page_count)
             
-            self.setFont('Times-Roman', 9)
+            self.setFont('Helvetica', 9)
             self.drawRightString(self.page_number_position[0], self.page_number_position[1], page)
 
         self.restoreState()
 
-
-
-class PageNumberCanvasMakerA5(PageNumberCanvasMakerA4):
-    def __init__(self, *args, **kwargs):
-        PageNumberCanvasMakerA4.__init__(self, *args, **kwargs)
-        self.page_number_position = (138*mm, 10*mm)
 
 
 
@@ -96,29 +131,28 @@ class DocTemplate(SimpleDocTemplate):
         self.page_footer = page_footer
         self.first_page_footer = first_page_footer
 
-        if self.first_page_footer is None:
-            self.first_page_footer = page_footer
+        #if self.first_page_footer is None:
+        self.first_page_footer = ""
 
         self.pagesize = pagesize
 
 
     def onFirstPage(self, this_canvas, document):
-        self.onLaterPages(this_canvas, document)
+        this_canvas.saveState()
+        this_canvas.setFont('Helvetica', 9)
+        this_canvas.drawString(10*mm, 10*mm, self.first_page_footer)
+        this_canvas.restoreState()
 
 
     def onLaterPages(self, this_canvas, document):
         this_canvas.saveState()
-        this_canvas.setFont('Times-Roman', 9)
+        this_canvas.setFont('Helvetica', 9)
         this_canvas.drawString(10*mm, 10*mm, self.page_footer)
         this_canvas.restoreState()
 
     
     def build(self, flowables):
-        canvas_maker = PageNumberCanvasMakerA5
-        if self.pagesize == A4:
-            canvas_maker = PageNumberCanvasMakerA4
-    
         SimpleDocTemplate.build(self, flowables,
                                 onFirstPage=self.onFirstPage,
                                 onLaterPages=self.onLaterPages,
-                                canvasmaker=canvas_maker)
+                                canvasmaker=PageNumberCanvasMaker)

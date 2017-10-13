@@ -10,7 +10,7 @@ def get(image_name):
     image = base64.b64decode(_IMAGE[image_name])
     stream = cStringIO.StringIO(image)
 
-    return wx.BitmapFromImage(wx.ImageFromStream(stream))
+    return wx.Bitmap(wx.Image(stream))
 
 
 _IMAGE = {}

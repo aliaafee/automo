@@ -21,9 +21,9 @@ class EncounterNotebookList(EncounterNotebookPage):
 
         self.changed = False
 
-        self.toolbar.AddLabelTool(wx.ID_ADD, "Add", images.get("add"), wx.NullBitmap, wx.ITEM_NORMAL, "Add", "")
+        self.toolbar.AddTool(wx.ID_ADD, "Add", images.get("add"), wx.NullBitmap, wx.ITEM_NORMAL, "Add", "")
         self.toolbar.AddSeparator()
-        self.toolbar.AddLabelTool(wx.ID_SAVE, "Save", images.get("save"), wx.NullBitmap, wx.ITEM_NORMAL, "Save changes", "")
+        self.toolbar.AddTool(wx.ID_SAVE, "Save", images.get("save"), wx.NullBitmap, wx.ITEM_NORMAL, "Save changes", "")
         self.toolbar.Realize()
 
         self.toolbar.Bind(wx.EVT_TOOL, self._on_add, id=wx.ID_ADD)

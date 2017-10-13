@@ -59,7 +59,7 @@ class ProblemPanel(wx.Panel):
 
         self.toolbar = wx.ToolBar(self, style=wx.TB_FLAT | wx.TB_NODIVIDER)
 
-        tb_add = self.toolbar.AddLabelTool(
+        tb_add = self.toolbar.AddTool(
             wx.ID_ADD,
             label="Add",
             bitmap=images.get("add_condition"),

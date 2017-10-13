@@ -1,6 +1,7 @@
 """PyDateTimePickerCtrl"""
 import datetime
 import wx
+import wx.adv
 import wx.lib.newevent
 import wx.lib.masked
 
@@ -15,7 +16,7 @@ class PyDateTimePickerCtrl(wx.Panel):
         self.is_none = False
         self.show_checkbox = show_checkbox
 
-        self.date_picker = wx.DatePickerCtrl(self, style=wx.DP_DROPDOWN)
+        self.date_picker = wx.adv.DatePickerCtrl(self, style=wx.adv.DP_DROPDOWN)
         height = self.date_picker.GetSize().height
 
         self.time_spinner = wx.SpinButton(self, style=wx.SP_VERTICAL, size=(-1, height))
@@ -29,7 +30,7 @@ class PyDateTimePickerCtrl(wx.Panel):
         self.check_none.Bind(wx.EVT_CHECKBOX, self._on_toggle_none)
         sizer.Add(self.check_none, 0, wx.ALIGN_CENTER_VERTICAL| wx.RIGHT, border=2)
         sizer.Add(self.date_picker, 1, wx.EXPAND)
-        sizer.AddSpacer((2, height))
+        sizer.AddSpacer(height)
         sizer.Add(self.time_picker, 1, wx.EXPAND)
         sizer.Add(self.time_spinner, 0, wx.EXPAND)
         self.SetSizer(sizer)
@@ -39,7 +40,7 @@ class PyDateTimePickerCtrl(wx.Panel):
 
         self.time_spinner.Bind(wx.EVT_SPIN, self._on_changed_datetime)
         self.time_picker.Bind(wx.EVT_TEXT, self._on_changed_datetime)
-        self.date_picker.Bind(wx.EVT_DATE_CHANGED, self._on_changed_datetime)
+        self.date_picker.Bind(wx.adv.EVT_DATE_CHANGED, self._on_changed_datetime)
 
         self.check_none.SetCanFocus(True)
         self.time_picker.SetCanFocus(True)
@@ -105,7 +106,7 @@ class PyDateTimePickerCtrl(wx.Panel):
             return None
 
         wxdate = self.date_picker.GetValue()
-        if not wxdate.IsOk():
+        if not wxdate.IsValid():
             return None
 
         time_str = self.time_picker.GetValue()

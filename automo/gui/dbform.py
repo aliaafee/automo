@@ -247,7 +247,7 @@ class DbAddressField(DbFormFieldDefn):
     def create_editor(self, parent):
         self.editor = DbFormPanel(parent, db.Address, self.fields, scrollable=False, style=wx.BORDER_THEME)
         if self.editable:
-            self.editor.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_LISTBOX))
+            self.editor.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_LISTBOX))
         else:
             self.editor.Bind(events.EVT_AM_DB_FORM_CHANGED, self.on_editor_changed)
         return self.editor

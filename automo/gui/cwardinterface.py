@@ -18,13 +18,13 @@ class CWardInterface(WardInterface):
     def create_toolbar(self):
         super(CWardInterface, self).create_toolbar()
         self.toolbar.AddSeparator()
-        self.toolbar.AddLabelTool(ID_IMPORT_PATIENTS, "Batch Import Patients", images.get("new_patient_many"),
+        self.toolbar.AddTool(ID_IMPORT_PATIENTS, "Batch Import Patients", images.get("new_patient_many"),
                                   wx.NullBitmap, wx.ITEM_NORMAL, "Batch Import Patients", "")
 
 
     def create_tool_menu(self):
         self.tool_menu.Append(ID_IMPORT_PATIENTS, "Import Patients", "Import Patients")
-        wx.EVT_MENU(self, ID_IMPORT_PATIENTS, self._on_import)
+        self.Bind(wx.EVT_MENU, self._on_import, id=ID_IMPORT_PATIENTS)
         self.tool_menu.AppendSeparator()
         super(CWardInterface, self).create_tool_menu()
 

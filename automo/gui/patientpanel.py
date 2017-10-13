@@ -28,12 +28,12 @@ class PatientPanel(wx.Panel):
 
         self.toolbar = self.patient_info.toolbar
         self.toolbar.AddStretchableSpace()
-        self.toolbar.AddLabelTool(wx.ID_EDIT, "Edit", images.get("edit_24"), wx.NullBitmap, wx.ITEM_NORMAL, "Edit Patient", "")
+        self.toolbar.AddTool(wx.ID_EDIT, "Edit", images.get("edit_24"), wx.NullBitmap, wx.ITEM_NORMAL, "Edit Patient", "")
         self.toolbar.AddSeparator()
-        self.toolbar.AddLabelTool(ID_ADMIT, "Admit", images.get("admit"), wx.NullBitmap, wx.ITEM_NORMAL, "Admit Patient", "")
-        self.toolbar.AddLabelTool(ID_DISCHARGE, "Discharge", images.get("discharge"), wx.NullBitmap, wx.ITEM_NORMAL, "Discharge Patient", "")
+        self.toolbar.AddTool(ID_ADMIT, "Admit", images.get("admit"), wx.NullBitmap, wx.ITEM_NORMAL, "Admit Patient", "")
+        self.toolbar.AddTool(ID_DISCHARGE, "Discharge", images.get("discharge"), wx.NullBitmap, wx.ITEM_NORMAL, "Discharge Patient", "")
         self.toolbar.AddSeparator()
-        self.toolbar.AddLabelTool(wx.ID_NEW, "Open", images.get("new_widow_24"), wx.NullBitmap, wx.ITEM_NORMAL, "Open in New Window", "")
+        self.toolbar.AddTool(wx.ID_NEW, "Open", images.get("new_widow_24"), wx.NullBitmap, wx.ITEM_NORMAL, "Open in New Window", "")
         self.toolbar.Realize()
 
         self.toolbar.Bind(wx.EVT_TOOL, self._on_edit, id=wx.ID_EDIT)
