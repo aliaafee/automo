@@ -1,9 +1,8 @@
 """Discharge Summary Report"""
 import tempfile
-from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Paragraph, PageBreak, Table, TableStyle, ListFlowable, Image
+from reportlab.platypus import Paragraph, PageBreak, ListFlowable
 from reportlab.platypus.flowables import HRFlowable
-from reportlab.lib.pagesizes import A5, A4, cm, A3
+from reportlab.lib.pagesizes import A5
 from reportlab.lib.units import mm
 
 from .. import database as db
@@ -12,12 +11,12 @@ from .doctemplate import DocTemplate, DefaultHeader, TableExpandable
 from .stylesheet import get_stylesheet
 
 
-def get_discharge_summary_elements(admission, session, pagesize=A4):
+def get_discharge_summary_elements(admission, session, pagesize=A5):
     patient = admission.patient
 
     stylesheet = get_stylesheet()
     elements = [
-        DefaultHeader(title="DISCHARGE SUMMARY")
+        DefaultHeader(title="CIRCUMCISION DISCHARGE SUMMARY")
     ]
 
     elements.append(Paragraph("Patient Details", stylesheet['heading_1']))
@@ -46,6 +45,8 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
         colWidths=[18*mm, None, 22*mm, 28*mm],
         pagesize=pagesize, rightMargin=10*mm, leftMargin=10*mm,
         style=stylesheet['table-default'])
+
+    #demography_table.setStyle(stylesheet['table-default'])
 
     elements.append(demography_table)
     elements.append(HRFlowable(width="100%"))
@@ -99,12 +100,6 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
             Paragraph(unicode(admission.personnel), stylesheet['default']),
             "Signature:",
             ""
-        ],
-        [
-            "Prepared By:",
-            "",
-            "Signature:",
-            ""
         ]
     ]
 
@@ -120,7 +115,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
     return elements
 
 
-def generate_discharge_summary(admission, session, pagesize=A4):
+def generate_discharge_summary(admission, session, pagesize=A5):
     filename = tempfile.mktemp(".pdf")
 
     patient_name = admission.patient.name

@@ -30,7 +30,7 @@ class PyDateTimePickerCtrl(wx.Panel):
         self.check_none.Bind(wx.EVT_CHECKBOX, self._on_toggle_none)
         sizer.Add(self.check_none, 0, wx.ALIGN_CENTER_VERTICAL| wx.RIGHT, border=2)
         sizer.Add(self.date_picker, 1, wx.EXPAND)
-        sizer.AddSpacer(height)
+        sizer.AddSpacer(2)
         sizer.Add(self.time_picker, 1, wx.EXPAND)
         sizer.Add(self.time_spinner, 0, wx.EXPAND)
         self.SetSizer(sizer)

@@ -7,7 +7,8 @@ from sqlalchemy.orm import relationship
 
 from . import dbexception
 from .base import Base
-from .encounters import Encounter, Admission
+from .encounters import Encounter, Admission, CircumcisionAdmission, SurgicalProcedure
+from .problem import Problem
 
 
 class Patient(Base):
@@ -91,7 +92,7 @@ class Patient(Base):
             return None
 
 
-    def admit(self, session, doctor, bed, admission_time=None):
+    def admit(self, session, doctor, bed, admission_time=None, admission_class=Admission):
         """Admit the patient to the provided bed. If patient is already admitted or the bed
           is occupied, raises AutoMODatabaseError. Returns the created encounter object."""
         current_encounter = self.get_current_encounter(session)
@@ -107,7 +108,7 @@ class Patient(Base):
         if admission_time is None:
             admission_time = datetime.datetime.now()
 
-        new_admission = Admission(
+        new_admission = admission_class(
             patient = self,
             personnel = doctor,
             bed = bed,
@@ -119,6 +120,32 @@ class Patient(Base):
         return new_admission
 
 
+    def admit_circumcision(self, session, doctor, bed, admission_time=None):
+        new_admission = self.admit(session, doctor, bed, admission_time=admission_time,
+                                   admission_class=CircumcisionAdmission)
+
+        problem = Problem()
+        problem.icd10class_code = "Z41.2"
+        problem.start_time = new_admission.start_time
+        self.problems.append(problem)
+        new_admission.add_problem(problem)
+
+        surgery = SurgicalProcedure()
+        surgery.personnel = doctor
+        surgery.start_time = new_admission.start_time + datetime.timedelta(days=1)
+        surgery.preoperative_diagnosis = "Circumcision"
+        surgery.postoperative_diagnosis = "Circumcision"
+        surgery.procedure_name = "Circumcision"
+        surgery.findings = ""
+        surgery.steps = ""
+        new_admission.add_child_encounter(surgery)
+
+        new_admission.prescribe_drug(session, None, "SYP CEFO-L", "")
+        new_admission.prescribe_drug(session, None, "SYP PARACETAMOL", "")
+
+        return new_admission
+
+
     def discharge(self, session, discharge_time=None, admission=None):
         """End the currently active admission, raises AutoMODatabase Error if their is no
           active admission"""
@@ -126,7 +153,7 @@ class Patient(Base):
             current_encounter = self.get_current_encounter(session)
             if current_encounter is None:
                 raise dbexception.AutoMODatabaseError("Patient has no active admissions.")
-            if current_encounter.type != "admission":
+            if current_encounter.type not in ["admission", "circumcisionadmission"]:
                 raise dbexception.AutoMODatabaseError("Current encounter is not an admission")
             admission = current_encounter
 

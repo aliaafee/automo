@@ -17,6 +17,8 @@ class ClinicalEncounter(Encounter):
         'polymorphic_identity':'clinicalencounter',
     }
 
+    label = "Clinical Encounter"
+
     history = Column(Text)
     examination = Column(Text)
 
@@ -63,6 +65,8 @@ class Admission(ClinicalEncounter):
         'polymorphic_identity':'admission',
     }
 
+    label = "Admission"
+
     bed_id = Column(Integer, ForeignKey('bed.id'))
     bed = relationship("Bed", foreign_keys=[bed_id], back_populates="admission")
 
@@ -87,6 +91,19 @@ class Admission(ClinicalEncounter):
 
 
 
+class CircumcisionAdmission(Admission):
+    """Admission Encounter. Each hospital stay is associated with a bed, when the
+      patient is discharged after the hospital stay, the bed attribute is cleared and the bed
+      number is moved to the discharged_bed attribute."""
+    id = Column(Integer, ForeignKey('admission.id'), primary_key=True)
+
+    __mapper_args__ = {
+        'polymorphic_identity':'circumcisionadmission',
+    }
+
+    label = "Circumcision"
+
+
 
 class OutpatientEncounter(ClinicalEncounter):
     """Visit to outpatient clinic"""
@@ -95,5 +112,7 @@ class OutpatientEncounter(ClinicalEncounter):
     __mapper_args__ = {
         'polymorphic_identity':'outpatientencounter',
     }
+
+    label = "Outpatient"
 
     room = Column(String(50))

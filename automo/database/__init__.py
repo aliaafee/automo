@@ -16,6 +16,7 @@ from .problem import Problem
 from .encounters import Encounter,\
                         ClinicalEncounter,\
                         Admission,\
+                        CircumcisionAdmission,\
                         OutpatientEncounter,\
                         Measurements,\
                         VitalSigns,\

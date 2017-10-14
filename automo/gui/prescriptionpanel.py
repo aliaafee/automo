@@ -5,19 +5,15 @@ from ObjectListView import ObjectListView, ColumnDefn, OLVEvent
 
 from . import images
 from .. import database as db
+from encounternotebookpage import EncounterNotebookPage
 from .acdbtextctrl import AcDbTextCtrl
 from .objectlistviewmod import ObjectListViewMod, EVT_OVL_CHECK_EVENT
 
 
-class PrescriptionPanel(wx.Panel):
+class PrescriptionPanel(EncounterNotebookPage):
     """Prescription Panel"""
     def __init__(self, parent, session, **kwds):
-        super(PrescriptionPanel, self).__init__(parent, **kwds)
-
-        self.session = session
-        self.encounter = None
-
-        self.editable = True
+        super(PrescriptionPanel, self).__init__(parent, session, **kwds)
 
         self.drug_add_panel = wx.Panel(self)
 
@@ -65,11 +61,9 @@ class PrescriptionPanel(wx.Panel):
         self.prescription_list.Bind(EVT_OVL_CHECK_EVENT, self._on_prescription_check)
         self.prescription_list.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self._on_prescription_context)
         self.prescription_list.Bind(OLVEvent.EVT_CELL_EDIT_FINISHED, self._on_prescription_order_edit)
-
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self.drug_add_panel, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx.LEFT, border=5)
-        sizer.Add(self.prescription_list, 1, wx.EXPAND | wx.ALL, border=5)
-        self.SetSizer(sizer)
+    
+        self.sizer.Add(self.drug_add_panel, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx.LEFT, border=5)
+        self.sizer.Add(self.prescription_list, 1, wx.EXPAND | wx.ALL, border=5)
 
         self.prescription_menu = wx.Menu()
         self.prescription_menu.Append(wx.ID_REMOVE, "Remove", "Remove Medication.")
@@ -79,9 +73,8 @@ class PrescriptionPanel(wx.Panel):
         self.prescription_menu.Bind(wx.EVT_MENU, self._on_tick_all_medication, id=wx.ID_SELECTALL)
         self.prescription_menu.Bind(wx.EVT_MENU, self._on_untick_all_medication, id=wx.ID_CLEAR)
 
-
-    def _on_save(self, event):
-        self.save_changes()
+        self.toolbar.Hide()
+        self.editable_on()
 
 
     def _on_drug_name_keyup(self, event):
@@ -99,6 +92,10 @@ class PrescriptionPanel(wx.Panel):
         selected_drug = self.txt_drug_name.get_selected_object()
         selected_drug_str = self.txt_drug_name.GetValue().upper()
         order_str = self.txt_drug_order.GetValue().upper()
+
+        if selected_drug is None and selected_drug_str == "":
+            self.txt_drug_name.SetFocus()
+            return
         
         self.encounter.prescribe_drug(self.session, selected_drug, selected_drug_str, order_str)
 
@@ -112,7 +109,6 @@ class PrescriptionPanel(wx.Panel):
     
     def _on_add_preset(self, event):
         pass
-
 
     def _on_prescription_check(self, event):
         if event.value is True:
@@ -186,40 +182,26 @@ class PrescriptionPanel(wx.Panel):
         self.prescription_list.RefreshObjects(self.prescription_list.GetObjects())
 
 
-    def set_editable(self, editable):
-        """Set control to editable or not"""
-        self.editable = editable
-
-        if self.editable:
-            self.drug_add_panel.Show()
-            self.prescription_list.SetColumns([
-                ColumnDefn("Medication", "left", 180, "drug", isEditable=False),
-                ColumnDefn("Order", "left", 140, "drug_order")
-            ])
-            self.prescription_list.CreateCheckStateColumn()
-        else:
-            self.drug_add_panel.Hide()
-            self.prescription_list.SetColumns([
-                ColumnDefn("Medication", "left", 180, "drug", isEditable=False),
-                ColumnDefn("Order", "left", 140, "drug_order", isEditable=False)
-            ])
-
+    def editable_on(self):
+        self.drug_add_panel.Show()
+        self.prescription_list.SetColumns([
+            ColumnDefn("Medication", "left", 180, "drug", isEditable=False),
+            ColumnDefn("Order", "left", 140, "drug_order")
+        ])
+        self.prescription_list.CreateCheckStateColumn()
         self._refresh_prescription()
 
-        self.Layout()
 
-
-    def is_unsaved(self):
-        """Check to see if any changes have been saved, must do before closing.
-          Always false in this panel as all changes are autosaved"""
-        return False
-
-
-    def save_changes(self):
-        """Save changes. Everything is auto saved."""
-        pass
+    def editable_off(self):
+        self.drug_add_panel.Hide()
+        self.prescription_list.SetColumns([
+            ColumnDefn("Medication", "left", 180, "drug", isEditable=False),
+            ColumnDefn("Order", "left", 140, "drug_order", isEditable=False)
+        ])
+        self._refresh_prescription()
 
 
     def set_encounter(self, encounter, editable=True):
         """Set the current encounter"""
         self.encounter = encounter
+        self._refresh_prescription()

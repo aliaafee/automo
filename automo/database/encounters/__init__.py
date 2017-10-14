@@ -3,6 +3,7 @@
 from .encounter import Encounter
 from .clinicalencounter import ClinicalEncounter,\
                                Admission,\
+                               CircumcisionAdmission,\
                                OutpatientEncounter
 from .measurements import Measurements
 from .vitalsigns import VitalSigns,\

@@ -11,7 +11,7 @@ def get_stylesheet():
     styles['default'] = ParagraphStyle(
         'default',
         fontName='Helvetica',
-        fontSize=10,
+        fontSize=8,
         leading=12,
         leftIndent=0,
         rightIndent=0,
@@ -20,7 +20,7 @@ def get_stylesheet():
         spaceBefore=0,
         spaceAfter=0,
         bulletFontName='Helvetica',
-        bulletFontSize=10,
+        bulletFontSize=8,
         bulletIndent=0,
         textColor=black,
         backColor=None,
@@ -40,25 +40,6 @@ def get_stylesheet():
         'text',
         parent=styles['default'],
         spaceAfter=10
-    )
-
-    styles['header'] = ParagraphStyle(
-        'header',
-        parent=styles['default'],
-        fontName='Helvetica-Bold',
-        fontSize=12,
-        leading=14,
-        alignment=TA_CENTER,
-        textTransform='uppercase'
-    )
-
-    styles['header-subscript'] = ParagraphStyle(
-        'header-subscript',
-        parent=styles['default'],
-        fontName='Helvetica',
-        fontSize=8,
-        leading=9,
-        alignment=TA_CENTER
     )
 
     styles['title'] = ParagraphStyle(
@@ -91,15 +72,15 @@ def get_stylesheet():
     )
 
     styles['table-default'] = TableStyle([
-        ('FONT', (0, 0), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('FONT', (0, 0), (-1, -1), styles['default'].fontName),
+        ('FONTSIZE', (0, 0), (-1, -1), styles['default'].fontSize),
         ('VALIGN', (0, 0), (-1, -1), 'TOP')
     ])
 
     styles['list-default'] = ListStyle(
         name='list-style',
-        bulletFontName='Helvetica',
-        bulletFontSize=10
+        bulletFontName=styles['default'].fontName,
+        bulletFontSize=styles['default'].fontSize
     )
 
     styles['prescription-item'] = ParagraphStyle(

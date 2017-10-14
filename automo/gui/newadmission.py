@@ -35,7 +35,6 @@ class BasePage(wx.adv.WizardPage):
                               "Error",
                               wx.OK | wx.ICON_EXCLAMATION) as dlg:
             dlg.ShowModal()
-            dlg.Destroy()
 
     def set(self):
         pass

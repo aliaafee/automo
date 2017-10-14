@@ -4,6 +4,7 @@ import wx
 from .. import config
 from . import events
 from . import images
+from .encounternotebookpage import EncounterNotebookPage
 from .icd10coder import Icd10Coder
 from .dblistbox import DbListBox
 
@@ -45,55 +46,25 @@ def problems_decorator(problem_object):
     )
 
 
-class ProblemPanel(wx.Panel):
+class ProblemPanel(EncounterNotebookPage):
     """Problem Panel"""
     def __init__(self, parent, session, **kwds):
-        super(ProblemPanel, self).__init__(parent, **kwds)
+        super(ProblemPanel, self).__init__(parent, session, **kwds)
 
-        self.session = session
-        self.encounter = None
-
-        self.editable = True
-
-        sizer = wx.BoxSizer(wx.VERTICAL)
-
-        self.toolbar = wx.ToolBar(self, style=wx.TB_FLAT | wx.TB_NODIVIDER)
-
-        tb_add = self.toolbar.AddTool(
+        self.toolbar.AddTool(
             wx.ID_ADD,
             label="Add",
             bitmap=images.get("add_condition"),
             shortHelp="Add Condition"
         )
-        self.Bind(wx.EVT_TOOL, self._on_add_problem, tb_add)
-
-        """
-        tb_add_quick = self.toolbar.AddLabelTool(
-            wx.ID_ANY,
-            label="Add Quick Search",
-            bitmap=images.get("add_problem_quick"),
-            shortHelp="Add Condition from Quick Search"
-        )
-        self.Bind(wx.EVT_TOOL, self._on_add_quick, tb_add_quick)
-
-        tb_add_favourite = self.toolbar.AddLabelTool(
-            wx.ID_ANY,
-            label="Add Favourite",
-            bitmap=images.get("add_problem_favourite"),
-            shortHelp="Add Condition from Favourites"
-        )
-        self.Bind(wx.EVT_TOOL, self._on_add_favourite, tb_add_favourite)
-        """
+        self.Bind(wx.EVT_TOOL, self._on_add_problem, id=wx.ID_ADD)
 
         self.toolbar.Realize()
-        sizer.Add(self.toolbar, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx.LEFT,
-                  border=5)
 
         self.problems_list = DbListBox(self, problems_decorator, style=wx.LB_MULTIPLE)
         self.problems_list.Bind(wx.EVT_RIGHT_DOWN, self._on_problems_context)
-        sizer.Add(self.problems_list, 1, wx.EXPAND | wx.ALL, border=5)
-
-        self.SetSizer(sizer)
+        
+        self.sizer.Add(self.problems_list, 1, wx.EXPAND | wx.ALL, border=5)
 
         self.icd10_coder = Icd10Coder(self, self.session)
 
@@ -162,31 +133,9 @@ class ProblemPanel(wx.Panel):
             self.problems_list.set_items(self.encounter.problems)
 
 
-    def set_editable(self, editable):
-        """Set control to editable or not"""
-        if editable:
-            self.toolbar.Show()
-        else:
-            self.toolbar.Hide()
-
-        if self.editable != editable:
-            self.Layout()
-
-        self.editable = editable
-
-    def is_unsaved(self):
-        """Check to see if any changes have been saved, must do before closing.
-          Always false in this panel as all changes are autosaved"""
-        return False
-
-
-    def save_changes(self):
-        """Save changes. Everything is auto saved."""
-        pass
-
-
     def set_encounter(self, encounter):
         """Set the current encounter"""
         self.encounter = encounter
 
         self.problems_list.set_items(self.encounter.problems)
+

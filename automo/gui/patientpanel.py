@@ -98,6 +98,9 @@ class PatientPanel(wx.Panel):
 
 
     def _on_admit(self, event):
+        self.admit_patient(self)
+
+    def admit_patient(self, *args):
         with NewAdmissionDialog(self, self.session, patient=self.patient) as dlg:
             done = False
             while not done:

@@ -1,11 +1,55 @@
 """C Ward Interface"""
 import wx
 
+from .. import database as db
+from . import events
 from . import images
 from .wardinterface import WardInterface
 from .batchpatientimporter import BatchPatientImporter
+from .newadmission import NewAdmissionDialog
 
 ID_IMPORT_PATIENTS = wx.NewId()
+
+
+def circum_admit(patient_panel):
+    print "Alternate Admission"
+    with NewAdmissionDialog(patient_panel, patient_panel.session, patient=patient_panel.patient) as dlg:
+        dlg.SetTitle("New Admission for Circumcision")
+        done = False
+        while not done:
+            dlg.ShowModal()
+            if dlg.GetReturnCode() == wx.ID_OK:
+                try:
+                    patient = patient_panel.patient
+                    doctor = dlg.get_doctor()
+                    bed = dlg.get_bed()
+                    problems = dlg.get_problems()
+                    admission = patient.admit_circumcision(patient_panel.session, doctor, bed)
+                    for problem in problems:
+                        patient.problems.append(problem)
+                        admission.add_problem(problem)
+                except db.dbexception.AutoMODatabaseError as e:
+                    patient_panel.session.rollback()
+                    with wx.MessageDialog(None,
+                        "Database Error Occured. {}".format(e.message),
+                        "Database Error",
+                        wx.OK | wx.ICON_EXCLAMATION) as err_dlg:
+                        err_dlg.ShowModal()
+                except Exception as e:
+                    patient_panel.session.rollback()
+                    with wx.MessageDialog(None,
+                        "Error Occured. {}".format(e.message),
+                        "Error",
+                        wx.OK | wx.ICON_EXCLAMATION) as err_dlg:
+                        err_dlg.ShowModal()
+                else:
+                    patient_panel.session.commit()
+                    patient_panel.refresh()
+                    event = events.PatientInfoChangedEvent(events.ID_PATIENT_INFO_CHANGED, object=patient_panel.patient)
+                    wx.PostEvent(patient_panel, event)
+                    done = True
+            else:
+                done = True
 
 
 class CWardInterface(WardInterface):
@@ -13,6 +57,8 @@ class CWardInterface(WardInterface):
         super(CWardInterface, self).__init__(parent, session)
 
         self.set_title("Circumcision Ward")
+
+        self.patient_panel.admit_patient = circum_admit
 
 
     def create_toolbar(self):

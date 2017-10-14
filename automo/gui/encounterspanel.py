@@ -7,7 +7,56 @@ from .. import database as db
 from . import events
 from .dbqueryresultbox import DbQueryResultBox
 from .admissionpanel import AdmissionPanel
+from .admissioncircumcision import AdmissionCircumcisionPanel
 from .baseclinicalencounterpanel import BaseClinicalEncounterPanel
+
+
+class EncounterPanelSwitcher(wx.Panel):
+    """Encounter panel, displays the appropriate encounter window"""
+    def __init__(self, parent, session, **kwds):
+        super(EncounterPanelSwitcher, self).__init__(parent, **kwds)
+
+        self.session = session
+
+        self.active_panel = None
+        self.panels = {}
+
+        self._prev_active_panel = None
+
+        self.sizer = wx.BoxSizer()
+        self.SetSizer(self.sizer)
+
+
+    def show_encounter_panel(self, encounter):
+        if encounter is None:
+            if self.active_panel is not None:
+                self.active_panel.Hide()
+                self.Layout()
+                return
+
+        if encounter.type == "admission":
+            if not self.panels.has_key("admission"):
+                self.panels["admission"] = AdmissionPanel(self, self.session)
+                self.sizer.Add(self.panels["admission"], 1, wx.EXPAND)
+            self.active_panel = self.panels["admission"]
+        elif encounter.type == "circumcisionadmission":
+            if not self.panels.has_key("circumcisionadmission"):
+                self.panels["circumcisionadmission"] = AdmissionCircumcisionPanel(self, self.session)
+                self.sizer.Add(self.panels["circumcisionadmission"], 1, wx.EXPAND)
+            self.active_panel = self.panels["circumcisionadmission"]
+
+        for name, panel in self.panels.items():
+            if panel == self.active_panel:
+                panel.Show()
+            else:
+                panel.Hide()
+
+        if self.active_panel != self._prev_active_panel:
+            self.Layout()
+            self._prev_active_panel = self.active_panel
+        
+        return self.active_panel
+
 
 
 class EncountersPanel(wx.Panel):
@@ -23,11 +72,12 @@ class EncountersPanel(wx.Panel):
         self.encounters_list = DbQueryResultBox(splitter, self._encounter_decorator)
         self.encounters_list.Bind(wx.EVT_LISTBOX, self._on_encounter_selected)
 
-        self.encounter_panel = AdmissionPanel(splitter, self.session)
+        self.encounter_switcher_panel = EncounterPanelSwitcher(splitter, self.session)
+        self.encounter_panel = None
         #self.encounter_panel = BaseClinicalEncounterPanel(splitter, self.session)
         self.Bind(events.EVT_AM_ENCOUNTER_CHANGED, self._on_encounter_changed)
 
-        splitter.SplitVertically(self.encounters_list, self.encounter_panel)
+        splitter.SplitVertically(self.encounters_list, self.encounter_switcher_panel)
         splitter.SetMinimumPaneSize(100)
         splitter.SetSashPosition(200)
 
@@ -39,15 +89,11 @@ class EncountersPanel(wx.Panel):
 
 
     def _encounter_decorator(self, encounter_object, query_string):
-        date_str = ""
-        if encounter_object.type == "admission":
-            date_str = "Admission"
-        elif encounter_object.type == "outpatientencounter":
-            date_str = "Outpatient"
+        date_str = encounter_object.label
         date_str += " <b>{0}</b>".format(config.format_date(encounter_object.start_time))
         if encounter_object.end_time is None:
             date_str += " (current)"
-        elif encounter_object.type == "admission":
+        elif encounter_object.type != "outpatientencounter":
             date_str += " ({})".format(
                 config.format_duration(
                     relativedelta(
@@ -73,13 +119,22 @@ class EncountersPanel(wx.Panel):
         return html.format(date_str, diagnoses_str)
 
 
+    def _set_encounter(self, encounter):
+        self.encounter_panel = self.encounter_switcher_panel.show_encounter_panel(encounter)
+        if self.encounter_panel is None:
+            return
+
+        self.encounter_panel.set(encounter)
+
+
     def _on_encounter_selected(self, event):
-        if self.encounter_panel.is_unsaved():
-            self.encounter_panel.save_changes()
+        if self.encounter_panel is not None:
+            if self.encounter_panel.is_unsaved():
+                self.encounter_panel.save_changes()
 
         selected_encounter = self.encounters_list.get_selected_object()
         if selected_encounter is not None:
-            self.encounter_panel.set(selected_encounter)
+            self._set_encounter(selected_encounter)
 
 
     def _on_encounter_changed(self, event):
@@ -102,7 +157,7 @@ class EncountersPanel(wx.Panel):
         if self.encounters_list.GetItemCount() > 0:
             self.encounters_list.SetSelection(0)
 
-        self.encounter_panel.set(self.encounters_list.get_selected_object())
+        self._set_encounter(self.encounters_list.get_selected_object())
 
 
     def unset_patient(self):
@@ -116,11 +171,18 @@ class EncountersPanel(wx.Panel):
         
 
     def is_unsaved(self):
+        if self.encounter_panel is None:
+            return False
+
         if self.encounter_panel.is_unsaved():
             return True
+
         return False
 
 
     def save_changes(self):
+        if self.encounter_panel is None:
+            return
+
         if self.encounter_panel.is_unsaved():
             self.encounter_panel.save_changes()
