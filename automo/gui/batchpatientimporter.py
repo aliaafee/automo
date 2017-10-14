@@ -307,39 +307,13 @@ class BatchPatientImporter(wx.Dialog):
 
                 bed = self._get_cell_value(row, 6)
                 
-                admission = new_patient.admit(self.session, admitting_doctor, bed)
-                
-                problem = db.Problem()
-                problem.icd10class_code = "Z41.2"
-                problem.start_time = admission.start_time
-                new_patient.problems.append(problem)
-                admission.add_problem(problem)
+                admission = new_patient.admit_circumcision(self.session, admitting_doctor, bed)
                 
                 measurement = db.Measurements()
                 measurement.weight = self._get_cell_value(row, 5)
                 measurement.record_time = admission.start_time
                 admission.add_child_encounter(measurement)
 
-                surgery = db.SurgicalProcedure()
-                surgery.personnel = admission.personnel
-                surgery.start_time = admission.start_time + datetime.timedelta(days=1)
-                surgery.preoperative_diagnosis = "Circumcision"
-                surgery.postoperative_diagnosis = "Circumcision"
-                surgery.procedure_name = "Circumcision"
-                surgery.findings = ""
-                surgery.steps = ""
-                admission.add_child_encounter(surgery)
-
-                #cefixime_dose = self.cefixime_dose(new_patient.age_td, measurement.weight)
-                #if cefixime_dose is not None:
-                #    cefixime_order_str = "{}ML PO BD x 5DAYS".format(cefixime_dose)
-                admission.prescribe_drug(self.session, None, "SYP CEFO-L", "")
-
-                #paracetamol_dose = self.paracetamol_dose(new_patient.age_td, measurement.weight)
-                #if paracetamol_dose is not None:
-                #    paracetamol_order_str = "{}ML PO TDS x 5DAYS".format(paracetamol_dose)
-                admission.prescribe_drug(self.session, None, "SYP PARACETAMOL", "")
-                
             self.session.commit()
             return True
         except ValueError:

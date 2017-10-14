@@ -117,6 +117,10 @@ class WardInterface(BaseInterface):
 
 
     def _on_new_admission(self, event):
+        self.new_admission()
+
+
+    def new_admission(self):
         with NewAdmissionDialog(self, self.session) as dlg:
             done = False
             while not done:
@@ -156,7 +160,6 @@ class WardInterface(BaseInterface):
                 else:
                     done = True
                 
-
 
     def _on_refresh(self, event):
         self.refresh()

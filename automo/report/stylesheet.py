@@ -12,7 +12,7 @@ def get_stylesheet():
         'default',
         fontName='Helvetica',
         fontSize=8,
-        leading=12,
+        leading=10,
         leftIndent=0,
         rightIndent=0,
         firstLineIndent=0,
@@ -86,7 +86,7 @@ def get_stylesheet():
     styles['prescription-item'] = ParagraphStyle(
         'prescription-item',
         parent=styles['default'],
-        spaceAfter=10
+        spaceAfter=4
     )
 
     return styles

@@ -132,7 +132,7 @@ class Patient(Base):
 
         surgery = SurgicalProcedure()
         surgery.personnel = doctor
-        surgery.start_time = new_admission.start_time + datetime.timedelta(days=1)
+        surgery.start_time =  new_admission.start_time.date() + datetime.timedelta(days=1)
         surgery.preoperative_diagnosis = "Circumcision"
         surgery.postoperative_diagnosis = "Circumcision"
         surgery.procedure_name = "Circumcision"

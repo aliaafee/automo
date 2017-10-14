@@ -34,8 +34,8 @@ class DefaultHeader(Flowable):
         this_canvas.setFont('Helvetica-Bold', 12)
         this_canvas.drawCentredString(self.width / 2.0, 12*mm, config.REPORT_HEAD_TITLE)
         this_canvas.setFont('Helvetica', 7)
-        this_canvas.drawCentredString(self.width / 2.0, 9*mm, config.REPORT_HEAD_SUBTITLE1)
-        this_canvas.drawCentredString(self.width / 2.0, 6*mm, config.REPORT_HEAD_SUBTITLE2)
+        this_canvas.drawCentredString(self.width / 2.0, 9.5*mm, config.REPORT_HEAD_SUBTITLE1)
+        this_canvas.drawCentredString(self.width / 2.0, 6.5*mm, config.REPORT_HEAD_SUBTITLE2)
         this_canvas.setFont('Helvetica-Bold', 12)
         this_canvas.drawCentredString(self.width / 2.0, 0*mm, self.title)
 
@@ -85,7 +85,8 @@ class PageNumberCanvasMaker(canvas.Canvas):
         self.pagesize = kwargs['pagesize']
 
         w, h = self.pagesize
-        self.page_number_position = (w - 10*mm, 10*mm)
+        self.page_number_position = (w - 10*mm, 12*mm)
+        self.head_position = h - 15*mm
 
 
     def showPage(self):
@@ -113,9 +114,12 @@ class PageNumberCanvasMaker(canvas.Canvas):
         self.line(10*mm, 15*mm, self.page_number_position[0], 15*mm)
 
         if page_count > 1:
+            if self._pageNumber > 1:
+                self.line(10*mm, self.head_position, self.page_number_position[0], self.head_position)
+
             page = "Page {0} of {1}".format(self._pageNumber, page_count)
             
-            self.setFont('Helvetica', 9)
+            self.setFont('Helvetica', 7)
             self.drawRightString(self.page_number_position[0], self.page_number_position[1], page)
 
         self.restoreState()
@@ -125,29 +129,32 @@ class PageNumberCanvasMaker(canvas.Canvas):
 
 class DocTemplate(SimpleDocTemplate):
     """Base Document Template"""
-    def __init__(self, filename, page_footer, first_page_footer=None, pagesize=A4, **kwds):
+    def __init__(self, filename, page_footer, page_header, first_page_footer=None, pagesize=A4, **kwds):
         SimpleDocTemplate.__init__(self, filename, pagesize=pagesize, **kwds)
 
         self.page_footer = page_footer
+        self.page_header = page_header
         self.first_page_footer = first_page_footer
 
         #if self.first_page_footer is None:
         self.first_page_footer = ""
 
         self.pagesize = pagesize
+        self.header_position = pagesize[1] - 14*mm
 
 
     def onFirstPage(self, this_canvas, document):
         this_canvas.saveState()
-        this_canvas.setFont('Helvetica', 9)
-        this_canvas.drawString(10*mm, 10*mm, self.first_page_footer)
+        this_canvas.setFont('Helvetica', 7)
+        this_canvas.drawString(10*mm, 12*mm, self.first_page_footer)
         this_canvas.restoreState()
 
 
     def onLaterPages(self, this_canvas, document):
         this_canvas.saveState()
-        this_canvas.setFont('Helvetica', 9)
-        this_canvas.drawString(10*mm, 10*mm, self.page_footer)
+        this_canvas.setFont('Helvetica', 7)
+        this_canvas.drawString(10*mm, 12*mm, self.page_footer)
+        this_canvas.drawString(10*mm, self.header_position, self.page_header)
         this_canvas.restoreState()
 
     

@@ -1,6 +1,6 @@
 """Discharge Summary Report"""
 import tempfile
-from reportlab.platypus import Paragraph, PageBreak, ListFlowable
+from reportlab.platypus import Paragraph, PageBreak, ListFlowable, KeepTogether
 from reportlab.platypus.flowables import HRFlowable
 from reportlab.lib.pagesizes import A5
 from reportlab.lib.units import mm
@@ -60,8 +60,8 @@ def get_discharge_summary_elements(admission, session, pagesize=A5):
         procedure_data = [
             ["Procedure:", Paragraph(procedure.procedure_name, stylesheet['default'])],
             ["Surgeon:", Paragraph(unicode(procedure.personnel), stylesheet['default'])],
-            ["Time:", Paragraph(config.format_datetime(procedure.start_time), stylesheet['default'])],
-            ["Findings:", Paragraph(procedure.findings, stylesheet['default'])]
+            ["Date:", Paragraph(config.format_date(procedure.start_time), stylesheet['default'])],
+            ["Findings:", Paragraph(unicode(procedure.findings), stylesheet['default'])]
         ]
         procedure_table = TableExpandable(
             procedure_data,
@@ -72,26 +72,34 @@ def get_discharge_summary_elements(admission, session, pagesize=A5):
         elements.append(HRFlowable(width="100%"))
 
 
-    elements.append(Paragraph("Hospital Course", stylesheet['heading_1']))
-    elements.append(Paragraph(unicode(admission.hospital_course), stylesheet['text']))
+    elements.append(KeepTogether([
+        Paragraph("Hospital Course", stylesheet['heading_1']),
+        Paragraph(unicode(admission.hospital_course), stylesheet['text'])
+    ]))
     elements.append(HRFlowable(width="100%"))
 
-    elements.append(Paragraph("Discharge Advice", stylesheet['heading_1']))
-    elements.append(Paragraph(unicode(admission.discharge_advice), stylesheet['text']))
+    elements.append(KeepTogether([
+        Paragraph("Discharge Advice", stylesheet['heading_1']),
+        Paragraph(unicode(admission.discharge_advice), stylesheet['text'])
+    ]))
     elements.append(HRFlowable(width="100%"))
 
-    elements.append(Paragraph("Prescription", stylesheet['heading_1']))
     prescription = []
     for item in admission.prescription:
         prescription.append(Paragraph(
             "{0} {1}".format(item.drug.name, item.drug_order),
             stylesheet['prescription-item']
         ))
-    elements.append(ListFlowable(prescription, style=stylesheet['list-default']))
+    elements.append(KeepTogether([
+        Paragraph("Prescription", stylesheet['heading_1']),
+        ListFlowable(prescription, style=stylesheet['list-default'])
+    ]))
     elements.append(HRFlowable(width="100%"))
 
-    elements.append(Paragraph("Follow up", stylesheet['heading_1']))
-    elements.append(Paragraph(unicode(admission.follow_up), stylesheet['text']))
+    elements.append(KeepTogether([
+        Paragraph("Follow up", stylesheet['heading_1']),
+        Paragraph(unicode(admission.follow_up), stylesheet['text'])
+    ]))
     elements.append(HRFlowable(width="100%"))
 
     signature = [
@@ -131,10 +139,11 @@ def generate_discharge_summary(admission, session, pagesize=A5):
     doc = DocTemplate(
         filename,
         page_footer=page_footer,
+        page_header="Circumcision Discharge Summary",
         pagesize=pagesize,
         rightMargin=10*mm,
         leftMargin=10*mm,
-        topMargin=10*mm,
+        topMargin=15*mm,
         bottomMargin=15*mm
     )
     doc.build(get_discharge_summary_elements(admission, session, pagesize))
