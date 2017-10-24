@@ -149,3 +149,4 @@ def generate_discharge_summary(admission, session, pagesize=A5):
     doc.build(get_discharge_summary_elements(admission, session, pagesize))
 
     return filename
+

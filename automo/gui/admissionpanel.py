@@ -31,12 +31,31 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
 
         self.set_title("Admission")
 
+        self.encounter_type = "admission"
+
         self.txt_bed = DbRelationCtrl(self.info_panel, self.session)
 
         self.notebook = wx.Notebook(self)
         self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self._on_changing_notebook)
         self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self._on_change_notebook)
 
+        self.create_notebook()
+
+        bed_sizer = wx.FlexGridSizer(2, 2, 2, 2)
+        bed_sizer.AddMany([
+            (wx.StaticText(self.info_panel, label="Bed"), 0, wx.ALIGN_CENTER_VERTICAL),
+            (self.txt_bed, 0, wx.EXPAND)
+        ])
+        bed_sizer.AddSpacer(21)
+        self.info_panel_sizer.Add(bed_sizer, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, border=5)
+        self.sizer.Add(self.notebook, 1, wx.EXPAND)
+
+        self.print_menu = wx.Menu()
+        self.create_print_menu()
+        
+
+
+    def create_notebook(self):
         admission_note_fields = [
             DbMultilineStringField("History", 'history', lines=8),
             DbMultilineStringField("Examination", 'examination', lines=8)
@@ -52,7 +71,7 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
         self.notebook.AddPage(self.progress_notes_panel, "Progress Notes")
 
         self.surgery_panel = SurgeryPanel(self.notebook, self.session)
-        self.notebook.AddPage(self.surgery_panel, "Surgeries")
+        self.notebook.AddPage(self.surgery_panel, "Procedures")
 
         self.measurements_panel = MeasurementsPanel(self.notebook, self.session)
         self.notebook.AddPage(self.measurements_panel, "Measurements")
@@ -75,22 +94,6 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
         self.prescription_panel = PrescriptionPanel(self.notebook, self.session)
         self.notebook.AddPage(self.prescription_panel, "Prescription")
 
-        bed_sizer = wx.FlexGridSizer(2, 2, 2, 2)
-        bed_sizer.AddMany([
-            (wx.StaticText(self.info_panel, label="Bed"), 0, wx.ALIGN_CENTER_VERTICAL),
-            (self.txt_bed, 0, wx.EXPAND)
-        ])
-        bed_sizer.AddSpacer(21)
-        self.info_panel_sizer.Add(bed_sizer, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, border=5)
-        self.sizer.Add(self.notebook, 1, wx.EXPAND)
-
-        self.print_menu = wx.Menu()
-        self.print_menu.Append(ID_PRINT_PRESCRIPTION, "Precription", "Print Prescription")
-        self.print_menu.Append(ID_PRINT_DISCHARGE, "Discharge", "Print Discharge")
-
-        self.print_menu.Bind(wx.EVT_MENU, self._on_print_prescription, id=ID_PRINT_PRESCRIPTION)
-        self.print_menu.Bind(wx.EVT_MENU, self._on_print_discharge, id=ID_PRINT_DISCHARGE)
-
 
     def create_toolbar(self):
         self.toolbar.AddTool(wx.ID_PRINT, "Print", images.get("print_24"), wx.NullBitmap, wx.ITEM_NORMAL, "Print", "")
@@ -101,6 +104,14 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
         self.toolbar.Bind(wx.EVT_TOOL, self._on_transfer_bed, id=ID_TRANSFER_BED)
 
         super(AdmissionPanel, self).create_toolbar()
+
+
+    def create_print_menu(self):
+        self.print_menu.Append(ID_PRINT_PRESCRIPTION, "Precription", "Print Prescription")
+        self.print_menu.Append(ID_PRINT_DISCHARGE, "Discharge Summary", "Print Discharge Summary")
+
+        self.print_menu.Bind(wx.EVT_MENU, self._on_print_prescription, id=ID_PRINT_PRESCRIPTION)
+        self.print_menu.Bind(wx.EVT_MENU, self._on_print_discharge, id=ID_PRINT_DISCHARGE)
 
 
     def _on_transfer_bed(self, event):
@@ -243,7 +254,7 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
             self.unset()
             return
 
-        if encounter.type != "admission":
+        if encounter.type != self.encounter_type:
             self.unset()
             return
 

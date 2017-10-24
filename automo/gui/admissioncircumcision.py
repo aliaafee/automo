@@ -1,42 +1,43 @@
-"""Admission Panel"""
+"""Circumcision Admission Panel"""
 import wx
 
 from .. import database as db
-from .. import config
-from . import events
-from . import images
-from .dbrelationctrl import DbRelationCtrl
-from .baseclinicalencounterpanel import BaseClinicalEncounterPanel
-from .problempanel import ProblemPanel
+
+from .admissionpanel import AdmissionPanel
 from .measurementspanel import MeasurementsPanel
 from .vitalspanel import VitalsPanel
 from .prescriptionpanel import PrescriptionPanel
-from .bedselector import BedSelectorDialog
 from .surgerypanel import SurgeryPanel
-from .progresspanel import ProgressPanel
 from .encounternotebookform import EncounterNotebookForm
-from .encounternotebookpage import EncounterNotebookPage
 from .dbform import DbMultilineStringField
 from .pdfviewer import PDFViewer
 
-ID_TRANSFER_BED = wx.NewId()
-ID_PRINT_DISCHARGE = wx.NewId()
-ID_PRINT_PRESCRIPTION = wx.NewId()
+ID_PRINT_ADMISSION = wx.NewId()
 
 
-class AdmissionCircumcisionPanel(BaseClinicalEncounterPanel):
-    """Circumcision Panel"""
+class AdmissionCircumcisionPanel(AdmissionPanel):
+    """Circumcision Admission Panel"""
     def __init__(self, parent, session, **kwds):
         super(AdmissionCircumcisionPanel, self).__init__(parent, session, **kwds)
-
+        
         self.set_title("Circumcision")
 
-        self.txt_bed = DbRelationCtrl(self.info_panel, self.session)
+        self.encounter_type = "circumcisionadmission"
 
-        self.notebook = wx.Notebook(self)
-        self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self._on_changing_notebook)
-        self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self._on_change_notebook)
 
+    def create_print_menu(self):
+        self.print_menu.Append(ID_PRINT_ADMISSION, "Admission Summary", "Print Admission Summary")
+        self.print_menu.Bind(wx.EVT_MENU, self._on_print_admission, id=ID_PRINT_ADMISSION)
+        
+        super(AdmissionCircumcisionPanel, self).create_print_menu()
+
+
+    def _on_print_admission(self, event):
+        pass
+
+
+    def create_notebook(self):
+        print "Creating it"
         admission_note_fields = [
             DbMultilineStringField("History", 'history', lines=8),
             DbMultilineStringField("Examination", 'examination', lines=8),
@@ -49,7 +50,7 @@ class AdmissionCircumcisionPanel(BaseClinicalEncounterPanel):
         self.notebook.AddPage(self.admission_note_panel, "Notes")
 
         self.surgery_panel = SurgeryPanel(self.notebook, self.session)
-        self.notebook.AddPage(self.surgery_panel, "Surgeries")
+        self.notebook.AddPage(self.surgery_panel, "Procedures")
 
         self.measurements_panel = MeasurementsPanel(self.notebook, self.session)
         self.notebook.AddPage(self.measurements_panel, "Measurements")
@@ -59,183 +60,3 @@ class AdmissionCircumcisionPanel(BaseClinicalEncounterPanel):
 
         self.prescription_panel = PrescriptionPanel(self.notebook, self.session)
         self.notebook.AddPage(self.prescription_panel, "Prescription")
-
-        bed_sizer = wx.FlexGridSizer(2, 2, 2, 2)
-        bed_sizer.AddMany([
-            (wx.StaticText(self.info_panel, label="Bed"), 0, wx.ALIGN_CENTER_VERTICAL),
-            (self.txt_bed, 0, wx.EXPAND)
-        ])
-        bed_sizer.AddSpacer(21)
-        self.info_panel_sizer.Add(bed_sizer, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, border=5)
-        self.sizer.Add(self.notebook, 1, wx.EXPAND)
-
-        self.print_menu = wx.Menu()
-        self.print_menu.Append(ID_PRINT_PRESCRIPTION, "Precription", "Print Prescription")
-        self.print_menu.Append(ID_PRINT_DISCHARGE, "Discharge", "Print Discharge")
-
-        self.print_menu.Bind(wx.EVT_MENU, self._on_print_prescription, id=ID_PRINT_PRESCRIPTION)
-        self.print_menu.Bind(wx.EVT_MENU, self._on_print_discharge, id=ID_PRINT_DISCHARGE)
-
-
-    def create_toolbar(self):
-        self.toolbar.AddTool(wx.ID_PRINT, "Print", images.get("print_24"), wx.NullBitmap, wx.ITEM_NORMAL, "Print", "")
-        self.toolbar.AddTool(ID_TRANSFER_BED, "Transfer", images.get("bed_transfer"), wx.NullBitmap, wx.ITEM_NORMAL, "Transfer Bed", "")
-        self.toolbar.AddSeparator()
-
-        self.toolbar.Bind(wx.EVT_TOOL, self._on_print, id=wx.ID_PRINT)
-        self.toolbar.Bind(wx.EVT_TOOL, self._on_transfer_bed, id=ID_TRANSFER_BED)
-
-        super(AdmissionCircumcisionPanel, self).create_toolbar()
-
-
-    def _on_transfer_bed(self, event):
-        if self.encounter.is_active():
-            is_active = True
-            current_bed = self.encounter.bed
-        else:
-            is_active = False
-            current_bed = self.encounter.discharged_bed
-
-        with BedSelectorDialog(self, self.session, current_bed=current_bed, empty_beds=False) as selector:
-            selector.CenterOnParent()
-            if selector.ShowModal() == wx.ID_OK:
-                new_bed = selector.get_bed()
-                if not is_active:
-                    self.encounter.discharged_bed = new_bed
-                    self.session.commit()
-                    self.refresh()
-                    new_event = events.EncounterChangedEvent(events.ID_ENCOUNTER_CHANGED, object=new_bed) 
-                    wx.PostEvent(self, new_event)
-                else:
-                    if new_bed.admission is None:
-                        self.encounter.bed = new_bed
-                        self.session.commit()
-                        self.refresh()
-                        new_event = events.PatientInfoChangedEvent(events.ID_PATIENT_INFO_CHANGED, object=self.encounter.bed) 
-                        wx.PostEvent(self, new_event)
-                        new_event = events.EncounterChangedEvent(events.ID_ENCOUNTER_CHANGED, object=new_bed) 
-                        wx.PostEvent(self, new_event)
-                    else:
-                        message = "Bed {0} is occupied by the following patient, "\
-                                  "do you want to exchange the two beds?\n\n{1}\t{2}\t{3}\\{4}"
-                        message = message.format(
-                            new_bed,
-                            new_bed.admission.patient.hospital_no,
-                            new_bed.admission.patient.name,
-                            config.format_duration(new_bed.admission.patient.age),
-                            new_bed.admission.patient.sex
-                        )
-                        with wx.MessageDialog(None, message, "Exchange Beds",
-                                              wx.YES_NO | wx.ICON_QUESTION) as dlg:
-                            if dlg.ShowModal() == wx.ID_YES:
-                                current_bed = self.encounter.bed
-                                new_bed.admission.bed = current_bed
-                                self.encounter.bed = new_bed
-                                self.session.commit()
-                                self.refresh()
-                                new_event = events.PatientInfoChangedEvent(events.ID_PATIENT_INFO_CHANGED, object=self.encounter.bed) 
-                                wx.PostEvent(self, new_event)
-                                new_event = events.EncounterChangedEvent(events.ID_ENCOUNTER_CHANGED, object=new_bed) 
-                                wx.PostEvent(self, new_event)
-
-
-    def _on_print(self, event):
-        self.PopupMenu(self.print_menu)
-
-
-    def _on_print_prescription(self, event):
-        filename = self.encounter.get_prescription_pdf(self.session)
-
-        pdf_view = PDFViewer(None, title="Print Preview - Prescription")
-        pdf_view.viewer.UsePrintDirect = ``False``
-        pdf_view.viewer.LoadFile(filename)
-        pdf_view.Show()
-
-
-    def _on_print_discharge(self, event):
-        filename = self.encounter.generate_discharge_summary(self.session)
-
-        pdf_view = PDFViewer(None, title="Print Preview - Discharge Summary")
-        pdf_view.viewer.UsePrintDirect = ``False``
-        pdf_view.viewer.LoadFile(filename)
-        pdf_view.Show()
-
-
-    def _on_change_notebook(self, event):
-        active_page = self.notebook.GetPage(event.GetSelection())
-        active_page.set_encounter(self.encounter)
-        active_page.set_editable(self.editable)
-
-
-    def _on_changing_notebook(self, event):
-        active_page = self.notebook.GetPage(self.notebook.GetSelection())
-        if active_page.is_unsaved():
-            active_page.save_changes()
-            print "Changes saved"
-            #event.Veto() to cancel switch to new tab
-
-
-    def is_unsaved(self):
-        """Check to see if any changes have been saved, must do before closing"""
-        if self.encounter is None:
-            return False
-
-        active_page = self.notebook.GetPage(self.notebook.GetSelection())
-        if active_page.is_unsaved():
-            return True
-        return False
-
-
-    def save_changes(self):
-        """Save changes"""
-        if self.encounter is None:
-            return
-
-        active_page = self.notebook.GetPage(self.notebook.GetSelection())
-        active_page.save_changes()
-
-
-    def editable_on(self):
-        super(AdmissionCircumcisionPanel, self).editable_on()
-        active_page = self.notebook.GetPage(self.notebook.GetSelection())
-        active_page.set_editable(True)
-        self.toolbar.EnableTool(ID_TRANSFER_BED, True)
-
-
-    def editable_off(self):
-        super(AdmissionCircumcisionPanel, self).editable_off()
-        active_page = self.notebook.GetPage(self.notebook.GetSelection())
-        active_page.set_editable(False)
-        self.toolbar.EnableTool(ID_TRANSFER_BED, False)
-
-
-    def set(self, encounter, refresh=False):
-        """Set The Encounter"""
-        if encounter is None:
-            self.unset()
-            return
-
-        if encounter.type != "circumcisionadmission":
-            self.unset()
-            return
-
-        super(AdmissionCircumcisionPanel, self).set(encounter, refresh=refresh)
-
-        if self.encounter.is_active():
-            self.txt_bed.set_dbobject_attr(encounter, "bed_id", "bed")
-        else:
-            self.txt_bed.set_dbobject_attr(encounter, "discharged_bed_id", "discharged_bed")
-
-        active_page = self.notebook.GetPage(self.notebook.GetSelection())
-        active_page.set_encounter(self.encounter)
-        self.notebook.Show()
-
-
-    def unset(self):
-        """Clear the panel"""
-        super(AdmissionCircumcisionPanel, self).unset()
-
-        self.txt_bed.set_dbobject_attr(None, "", "")
-
-        self.notebook.Hide()
-

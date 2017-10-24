@@ -1,3 +1,4 @@
 cd ..
-C:\Python27\python.exe .\automo-gui.py
+source .\automo-win\bin\activate
+python .\automo-gui.py
 Pause
