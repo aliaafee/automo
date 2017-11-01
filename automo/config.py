@@ -12,6 +12,8 @@ REPORT_HEAD_SUBTITLE2 = "Phone 0000000, Fax 000000, Email mail@somehospital.com"
 REPORT_HEAD_LOGO_RIGHT = ""
 REPORT_HEAD_LOGO_LEFT = ""
 
+BATCH_IMPORT_COLUMNS = "national_id_no,hospital_no,name,age,sex,weight,bed_number"
+
 def format_duration(duration): #from_date, to_date):
     """Format python relative delta duration to human readable form."""
     if duration is None:

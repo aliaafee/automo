@@ -22,6 +22,8 @@ def load_config():
     config.REPORT_HEAD_LOGO_RIGHT = wx_config.Read("report-head-logo-right", config.REPORT_HEAD_LOGO_RIGHT)
     config.REPORT_HEAD_LOGO_LEFT = wx_config.Read("report-head-logo-left", config.REPORT_HEAD_LOGO_LEFT)
 
+    config.BATCH_IMPORT_COLUMNS = wx_config.Read("batch-import-columns", config.BATCH_IMPORT_COLUMNS)
+
 
 def save_config():
     """Save Configuration to file/registery"""
@@ -37,3 +39,5 @@ def save_config():
     wx_config.Write("report-head-subtitle2", config.REPORT_HEAD_SUBTITLE2)
     wx_config.Write("report-head-logo-right", config.REPORT_HEAD_LOGO_RIGHT)
     wx_config.Write("report-head-logo-left", config.REPORT_HEAD_LOGO_LEFT)
+
+    wx_config.Write("batch-import-columns", config.BATCH_IMPORT_COLUMNS)

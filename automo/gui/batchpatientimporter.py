@@ -15,6 +15,16 @@ COL_AGE = 2
 COL_SEX = 3
 COL_BED = 4
 
+COLUMNS = {
+    "national_id_no" : ("ID Number", COL_STR),
+    "hospital_no" : ("Hospital Number", COL_STR),
+    "name" : ("Name", COL_STR),
+    "age" : ("Age", COL_AGE),
+    "sex" : ("Sex", COL_SEX),
+    "weight" : ("Weight", COL_INT),
+    "bed_number" : ("Bed Number", COL_BED)
+}
+
 
 class BatchPatientImporter(wx.Dialog):
     """Dialog to import a group of patients from tab delimated file/clipboard"""
@@ -37,6 +47,15 @@ class BatchPatientImporter(wx.Dialog):
         self.toolbar.Bind(wx.EVT_TOOL, self._on_row_insert, id=wx.ID_ADD)
         self.toolbar.Bind(wx.EVT_TOOL, self._on_row_delete, id=wx.ID_DELETE)
 
+        self.col_definition = []
+        self.col_id = {}
+        index = 0
+        for col_name in config.BATCH_IMPORT_COLUMNS.split(","):
+            self.col_definition.append(COLUMNS[col_name])
+            self.col_id[col_name] = index
+            index += 1
+
+        """
         self.col_definition = [
             ("ID Number", COL_STR),
             ("Hospital Number", COL_STR),
@@ -46,6 +65,7 @@ class BatchPatientImporter(wx.Dialog):
             ("Weight", COL_INT),
             ("Bed Number", COL_BED)
         ]
+        """
         self.col_count = len(self.col_definition)
         self.validation_errors = []
 
@@ -277,18 +297,27 @@ class BatchPatientImporter(wx.Dialog):
                     row_isvalid = False
             if row_isvalid:
                 #Check if similar patient exist in database
-                id_number = self._get_cell_value(row, 0)
-                #hospital_no = self._get_cell_value(row, 1)
-                patients = self.session.query(db.Patient)\
-                                .filter(db.Patient.national_id_no == id_number)
-                if patients.count() > 0:
-                    self.patient_grid.SetCellBackgroundColour(row, 0, wx.Colour(255, 0, 0))
-                    isvalid = False
-                    self.validation_errors.append(
-                        "In row {0}, A patient with the same Nation ID number found in database.".format(row)
-                    )
+                id_number = self._get_cell_value_by_col_name(row, "national_id_no")
+                if id_number is not None:
+                    patients = self.session.query(db.Patient)\
+                                    .filter(db.Patient.national_id_no == id_number)
+                    if patients.count() > 0:
+                        self.patient_grid.SetCellBackgroundColour(row, 0, wx.Colour(255, 0, 0))
+                        isvalid = False
+                        self.validation_errors.append(
+                            "In row {0}, A patient with the same Nation ID number found in database.".format(row)
+                        )
         #TODO: Look for duplicates in this list
         return isvalid
+
+
+    def _get_cell_value_by_col_name(self, row, col_name):
+        try:
+            col_id = self.col_id[col_name]
+            return self._get_cell_value(row, col_id)
+        except KeyError:
+            return None
+
 
 
     def _add_patients(self, admitting_doctor):
@@ -297,20 +326,20 @@ class BatchPatientImporter(wx.Dialog):
 
             for row in range(0, self.patient_grid.GetNumberRows()):
                 new_patient = db.Patient()
-                new_patient.national_id_no = self._get_cell_value(row, 0)
-                new_patient.hospital_no = self._get_cell_value(row, 1)
-                new_patient.name = self._get_cell_value(row, 2)
-                new_patient.age = self._get_cell_value(row, 3)
-                new_patient.sex = self._get_cell_value(row, 4)
+                new_patient.national_id_no = self._get_cell_value_by_col_name(row, "national_id_no")
+                new_patient.hospital_no = self._get_cell_value_by_col_name(row, "hospital_no")
+                new_patient.name = self._get_cell_value_by_col_name(row, "name")
+                new_patient.age = self._get_cell_value_by_col_name(row, "age")
+                new_patient.sex = self._get_cell_value_by_col_name(row, "sex")
                 patients.append(new_patient)
                 self.session.add(new_patient)
 
-                bed = self._get_cell_value(row, 6)
+                bed = self._get_cell_value_by_col_name(row, "bed_number")
                 
                 admission = new_patient.admit_circumcision(self.session, admitting_doctor, bed)
                 
                 measurement = db.Measurements()
-                measurement.weight = self._get_cell_value(row, 5)
+                measurement.weight = self._get_cell_value_by_col_name(row, "weight")
                 measurement.record_time = admission.start_time
                 admission.add_child_encounter(measurement)
 
