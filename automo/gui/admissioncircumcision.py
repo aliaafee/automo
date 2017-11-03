@@ -28,8 +28,8 @@ class AdmissionCircumcisionPanel(AdmissionPanel):
 
 
     def create_print_menu(self):
-        self.print_menu.Append(ID_PRINT_ADMISSION, "Admission Summary", "Print Admission Summary")
-        self.print_menu.Bind(wx.EVT_MENU, self._on_print_admission, id=ID_PRINT_ADMISSION)
+        #self.print_menu.Append(ID_PRINT_ADMISSION, "Admission Summary", "Print Admission Summary")
+        #self.print_menu.Bind(wx.EVT_MENU, self._on_print_admission, id=ID_PRINT_ADMISSION)
         
         super(AdmissionCircumcisionPanel, self).create_print_menu()
 
