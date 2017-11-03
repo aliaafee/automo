@@ -22,7 +22,8 @@ COLUMNS = {
     "age" : ("Age", COL_AGE),
     "sex" : ("Sex", COL_SEX),
     "weight" : ("Weight", COL_INT),
-    "bed_number" : ("Bed Number", COL_BED)
+    "bed_number" : ("Bed Number", COL_BED),
+    "address" : ("Address", COL_STR)
 }
 
 
@@ -55,17 +56,6 @@ class BatchPatientImporter(wx.Dialog):
             self.col_id[col_name] = index
             index += 1
 
-        """
-        self.col_definition = [
-            ("ID Number", COL_STR),
-            ("Hospital Number", COL_STR),
-            ("Name", COL_STR),
-            ("Age", COL_AGE),
-            ("Sex", COL_SEX),
-            ("Weight", COL_INT),
-            ("Bed Number", COL_BED)
-        ]
-        """
         self.col_count = len(self.col_definition)
         self.validation_errors = []
 
@@ -333,6 +323,12 @@ class BatchPatientImporter(wx.Dialog):
                 new_patient.sex = self._get_cell_value_by_col_name(row, "sex")
                 patients.append(new_patient)
                 self.session.add(new_patient)
+
+                address = self._get_cell_value_by_col_name(row, "address")
+                if address is not None:
+                    new_address = db.Address()
+                    new_address.line_1 = address
+                    new_patient.permanent_address = new_address
 
                 bed = self._get_cell_value_by_col_name(row, "bed_number")
                 
