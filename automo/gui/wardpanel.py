@@ -102,6 +102,7 @@ class WardPanel(wx.Panel):
                 "Error",
                 wx.OK | wx.ICON_EXCLAMATION) as err_dlg:
                 err_dlg.ShowModal()
+            return
         else:
             self.session.commit()
             self.refresh_all()

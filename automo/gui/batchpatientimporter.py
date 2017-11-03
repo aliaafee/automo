@@ -170,7 +170,13 @@ class BatchPatientImporter(wx.Dialog):
                 print "Error occured while adding patients"
         else:
             print "List not ok, fix the red cells"
-            print "\r\n".join(self.validation_errors)
+            message = "Problems found in the higlighted cells\n\n{}".format("\r\n".join(self.validation_errors))
+            with wx.MessageDialog(None,
+                message,
+                "Data errors",
+                wx.OK | wx.ICON_EXCLAMATION) as err_dlg:
+                err_dlg.ShowModal()
+
         self.patient_grid.Refresh()
 
 
