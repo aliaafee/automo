@@ -9,7 +9,9 @@ from .vitalspanel import VitalsPanel
 from .prescriptionpanel import PrescriptionPanel
 from .surgerypanel import SurgeryPanel
 from .encounternotebookform import EncounterNotebookForm
-from .dbform import DbMultilineStringField, DbOptionalMultilineStringField
+from .dbform import DbMultilineStringField,\
+                    DbOptionalMultilineStringField,\
+                    DbOptionsField
 from .pdfviewer import PDFViewer
 
 ID_PRINT_ADMISSION = wx.NewId()
@@ -39,13 +41,16 @@ class AdmissionCircumcisionPanel(AdmissionPanel):
     def create_notebook(self):
         print "Creating it"
         admission_note_fields = [
-            DbMultilineStringField("Cheif Complaints", 'chief_complaints', lines=4),
-            DbOptionalMultilineStringField("Past History", 'past_history', lines=8),
+            DbMultilineStringField("Chief Complaints", 'chief_complaints', lines=4),
+            DbOptionsField("Past History", 'past_history',options=['No significant past history'],
+                           nonelabel="Unknown", otherlabel="Specify", lines=8),
             DbOptionalMultilineStringField("Chest Exam", 'exam_chest', lines=8),
             DbOptionalMultilineStringField("Abdomen Exam", 'exam_abdomen', lines=8),
-            DbOptionalMultilineStringField("Genitalia Exam", 'exam_genitalia', lines=8),
+            DbOptionsField("Genitalia Exam", 'exam_genitalia',options=['Normal'],
+                           nonelabel="Not Examined", otherlabel="Abnormal", lines=4),
             DbOptionalMultilineStringField("Other Exam", 'exam_other', lines=8),
-            DbMultilineStringField("Hospital Course Summary", 'hospital_course', lines=8),
+            DbOptionsField("Hospital Course", 'hospital_course',options=['Uneventful'],
+                           nonelabel="Unspecified", otherlabel="Issues", lines=4),
             DbMultilineStringField("Discharge Advice", 'discharge_advice', lines=8),
             DbMultilineStringField("Follow Up", 'follow_up', lines=8)
         ]
