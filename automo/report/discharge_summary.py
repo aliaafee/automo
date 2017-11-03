@@ -136,10 +136,11 @@ def generate_discharge_summary(admission, session, pagesize=A4):
     doc = DocTemplate(
         filename,
         page_footer=page_footer,
+        page_header="Discharge Summary",
         pagesize=pagesize,
         rightMargin=10*mm,
         leftMargin=10*mm,
-        topMargin=10*mm,
+        topMargin=15*mm,
         bottomMargin=15*mm
     )
     doc.build(get_discharge_summary_elements(admission, session, pagesize))
