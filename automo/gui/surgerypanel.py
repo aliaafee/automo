@@ -14,7 +14,7 @@ class SurgeryPanel(EncounterNotebookList):
             DbRelationField("Surgeon", 'personnel', session.query(db.Doctor)),
             DbStringField("Preop Diagnosis", 'preoperative_diagnosis'),
             DbStringField("Postop Diagnosis", 'postoperative_diagnosis'),
-            DbStringField("Precedure Name", 'procedure_name'),
+            DbStringField("Procedure Name", 'procedure_name'),
             DbMultilineStringField("Findings", 'findings'),
             DbMultilineStringField("Steps", 'steps'),
         ]

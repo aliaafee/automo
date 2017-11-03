@@ -123,6 +123,9 @@ class Patient(Base):
     def admit_circumcision(self, session, doctor, bed, admission_time=None):
         new_admission = self.admit(session, doctor, bed, admission_time=admission_time,
                                    admission_class=CircumcisionAdmission)
+        new_admission.chief_complaints = "Admission for Circumcision"
+        new_admission.discharge_advice = "Olive oil application QID"
+        new_admission.follow_up = "Take shower and follow up in opd on ___"
 
         problem = Problem()
         problem.icd10class_code = "Z41.2"

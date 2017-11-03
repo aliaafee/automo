@@ -16,7 +16,7 @@ from .surgerypanel import SurgeryPanel
 from .progresspanel import ProgressPanel
 from .encounternotebookform import EncounterNotebookForm
 from .encounternotebookpage import EncounterNotebookPage
-from .dbform import DbMultilineStringField
+from .dbform import DbMultilineStringField, DbOptionalMultilineStringField
 from .pdfviewer import PDFViewer
 
 ID_TRANSFER_BED = wx.NewId()
@@ -57,8 +57,17 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
 
     def create_notebook(self):
         admission_note_fields = [
-            DbMultilineStringField("History", 'history', lines=8),
-            DbMultilineStringField("Examination", 'examination', lines=8)
+            DbMultilineStringField("Cheif Complaints", 'chief_complaints', lines=4),
+            DbOptionalMultilineStringField("History of Present Illness", 'history', lines=8),
+            DbOptionalMultilineStringField("Past History", 'past_history', lines=8),
+            DbOptionalMultilineStringField("General Inspection", 'general_inspection', lines=8),
+            DbOptionalMultilineStringField("Head Exam", 'exam_head', lines=8),
+            DbOptionalMultilineStringField("Neck Exam", 'exam_neck', lines=8),
+            DbOptionalMultilineStringField("Chest Exam", 'exam_chest', lines=8),
+            DbOptionalMultilineStringField("Abdomen Exam", 'exam_abdomen', lines=8),
+            DbOptionalMultilineStringField("Genitalia Exam", 'exam_genitalia', lines=8),
+            DbOptionalMultilineStringField("Pelvic/Rectal Exam", 'exam_pelvic_rectal', lines=8),
+            DbOptionalMultilineStringField("Other Exam", 'exam_other', lines=8)
         ]
         self.admission_note_panel = EncounterNotebookForm(self.notebook, self.session, db.Admission,
                                                           admission_note_fields)

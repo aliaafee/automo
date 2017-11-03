@@ -9,7 +9,7 @@ from .vitalspanel import VitalsPanel
 from .prescriptionpanel import PrescriptionPanel
 from .surgerypanel import SurgeryPanel
 from .encounternotebookform import EncounterNotebookForm
-from .dbform import DbMultilineStringField
+from .dbform import DbMultilineStringField, DbOptionalMultilineStringField
 from .pdfviewer import PDFViewer
 
 ID_PRINT_ADMISSION = wx.NewId()
@@ -39,8 +39,12 @@ class AdmissionCircumcisionPanel(AdmissionPanel):
     def create_notebook(self):
         print "Creating it"
         admission_note_fields = [
-            DbMultilineStringField("History", 'history', lines=8),
-            DbMultilineStringField("Examination", 'examination', lines=8),
+            DbMultilineStringField("Cheif Complaints", 'chief_complaints', lines=4),
+            DbOptionalMultilineStringField("Past History", 'past_history', lines=8),
+            DbOptionalMultilineStringField("Chest Exam", 'exam_chest', lines=8),
+            DbOptionalMultilineStringField("Abdomen Exam", 'exam_abdomen', lines=8),
+            DbOptionalMultilineStringField("Genitalia Exam", 'exam_genitalia', lines=8),
+            DbOptionalMultilineStringField("Other Exam", 'exam_other', lines=8),
             DbMultilineStringField("Hospital Course Summary", 'hospital_course', lines=8),
             DbMultilineStringField("Discharge Advice", 'discharge_advice', lines=8),
             DbMultilineStringField("Follow Up", 'follow_up', lines=8)

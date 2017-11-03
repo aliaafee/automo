@@ -19,8 +19,18 @@ class ClinicalEncounter(Encounter):
 
     label = "Clinical Encounter"
 
+    chief_complaints = Column(Text)
     history = Column(Text)
-    examination = Column(Text)
+    past_history = Column(Text)
+
+    general_inspection = Column(Text)
+    exam_head = Column(Text)
+    exam_neck = Column(Text)
+    exam_chest = Column(Text)
+    exam_abdomen = Column(Text)
+    exam_genitalia = Column(Text)
+    exam_pelvic_rectal = Column(Text)
+    exam_other = Column(Text)
 
     notes = relationship("Note", back_populates="clinicalencounter",
                          cascade="all, delete, delete-orphan")
