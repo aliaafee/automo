@@ -4,7 +4,13 @@ import wx
 from .. import config
 from .. import database as db
 from . import images
-from .dbform import DbFormPanel, DbFormDialog, DbStringField, DbDateTimeField, DbAddressField, DbEnumField
+from .dbform import DbFormPanel,\
+                    DbFormDialog,\
+                    DbStringField,\
+                    DbDateTimeField,\
+                    DbAddressField,\
+                    DbEnumField,\
+                    DbOptionalMultilineStringField
 
 
 class PatientInfoPanelSmall(wx.Panel):
@@ -17,20 +23,21 @@ class PatientInfoPanelSmall(wx.Panel):
 
         self.toolbar = wx.ToolBar(self, style=wx.TB_FLAT | wx.TB_NODIVIDER)
 
-        lbl_font = self.GetFont()
+        self.lbl_font = self.GetFont()
+        self.alert_font = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.BOLD)
         bold_font = self.GetFont()
         bold_font.SetWeight(wx.BOLD)
         med_font = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
         big_font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.BOLD)
 
         self.lbl_lbl_hospital_no = wx.StaticText(self, label='IP No', size=(40,-1))
-        self.lbl_lbl_hospital_no.SetFont(lbl_font)
+        self.lbl_lbl_hospital_no.SetFont(self.lbl_font)
 
         self.lbl_hospital_no = wx.StaticText(self, label='', size=(-1,-1))
         self.lbl_hospital_no.SetFont(bold_font)
 
         self.lbl_lbl_national_id_no = wx.StaticText(self, label='ID No', size=(40, -1))
-        self.lbl_lbl_national_id_no.SetFont(lbl_font)
+        self.lbl_lbl_national_id_no.SetFont(self.lbl_font)
 
         self.lbl_national_id_no = wx.StaticText(self, label='', size=(-1, -1))
         self.lbl_national_id_no.SetFont(bold_font)
@@ -44,6 +51,8 @@ class PatientInfoPanelSmall(wx.Panel):
         self.lbl_weight = wx.StaticText(self, label="")
         self.lbl_height = wx.StaticText(self, label="")
         self.lbl_bmi = wx.StaticText(self, label="")
+
+        self.lbl_allergies = wx.StaticText(self, label="")
         
         grid_sizer = wx.FlexGridSizer(2, 2, 2, 2)
         grid_sizer.Add(self.lbl_lbl_hospital_no, 1, wx.EXPAND)
@@ -59,6 +68,7 @@ class PatientInfoPanelSmall(wx.Panel):
         hsizer.Add(self.lbl_name, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, border=5)
         hsizer.Add(self.lbl_age_sex, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, border=5)
         hsizer.Add(msizer, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, border=5)
+        hsizer.Add(self.lbl_allergies, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, border=5)
         #hsizer.AddStretchSpacer()
         hsizer.Add(self.toolbar, 1, wx.ALIGN_CENTER_VERTICAL | wx.ALL, border=5)
 
@@ -117,6 +127,15 @@ class PatientInfoPanelSmall(wx.Panel):
             self.lbl_height.SetLabel("")
             self.lbl_bmi.SetLabel("")
 
+        if self.patient.allergies is None:
+            self.lbl_allergies.SetLabel("No Known Allergies")
+            self.lbl_allergies.SetFont(self.lbl_font)
+            self.lbl_allergies.SetForegroundColour(wx.Colour(0,0,0))
+        else:
+            self.lbl_allergies.SetLabel("Allergic to: {}".format(self.patient.allergies))
+            self.lbl_allergies.SetFont(self.alert_font)
+            self.lbl_allergies.SetForegroundColour(wx.Colour(255,0,0))
+
     def unset(self):
         """Clear selected patient"""
         self.patient = None
@@ -146,6 +165,7 @@ class PatientForm(DbFormDialog):
             DbStringField("Name", "name", required=True),
             DbDateTimeField("Date of Birth", "time_of_birth", required=True),
             DbEnumField("Sex", "sex", ["M", "F"], required=True),
+            DbOptionalMultilineStringField("Known Allergies", "allergies", lines=3),
             DbStringField("Phone No.", "phone_no"),
             DbAddressField("Current Address", "current_address"),
             DbAddressField("Permanent Address", "permanent_address")
@@ -163,6 +183,7 @@ class PatientFormPanel(DbFormPanel):
             DbStringField("Name", "name", required=True),
             DbDateTimeField("Date of Birth", "time_of_birth", required=True),
             DbEnumField("Sex", "sex", ["M", "F"], required=True),
+            DbOptionalMultilineStringField("Known Allergies", "allergies", lines=3),
             DbStringField("Phone No.", "phone_no"),
             DbAddressField("Current Address", "current_address"),
             DbAddressField("Permanent Address", "permanent_address")

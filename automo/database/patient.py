@@ -2,7 +2,7 @@
 import datetime
 import dateutil.relativedelta
 
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Text
 from sqlalchemy.orm import relationship
 
 from . import dbexception
@@ -23,6 +23,8 @@ class Patient(Base):
     time_of_birth = Column(DateTime())
     time_of_death = Column(DateTime())
     sex = Column(String(1))
+
+    allergies = Column(Text)
 
     phone_no = Column(String(250))
 
