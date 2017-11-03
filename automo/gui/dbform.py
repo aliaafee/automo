@@ -147,9 +147,12 @@ class DbOptionalMultilineStringField(DbFormFieldDefn):
         self.checkbox.SetValue(True)
 
     def get_editor_value(self):
-        if self.checkbox.GetValue() is True:
-            return self.textbox.GetValue()
-        return None
+        if self.checkbox.GetValue() is False:
+            return None
+        str_value = self.textbox.GetValue()
+        if str_value == "":
+            return None
+        return str_value
 
 
 class DbOptionsField(DbFormFieldDefn):

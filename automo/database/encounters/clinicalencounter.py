@@ -30,6 +30,7 @@ class ClinicalEncounter(Encounter):
     exam_abdomen = Column(Text)
     exam_genitalia = Column(Text)
     exam_pelvic_rectal = Column(Text)
+    exam_extremities = Column(Text)
     exam_other = Column(Text)
 
     notes = relationship("Note", back_populates="clinicalencounter",

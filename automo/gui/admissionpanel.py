@@ -67,6 +67,7 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
             DbOptionalMultilineStringField("Abdomen Exam", 'exam_abdomen', lines=8),
             DbOptionalMultilineStringField("Genitalia Exam", 'exam_genitalia', lines=8),
             DbOptionalMultilineStringField("Pelvic/Rectal Exam", 'exam_pelvic_rectal', lines=8),
+            DbOptionalMultilineStringField("Extremities Exam", 'exam_extremities', lines=8),
             DbOptionalMultilineStringField("Other Exam", 'exam_other', lines=8)
         ]
         self.admission_note_panel = EncounterNotebookForm(self.notebook, self.session, db.Admission,

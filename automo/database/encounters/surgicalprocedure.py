@@ -17,6 +17,10 @@ class SurgicalProcedure(Encounter):
         'polymorphic_identity':'surgicalprocedure'
     }
 
+    assistant = Column(Text())
+    anesthetist = Column(Text())
+    nurse = Column(Text())
+
     preoperative_diagnosis = Column(Text())
 
     postoperative_diagnosis = Column(Text())
