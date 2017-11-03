@@ -104,12 +104,39 @@ class PatientInfoPanelSmall(wx.Panel):
         self.lbl_name.SetLabelMarkup("<b>{}</b>".format(self.patient.name))
         self.lbl_age_sex.SetLabelMarkup("<b>{0} / {1}</b>".format(age_str, self.patient.sex))
         
+        weight = None
         measurements = self.session.query(db.Measurements)\
                             .filter(db.Measurements.patient == self.patient)\
+                            .filter(db.Measurements.weight != None)\
                             .order_by(db.Measurements.start_time.desc())\
                             .limit(1)
         if measurements.count() == 1:
             measurement = measurements.one()
+            weight = measurement.weight
+            self.lbl_weight.SetLabel("Wt {0} kg".format(round(weight,1)))
+        else:
+            self.lbl_weight.SetLabel("")
+
+        height = None
+        measurements = self.session.query(db.Measurements)\
+                            .filter(db.Measurements.patient == self.patient)\
+                            .filter(db.Measurements.height != None)\
+                            .order_by(db.Measurements.start_time.desc())\
+                            .limit(1)
+        if measurements.count() == 1:
+            measurement = measurements.one()
+            height = measurement.height
+            self.lbl_height.SetLabel("Ht {0} m".format(round(height,2)))
+        else:
+            self.lbl_height.SetLabel("")
+
+        if weight is not None and height is not None:
+            bmi = weight / (height ** 2)
+            self.lbl_bmi.SetLabel(u"BMI {} kg/m\u00B2".format(round(bmi,2)))
+        else:
+            self.lbl_bmi.SetLabel("")
+
+        """
             if measurement.weight is not None:
                 self.lbl_weight.SetLabel("Wt {}kg".format(round(measurement.weight,1)))
             else:
@@ -123,9 +150,8 @@ class PatientInfoPanelSmall(wx.Panel):
             else:
                 self.lbl_bmi.SetLabel("")
         else:
-            self.lbl_weight.SetLabel("")
-            self.lbl_height.SetLabel("")
-            self.lbl_bmi.SetLabel("")
+            
+        """
 
         if self.patient.allergies is None:
             self.lbl_allergies.SetLabel("No Known Allergies")

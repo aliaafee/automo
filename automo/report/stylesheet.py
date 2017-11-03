@@ -39,7 +39,8 @@ def get_stylesheet():
     styles['text'] = ParagraphStyle(
         'text',
         parent=styles['default'],
-        spaceAfter=10
+        spaceBefore=2,
+        spaceAfter=4
     )
 
     styles['title'] = ParagraphStyle(
@@ -57,8 +58,8 @@ def get_stylesheet():
         'heading_1',
         parent=styles['default'],
         fontName='Helvetica-Bold',
-        fontSize=10,
-        leading=12,
+        fontSize=9,
+        leading=11,
         spaceBefore=10
     )
 
@@ -74,6 +75,9 @@ def get_stylesheet():
     styles['table-default'] = TableStyle([
         ('FONT', (0, 0), (-1, -1), styles['default'].fontName),
         ('FONTSIZE', (0, 0), (-1, -1), styles['default'].fontSize),
+        ('LEADING', (0, 0), (-1, -1), styles['default'].leading),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
+        ('TOPPADDING', (0, 0), (-1, -1), 1),
         ('VALIGN', (0, 0), (-1, -1), 'TOP')
     ])
 

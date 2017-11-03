@@ -25,14 +25,31 @@ def get_discharge_summary_elements(admission, session, pagesize=A5):
     if patient.permanent_address:
         address = unicode(patient.permanent_address.line_1)
 
+    weight = None
+    measurements = session.query(db.Measurements)\
+                            .filter(db.Measurements.patient == patient)\
+                            .filter(db.Measurements.weight != None)\
+                            .order_by(db.Measurements.start_time.desc())\
+                            .limit(1)
+    if measurements.count() == 1:
+        measurement = measurements.one()
+        weight = measurement.weight
+    str_weight = ""
+    if weight is not None:
+        str_weight = "{} kg".format(round(weight,1))
+
     demography = [
         [
+            "Hospital No:", patient.hospital_no,
+            "National ID No:", patient.national_id_no
+        ],
+        [
             'Name:', Paragraph(patient.name, stylesheet['default']),
-            "Hospital No:", patient.hospital_no
+            "Age/Sex:", "{0} / {1}".format(config.format_duration(patient.age), patient.sex)
         ],
         [
             'Address:', Paragraph(address, stylesheet['default']),
-            "Age/Sex:", "{0} / {1}".format(config.format_duration(patient.age), patient.sex)
+            'Weight:', str_weight
         ],
         [
             'Admitted:', config.format_date(admission.start_time),
@@ -49,6 +66,28 @@ def get_discharge_summary_elements(admission, session, pagesize=A5):
     #demography_table.setStyle(stylesheet['table-default'])
 
     elements.append(demography_table)
+    elements.append(HRFlowable(width="100%"))
+
+    elements.append(Paragraph("History & Physical Examination", stylesheet['heading_1']))
+
+    if patient.allergies is not None:
+        elements.append(Paragraph("<b>Allergic to {}</b>".format(patient.allergies), stylesheet['text']))
+
+    components = [
+        ("Past History", admission.past_history),
+        ("Chest", admission.exam_chest), 
+        ("Abdomen", admission.exam_abdomen),
+        ("Genitalia", admission.exam_genitalia),
+        ("Others", admission.exam_other)
+    ]
+
+    for label, component in components:
+        if component is not None:
+            elements.append(Paragraph(
+                "<b>{0}</b> {1}".format(label, component),
+                stylesheet['text']
+            ))
+
     elements.append(HRFlowable(width="100%"))
 
     elements.append(Paragraph("Procedure Details", stylesheet['heading_1']))
@@ -71,10 +110,12 @@ def get_discharge_summary_elements(admission, session, pagesize=A5):
         elements.append(procedure_table)
         elements.append(HRFlowable(width="100%"))
 
-
+    str_hospital_course = admission.hospital_course
+    if str_hospital_course is None:
+        str_hospital_course = ""
     elements.append(KeepTogether([
         Paragraph("Hospital Course", stylesheet['heading_1']),
-        Paragraph(unicode(admission.hospital_course), stylesheet['text'])
+        Paragraph(str_hospital_course, stylesheet['text'])
     ]))
     elements.append(HRFlowable(width="100%"))
 
@@ -103,17 +144,25 @@ def get_discharge_summary_elements(admission, session, pagesize=A5):
     elements.append(HRFlowable(width="100%"))
 
     signature = [
+        [""],
         [
-            "Doctor:",
+            "Admitting Surgeon:",
             Paragraph(unicode(admission.personnel), stylesheet['default']),
-            "Signature:",
+            "",
+            ""
+        ],
+        [""],
+        [
+            "Discharge Prepared By:",
+            "",
+            "Signature",
             ""
         ]
     ]
 
     signature_table = TableExpandable(
         signature,
-        colWidths=[None, None],
+        colWidths=[25*mm, None, 15*mm, None],
         pagesize=pagesize, rightMargin=10*mm, leftMargin=10*mm,
         style=stylesheet['table-default'])
     elements.append(signature_table)

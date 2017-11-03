@@ -46,7 +46,7 @@ class AdmissionCircumcisionPanel(AdmissionPanel):
                            nonelabel="Unknown", otherlabel="Specify", lines=8),
             DbOptionalMultilineStringField("Chest Exam", 'exam_chest', lines=8),
             DbOptionalMultilineStringField("Abdomen Exam", 'exam_abdomen', lines=8),
-            DbOptionsField("Genitalia Exam", 'exam_genitalia',options=['Normal'],
+            DbOptionsField("Genital Exam", 'exam_genitalia',options=['Normal'],
                            nonelabel="Not Examined", otherlabel="Abnormal", lines=4),
             DbOptionalMultilineStringField("Other Exam", 'exam_other', lines=8),
             DbOptionsField("Hospital Course", 'hospital_course',options=['Uneventful'],
