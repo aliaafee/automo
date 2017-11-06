@@ -28,14 +28,19 @@ class AdmissionCircumcisionPanel(AdmissionPanel):
 
 
     def create_print_menu(self):
-        #self.print_menu.Append(ID_PRINT_ADMISSION, "Admission Summary", "Print Admission Summary")
-        #self.print_menu.Bind(wx.EVT_MENU, self._on_print_admission, id=ID_PRINT_ADMISSION)
+        self.print_menu.Append(ID_PRINT_ADMISSION, "Admission Sheet", "Print Admission Sheet")
+        self.print_menu.Bind(wx.EVT_MENU, self._on_print_admission, id=ID_PRINT_ADMISSION)
         
         super(AdmissionCircumcisionPanel, self).create_print_menu()
 
 
     def _on_print_admission(self, event):
-        pass
+        filename = self.encounter.generate_admission_summary(self.session)
+
+        pdf_view = PDFViewer(None, title="Print Preview - Circumcision Admission Sheet")
+        pdf_view.viewer.UsePrintDirect = ``False``
+        pdf_view.viewer.LoadFile(filename)
+        pdf_view.Show()
 
 
     def create_notebook(self):
@@ -43,16 +48,17 @@ class AdmissionCircumcisionPanel(AdmissionPanel):
         admission_note_fields = [
             DbMultilineStringField("Chief Complaints", 'chief_complaints', lines=4),
             DbOptionsField("Past History", 'past_history',options=['No significant past history'],
-                           nonelabel="Unknown", otherlabel="Specify", lines=8),
-            DbOptionalMultilineStringField("Chest Exam", 'exam_chest', lines=8),
-            DbOptionalMultilineStringField("Abdomen Exam", 'exam_abdomen', lines=8),
+                           nonelabel="Unknown", otherlabel="Specify", lines=4),
+            DbOptionalMultilineStringField("Chest Exam", 'exam_chest', lines=4),
+            DbOptionalMultilineStringField("Abdomen Exam", 'exam_abdomen', lines=4),
             DbOptionsField("Genital Exam", 'exam_genitalia',options=['Normal'],
                            nonelabel="Not Examined", otherlabel="Abnormal", lines=4),
-            DbOptionalMultilineStringField("Other Exam", 'exam_other', lines=8),
+            DbOptionalMultilineStringField("Other Exam", 'exam_other', lines=4),
+            DbMultilineStringField("Preoperative Orders", 'preoperative_orders', lines=4),
             DbOptionsField("Hospital Course", 'hospital_course',options=['Uneventful'],
                            nonelabel="Unspecified", otherlabel="Issues", lines=4),
-            DbMultilineStringField("Discharge Advice", 'discharge_advice', lines=8),
-            DbMultilineStringField("Follow Up", 'follow_up', lines=8)
+            DbMultilineStringField("Discharge Advice", 'discharge_advice', lines=4),
+            DbMultilineStringField("Follow Up", 'follow_up', lines=4)
         ]
         self.admission_note_panel = EncounterNotebookForm(self.notebook, self.session, db.Admission,
                                                           admission_note_fields)

@@ -114,6 +114,8 @@ class CircumcisionAdmission(Admission):
 
     label = "Circumcision"
 
+    preoperative_orders = Column(Text)
+
 
 
 class OutpatientEncounter(ClinicalEncounter):

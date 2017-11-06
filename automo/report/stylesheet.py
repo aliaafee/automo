@@ -93,4 +93,18 @@ def get_stylesheet():
         spaceAfter=4
     )
 
+    styles['list-big'] = ListStyle(
+        name='list-style',
+        bulletFontName=styles['default'].fontName,
+        bulletFontSize=10
+    )
+
+    styles['prescription-item-big'] = ParagraphStyle(
+        'prescription-item',
+        parent=styles['default'],
+        fontSize=10,
+        leading=12,
+        spaceAfter=4
+    )
+
     return styles

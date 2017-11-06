@@ -73,9 +73,9 @@ def get_prescription_pdf(encounter, session):
     for item in encounter.prescription:
         prescription.append(Paragraph(
             "{0} {1}".format(item.drug.name, item.drug_order),
-            stylesheet['prescription-item']
+            stylesheet['prescription-item-big']
         ))
-    elements.append(ListFlowable(prescription, style=stylesheet['list-default']))
+    elements.append(ListFlowable(prescription, style=stylesheet['list-big']))
 
     doc = PrescriptionTemplate(filename, encounter)
     doc.build(elements)

@@ -172,6 +172,154 @@ def get_discharge_summary_elements(admission, session, pagesize=A5):
     return elements
 
 
+def get_admission_summary_elements(admission, session, pagesize=A5):
+    patient = admission.patient
+
+    stylesheet = get_stylesheet()
+    elements = [
+        DefaultHeader(title="CIRCUMCISION ADMISSION SHEET")
+    ]
+
+    elements.append(Paragraph("Patient Details", stylesheet['heading_1']))
+
+    address = ""
+    if patient.permanent_address:
+        address = unicode(patient.permanent_address.line_1)
+
+    weight = None
+    measurements = session.query(db.Measurements)\
+                            .filter(db.Measurements.patient == patient)\
+                            .filter(db.Measurements.weight != None)\
+                            .order_by(db.Measurements.start_time)\
+                            .limit(1)
+    if measurements.count() == 1:
+        measurement = measurements.one()
+        weight = measurement.weight
+    str_weight = ""
+    if weight is not None:
+        str_weight = "{} kg".format(round(weight,1))
+
+    demography = [
+        [
+            "Hospital No:", patient.hospital_no,
+            "National ID No:", patient.national_id_no
+        ],
+        [
+            'Name:', Paragraph(patient.name, stylesheet['default']),
+            "Age/Sex:", "{0} / {1}".format(config.format_duration(patient.age), patient.sex)
+        ],
+        [
+            'Address:', Paragraph(address, stylesheet['default']),
+            'Weight:', str_weight
+        ],
+        [
+            'Admitted:', config.format_date(admission.start_time)
+        ]
+    ]
+
+    demography_table = TableExpandable(
+        demography,
+        colWidths=[18*mm, None, 22*mm, 28*mm],
+        pagesize=pagesize, rightMargin=10*mm, leftMargin=10*mm,
+        style=stylesheet['table-default'])
+
+    #demography_table.setStyle(stylesheet['table-default'])
+
+    elements.append(demography_table)
+    elements.append(HRFlowable(width="100%"))
+
+    elements.append(Paragraph("History & Physical Examination", stylesheet['heading_1']))
+
+    if patient.allergies is not None:
+        elements.append(Paragraph("<b>Allergic to {}</b>".format(patient.allergies), stylesheet['text']))
+
+    hx_components = [
+        ("Past History", admission.past_history)
+    ]
+
+    for label, component in hx_components:
+        if component is not None:
+            elements.append(Paragraph(
+                "<b>{0}</b> {1}".format(label, component),
+                stylesheet['text']
+            ))
+
+    vitals = session.query(db.VitalSigns)\
+                            .filter(db.VitalSigns.patient == patient)\
+                            .order_by(db.VitalSigns.start_time)\
+                            .limit(1)
+    if vitals.count() == 1:
+        vital = vitals.one()
+        vitals_str = []
+        bp = None
+        if vital.diastolic_bp is not None or vital.systolic_bp is not None:
+            bp = "{0}/{1}".format(int(round(vital.systolic_bp, 0)), int(round(vital.diastolic_bp, 0)))
+        vital_components = [
+            ("Pulse", int(round(vital.pulse_rate, 0)), "bpm"),
+            ("BP", bp, "mmHg"),
+            ("RR", int(round(vital.respiratory_rate, 0)), "bpm"),
+            (u"T\u00B0", round(vital.temperature, 1), u"\u00B0C")
+        ]
+        for label, value, unit in vital_components:
+            if value is not None:
+                vitals_str.append(u"<b>{0}</b> {1} {2}".format(label, value, unit))
+        if vitals_str:
+            elements.append(Paragraph(
+                u"<b>Vital Signs:</b> {}".format(", ".join(vitals_str)),
+                stylesheet['text']
+            ))
+
+    ex_components = [
+        ("Chest", admission.exam_chest),
+        ("Abdomen", admission.exam_abdomen),
+        ("Genitalia", admission.exam_genitalia),
+        ("Others", admission.exam_other)
+    ]
+
+    for label, component in ex_components:
+        if component is not None:
+            elements.append(Paragraph(
+                "<b>{0}</b> {1}".format(label, component),
+                stylesheet['text']
+            ))
+
+    elements.append(HRFlowable(width="100%"))
+
+    elements.append(KeepTogether([
+        Paragraph("Preoperative Orders", stylesheet['heading_1']),
+        Paragraph(unicode(admission.preoperative_orders), stylesheet['text'])
+    ]))
+    elements.append(HRFlowable(width="100%"))
+
+    signature = [
+        [""],
+        [
+            "Admitting Surgeon:",
+            Paragraph(unicode(admission.personnel), stylesheet['default']),
+            "",
+            ""
+        ],
+        [""],
+        [
+            "Admission Sheet Prepared By:",
+            "",
+            "Signature",
+            ""
+        ]
+    ]
+
+    signature_table = TableExpandable(
+        signature,
+        colWidths=[25*mm, None, 15*mm, None],
+        pagesize=pagesize, rightMargin=10*mm, leftMargin=10*mm,
+        style=stylesheet['table-default'])
+    elements.append(signature_table)
+
+    elements.append(PageBreak())
+    
+    return elements
+
+
 def generate_discharge_summary(admission, session, pagesize=A5):
     filename = tempfile.mktemp(".pdf")
 
@@ -199,3 +347,30 @@ def generate_discharge_summary(admission, session, pagesize=A5):
 
     return filename
 
+
+def generate_admission_summary(admission, session, pagesize=A5):
+    filename = tempfile.mktemp(".pdf")
+
+    patient_name = admission.patient.name
+    if len(patient_name) > 20:
+        patient_name = patient_name[0:20] + "..."
+
+    page_footer = "{0}, {1}, {2} / {3}".format(
+        admission.patient.hospital_no,
+        patient_name,
+        config.format_duration(admission.patient.age),
+        admission.patient.sex)
+
+    doc = DocTemplate(
+        filename,
+        page_footer=page_footer,
+        page_header="Circumcision Admission Sheet",
+        pagesize=pagesize,
+        rightMargin=10*mm,
+        leftMargin=10*mm,
+        topMargin=15*mm,
+        bottomMargin=15*mm
+    )
+    doc.build(get_admission_summary_elements(admission, session, pagesize))
+
+    return filename
