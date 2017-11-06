@@ -4,6 +4,11 @@ import wx
 from .. import database as db
 from . import images
 from .about import AboutDlg
+from .listformeditor import ListFormEditor
+from .dbform import DbStringField
+
+ID_SETTING_DOCTORS = wx.NewId()
+ID_SETTING_WARDS = wx.NewId()
 
 
 class BaseInterface(wx.Frame):
@@ -53,7 +58,11 @@ class BaseInterface(wx.Frame):
 
 
     def create_tool_menu(self):
-        pass
+        self.tool_menu.Append(ID_SETTING_DOCTORS, "Edit Doctors", "Edit The Doctors")
+        self.Bind(wx.EVT_MENU, self._on_setting_doctors, id=ID_SETTING_DOCTORS)
+
+        self.tool_menu.Append(ID_SETTING_WARDS, "Edit Wards", "Edit The Wards")
+        self.Bind(wx.EVT_MENU, self._on_setting_wards, id=ID_SETTING_WARDS)
 
 
     def create_help_menu(self):
@@ -68,6 +77,29 @@ class BaseInterface(wx.Frame):
     def set_title(self, title):
         """Set the window title"""
         self.SetTitle("AutoMO - {}".format(title))
+
+
+    def _on_setting_doctors(self, event):
+        """Settings for doctors"""
+        frame = wx.Frame(None)
+        fields = [
+            DbStringField("Record Card No.", 'record_card_no'),
+            DbStringField("Name", 'name'),
+            DbStringField("PMR Number", 'pmr_no')
+        ]
+        editor = ListFormEditor(frame, self.session, db.Doctor, fields)
+        frame.Show()
+
+
+    def _on_setting_wards(self, event):
+        """Settings for wards"""
+        frame = wx.Frame(None)
+        fields = [
+            DbStringField("Ward Name", 'name'),
+            DbStringField("Bed Prefix", 'bed_prefix')
+        ]
+        editor = ListFormEditor(frame, self.session, db.Ward, fields)
+        frame.Show()
 
 
     def  _on_about(self, event):

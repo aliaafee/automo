@@ -15,4 +15,4 @@ class Ward(Base):
     beds = relationship("Bed", back_populates="ward")
 
     def __repr__(self):
-        return self.name
+        return "{}".format(self.name)
