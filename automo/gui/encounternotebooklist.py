@@ -186,7 +186,11 @@ class EncounterNotebookList(EncounterNotebookPage):
             self._set_subencounter(self.subencounter_list.get_selected_object())
             #self.subencounter_form.set_object(self.subencounter_list.get_selected_object())
         else:
-            self.subencounter_form.Hide()
+            if self.subencounter_list.GetItemCount() > 0:
+                self.subencounter_list.SetSelection(0)
+                self._set_subencounter(self.subencounter_list.get_selected_object())
+            else:
+                self.subencounter_form.Hide()
 
 
         self.changed = False
