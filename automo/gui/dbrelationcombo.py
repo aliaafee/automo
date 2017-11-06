@@ -21,6 +21,8 @@ class DbRelationCombo(wx.ComboBox):
         self.db_choices_id_str = None
 
         self.choices = []
+        self.Append("<None>")
+        self.SetSelection(0)
 
         if self.value_formatter is None:
             self.value_formatter = self._value_formatter
@@ -34,7 +36,9 @@ class DbRelationCombo(wx.ComboBox):
 
     def get_selected_object(self):
         """Returns the selected database object"""
-        index = self.GetSelection()
+        index = self.GetSelection() - 1
+        if index == -1:
+            return None
         try:
             return self.choices[index]
         except IndexError:
@@ -53,30 +57,20 @@ class DbRelationCombo(wx.ComboBox):
         if self.db_object is None\
                 or self.db_str_attr_id == ""\
                 or self.db_str_attr == "":
-            #self.ChangeValue("")
             self.Clear()
             return
 
         rel_object = getattr(self.db_object, self.db_str_attr)
 
-        if rel_object is None:
-            self.ChangeValue("")
-            self.Clear()
-            self.SetSelection(-1)
-            return
-
-        #self.ChangeValue(self.value_formatter(rel_object))
-
         self.Clear()
-        #self.choice_ids = []
+        self.Append("<None>")
         self.choices = self.db_choices_query.all()
-        selection_index = -1
-        list_index = 0
+        selection_index = 0
+        list_index = 1
         for choice in self.choices:
-            if choice == rel_object:
-                selection_index = list_index
-            #choice_id = getattr(choice, self.db_choices_id_str)
-            #self.choice_ids.append(choice_id)
+            if rel_object is not None:
+                if rel_object == choice:
+                    selection_index = list_index
             choice_str = self.value_formatter(choice)
             self.Append(choice_str, choice)
             list_index += 1
@@ -88,7 +82,10 @@ class DbRelationCombo(wx.ComboBox):
         """Updates and commits changes. Does not do anything"""
         selected_object = self.get_selected_object()
 
-        new_value = getattr(selected_object, self.db_choices_id_str)
+        if selected_object is None:
+            new_value = None
+        else:
+            new_value = getattr(selected_object, self.db_choices_id_str)
 
         setattr(self.db_object, self.db_str_attr_id, new_value)
 
@@ -96,3 +93,4 @@ class DbRelationCombo(wx.ComboBox):
 
         event = DbCtrlChangedEvent(object=self.db_object)
         wx.PostEvent(self, event)
+
