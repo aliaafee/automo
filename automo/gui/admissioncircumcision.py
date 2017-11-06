@@ -54,24 +54,30 @@ class AdmissionCircumcisionPanel(AdmissionPanel):
             DbOptionsField("Genital Exam", 'exam_genitalia',options=['Normal'],
                            nonelabel="Not Examined", otherlabel="Abnormal", lines=4),
             DbOptionalMultilineStringField("Other Exam", 'exam_other', lines=4),
-            DbMultilineStringField("Preoperative Orders", 'preoperative_orders', lines=4),
+            DbMultilineStringField("Preoperative Orders", 'preoperative_orders', lines=4)
+        ]
+        self.admission_note_panel = EncounterNotebookForm(self.notebook, self.session, db.Admission,
+                                                          admission_note_fields)
+        self.notebook.AddPage(self.admission_note_panel, "Admission Notes")
+
+        self.vitals_panel = VitalsPanel(self.notebook, self.session)
+        self.notebook.AddPage(self.vitals_panel, "Vitals")
+
+        self.measurements_panel = MeasurementsPanel(self.notebook, self.session)
+        self.notebook.AddPage(self.measurements_panel, "Measurements")
+
+        self.surgery_panel = SurgeryPanel(self.notebook, self.session)
+        self.notebook.AddPage(self.surgery_panel, "Procedures")
+
+        discharge_note_fields = [
             DbOptionsField("Hospital Course", 'hospital_course',options=['Uneventful'],
                            nonelabel="Unspecified", otherlabel="Issues", lines=4),
             DbMultilineStringField("Discharge Advice", 'discharge_advice', lines=4),
             DbMultilineStringField("Follow Up", 'follow_up', lines=4)
         ]
-        self.admission_note_panel = EncounterNotebookForm(self.notebook, self.session, db.Admission,
-                                                          admission_note_fields)
-        self.notebook.AddPage(self.admission_note_panel, "Notes")
-
-        self.surgery_panel = SurgeryPanel(self.notebook, self.session)
-        self.notebook.AddPage(self.surgery_panel, "Procedures")
-
-        self.measurements_panel = MeasurementsPanel(self.notebook, self.session)
-        self.notebook.AddPage(self.measurements_panel, "Measurements")
-
-        self.vitals_panel = VitalsPanel(self.notebook, self.session)
-        self.notebook.AddPage(self.vitals_panel, "Vitals")
+        self.discharge_note_panel = EncounterNotebookForm(self.notebook, self.session, db.Admission,
+                                                          discharge_note_fields)
+        self.notebook.AddPage(self.discharge_note_panel, "Discharge Notes")
 
         self.prescription_panel = PrescriptionPanel(self.notebook, self.session)
         self.notebook.AddPage(self.prescription_panel, "Prescription")
