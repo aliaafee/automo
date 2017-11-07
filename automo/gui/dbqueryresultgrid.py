@@ -273,7 +273,7 @@ class DbQueryResultGrid(wx.grid.Grid):
     """DB Query Result as editable grid, supports very large query results without
       much slowdown. Cells can be edited in place and changes are auto saved."""
     def __init__(self, parent, session, minimum_fetch=50):
-        super(DbQueryResultGrid, self).__init__(parent, style=wx.BORDER_SIMPLE)
+        super(DbQueryResultGrid, self).__init__(parent, style=wx.BORDER_THEME)
         self.parent = parent
         self.session = session
         self.minimum_fetch = minimum_fetch

@@ -343,10 +343,15 @@ class BatchPatientImporter(wx.Dialog):
                 measurement = db.Measurements()
                 measurement.weight = self._get_cell_value_by_col_name(row, "weight")
                 measurement.record_time = admission.start_time
-                admission.add_child_encounter(measurement)
-
+                admission.add_child_encounter(measurement) 
+        except Exception as e:
+            self.session.rollback()
+            with wx.MessageDialog(None,
+                "Error Occured. {}".format(e.message),
+                "Error",
+                wx.OK | wx.ICON_EXCLAMATION) as err_dlg:
+                err_dlg.ShowModal()
+            return False
+        else:
             self.session.commit()
             return True
-        except ValueError:
-            self.session.rollback()
-            return False

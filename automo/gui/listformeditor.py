@@ -17,9 +17,7 @@ class ListFormEditor(wx.Panel):
         self.fields = fields
 
         self.toolbar = wx.ToolBar(self, style=wx.TB_FLAT | wx.TB_NODIVIDER)
-        self.toolbar.AddTool(wx.ID_ADD, "Add", images.get("add"), wx.NullBitmap, wx.ITEM_NORMAL, "Add", "")
-        self.toolbar.Bind(wx.EVT_TOOL, self._on_add, id=wx.ID_ADD)
-
+        self.create_toolbar()
         self.toolbar.Realize()
 
         splitter = wx.SplitterWindow(self, style=wx.SP_LIVE_UPDATE)
@@ -30,11 +28,11 @@ class ListFormEditor(wx.Panel):
 
         self._left_panel = wx.Panel(splitter, style=wx.BORDER_THEME)
 
-        self.data_form = DbFormPanel(self._left_panel, self.db_class, fields)
+        self.data_form = DbFormPanel(self._left_panel, self.db_class, fields, scrollable=False)
         self.data_form.Bind(events.EVT_AM_DB_FORM_CHANGED, self._on_field_changed)
 
-        left_sizer = wx.BoxSizer()
-        left_sizer.Add(self.data_form, 1, wx.EXPAND | wx.ALL, border=5)
+        left_sizer = wx.BoxSizer(wx.VERTICAL)
+        left_sizer.Add(self.data_form, 0, wx.EXPAND | wx.ALL, border=5)
         self._left_panel.SetSizer(left_sizer)
 
         splitter.SplitVertically(self.data_list, self._left_panel, 200)
@@ -49,16 +47,18 @@ class ListFormEditor(wx.Panel):
         self.list_item_menu.Bind(wx.EVT_MENU, self._on_remove_list_item, id=wx.ID_REMOVE)
 
         self.selected_item = None
-
+        self.data_form.Hide()
         self.update_list()
+
+
+    def create_toolbar(self):
+        self.toolbar.AddTool(wx.ID_ADD, "Add", images.get("add_24"), wx.NullBitmap, wx.ITEM_NORMAL, "Add", "")
+        self.toolbar.Bind(wx.EVT_TOOL, self._on_add, id=wx.ID_ADD)
 
 
     def update_list(self):
         result = self.session.query(self.db_class)
         self.data_list.set_result(result)
-
-        self.data_form.Hide()
-        self.selected_item = None
 
 
     def _on_add(self, event):
@@ -66,24 +66,24 @@ class ListFormEditor(wx.Panel):
         self.session.add(new_item)
         self.session.commit()
         self.update_list()
-        self.selected_item = new_item
-        self.data_form.Show()
-        self.data_form.set_object(new_item)
-        self._left_panel.Layout()
-    
+        self.set_selected_item(new_item)
 
-    def _on_list_item_selected(self, event):
-        selected = self.data_list.get_selected_object()
 
-        self.selected_item = selected
+    def set_selected_item(self, item):
+        self.selected_item = item
 
         if self.selected_item is None:
             self.data_form.Hide()
+            return
 
         self.data_form.Show()
         self.data_form.set_object(self.selected_item)
 
         self._left_panel.Layout()
+    
+
+    def _on_list_item_selected(self, event):
+        self.set_selected_item(self.data_list.get_selected_object())
 
     
     def _on_list_item_context(self, event):

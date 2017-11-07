@@ -5,6 +5,7 @@ from .. import database as db
 from . import images
 from .about import AboutDlg
 from .listformeditor import ListFormEditor
+from .wardeditor import WardEditor
 from .dbform import DbStringField
 
 ID_SETTING_DOCTORS = wx.NewId()
@@ -94,11 +95,7 @@ class BaseInterface(wx.Frame):
     def _on_setting_wards(self, event):
         """Settings for wards"""
         frame = wx.Frame(None)
-        fields = [
-            DbStringField("Ward Name", 'name'),
-            DbStringField("Bed Prefix", 'bed_prefix')
-        ]
-        editor = ListFormEditor(frame, self.session, db.Ward, fields)
+        editor = WardEditor(frame, self.session)
         frame.Show()
 
 
