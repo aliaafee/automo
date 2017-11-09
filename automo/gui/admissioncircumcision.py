@@ -15,6 +15,7 @@ from .dbform import DbMultilineStringField,\
 from .pdfviewer import PDFViewer
 
 ID_PRINT_ADMISSION = wx.NewId()
+ID_PRINT_OT_NOTE = wx.NewId()
 
 
 class AdmissionCircumcisionPanel(AdmissionPanel):
@@ -30,8 +31,20 @@ class AdmissionCircumcisionPanel(AdmissionPanel):
     def create_print_menu(self):
         self.print_menu.Append(ID_PRINT_ADMISSION, "Admission Sheet", "Print Admission Sheet")
         self.print_menu.Bind(wx.EVT_MENU, self._on_print_admission, id=ID_PRINT_ADMISSION)
+
+        self.print_menu.Append(ID_PRINT_OT_NOTE, "OT Note Template", "Print OT Note Template")
+        self.print_menu.Bind(wx.EVT_MENU, self._on_print_ot_note, id=ID_PRINT_OT_NOTE)
         
         super(AdmissionCircumcisionPanel, self).create_print_menu()
+
+
+    def _on_print_ot_note(self, event):
+        filename = self.encounter.generate_ot_note(self.session)
+
+        pdf_view = PDFViewer(None, title="Print Preview - OT Note Template")
+        pdf_view.viewer.UsePrintDirect = ``False``
+        pdf_view.viewer.LoadFile(filename)
+        pdf_view.Show()
 
 
     def _on_print_admission(self, event):

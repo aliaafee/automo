@@ -326,6 +326,161 @@ def get_admission_summary_elements(admission, session, pagesize=A5):
     return elements
 
 
+
+def get_ot_note_elements(admission, session, pagesize=A5):
+    patient = admission.patient
+
+    stylesheet = get_stylesheet()
+    elements = [
+        DefaultHeader(title="CIRCUMCISION OPERATIVE NOTE")
+    ]
+
+    elements.append(Paragraph("Patient Details", stylesheet['heading_1']))
+
+    address = ""
+    if patient.permanent_address:
+        address = unicode(patient.permanent_address.line_1)
+
+    weight = None
+    measurements = session.query(db.Measurements)\
+                            .filter(db.Measurements.patient == patient)\
+                            .filter(db.Measurements.weight != None)\
+                            .order_by(db.Measurements.start_time)\
+                            .limit(1)
+    if measurements.count() == 1:
+        measurement = measurements.one()
+        weight = measurement.weight
+    str_weight = ""
+    if weight is not None:
+        str_weight = "{} kg".format(round(weight,1))
+
+    demography = [
+        [
+            "Hospital No:", patient.hospital_no,
+            "National ID No:", patient.national_id_no
+        ],
+        [
+            'Name:', Paragraph(patient.name, stylesheet['default']),
+            "Age/Sex:", "{0} / {1}".format(config.format_duration(patient.age), patient.sex)
+        ],
+        [
+            'Address:', Paragraph(address, stylesheet['default']),
+            'Weight:', str_weight
+        ]
+    ]
+
+    demography_table = TableExpandable(
+        demography,
+        colWidths=[18*mm, None, 22*mm, 28*mm],
+        pagesize=pagesize, rightMargin=10*mm, leftMargin=10*mm,
+        style=stylesheet['table-default'])
+
+    elements.append(demography_table)
+    elements.append(HRFlowable(width="100%"))
+
+    elements.append(Paragraph("Procedure Details", stylesheet['heading_1']))
+
+    details = [
+        ["Surgeon:", "Assistant:"],
+        [""],
+        ["Anesthetist:", "Anesthesia:"],
+        [""],
+        ["Nurse:"],
+        [""],
+        ["Type of Operation:"],
+        [u"     Open [ ]"],
+        [u"     Plastibell [ ]"],
+        [u"     Other:"],
+        [""],
+        ["Operative Findings"],
+        [u"     Normal [ ]"],
+        [u"     Phimosis [ ]"],
+        [u"     Other Findings:"],
+        [" "],
+        [" "],
+        [" "],
+        [" "]
+    ]
+
+    details_table = TableExpandable(
+        details,
+        colWidths=[ None, None],
+        pagesize=pagesize, rightMargin=10*mm, leftMargin=10*mm,
+        style=stylesheet['table-default'])
+    elements.append(details_table)
+    elements.append(HRFlowable(width="100%"))
+
+    elements.append(Paragraph("Post Operative Orders", stylesheet['heading_1']))
+
+    prescription = [
+        Paragraph("SYP CEFO-L (50MG/5ML) _____________________________",stylesheet['prescription-item']),
+        Paragraph("SYP PARACETAMOL (250MG/5ML) _______________________",stylesheet['prescription-item'])
+    ]
+
+    elements.append(ListFlowable(prescription, style=stylesheet['list-default']))
+    elements.append(Paragraph(" ", stylesheet['text']))
+    elements.append(Paragraph(" ", stylesheet['text']))
+    elements.append(Paragraph(" ", stylesheet['text']))
+    elements.append(Paragraph(" ", stylesheet['text']))
+    elements.append(Paragraph(" ", stylesheet['text']))
+    elements.append(Paragraph(" ", stylesheet['text']))
+    elements.append(Paragraph(" ", stylesheet['text']))
+    elements.append(Paragraph(" ", stylesheet['text']))
+    elements.append(Paragraph(" ", stylesheet['text']))
+    elements.append(Paragraph(" ", stylesheet['text']))
+    elements.append(Paragraph(" ", stylesheet['text']))
+
+
+    signature = [
+        [""],
+        [
+            "Signature:",
+            "",
+            "",
+            ""
+        ]
+    ]
+
+    signature_table = TableExpandable(
+        signature,
+        colWidths=[25*mm, None, 15*mm, None],
+        pagesize=pagesize, rightMargin=10*mm, leftMargin=10*mm,
+        style=stylesheet['table-default'])
+    elements.append(signature_table)
+
+    return elements
+
+
+
+
+def generate_ot_note(admission, session, pagesize=A5):
+    filename = tempfile.mktemp(".pdf")
+
+    patient_name = admission.patient.name
+    if len(patient_name) > 20:
+        patient_name = patient_name[0:20] + "..."
+
+    page_footer = "{0}, {1}, {2} / {3}".format(
+        admission.patient.hospital_no,
+        patient_name,
+        config.format_duration(admission.patient.age),
+        admission.patient.sex)
+
+    doc = DocTemplate(
+        filename,
+        page_footer=page_footer,
+        page_header="Operative Note",
+        pagesize=pagesize,
+        rightMargin=10*mm,
+        leftMargin=10*mm,
+        topMargin=15*mm,
+        bottomMargin=15*mm
+    )
+    doc.build(get_ot_note_elements(admission, session, pagesize))
+
+    return filename
+
+
 def generate_discharge_summary(admission, session, pagesize=A5):
     filename = tempfile.mktemp(".pdf")
 
