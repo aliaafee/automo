@@ -4,15 +4,10 @@ import wx
 from .. import database as db
 from . import images
 from .about import AboutDlg
-from .listformeditor import ListFormEditor
-from .wardeditor import WardEditor
-from .dbform import DbStringField
-from .configeditor import ConfigEditor
+from .settingsdialog import SettingsDialog
 
 
-ID_SETTING_CONFIG = wx.NewId()
-ID_SETTING_DOCTORS = wx.NewId()
-ID_SETTING_WARDS = wx.NewId()
+ID_SETTINGS = wx.NewId()
 
 
 class BaseInterface(wx.Frame):
@@ -62,14 +57,8 @@ class BaseInterface(wx.Frame):
 
 
     def create_tool_menu(self):
-        self.tool_menu.Append(ID_SETTING_CONFIG, "Configuration", "Edit The Configuraion")
-        self.Bind(wx.EVT_MENU, self._on_setting_config, id=ID_SETTING_CONFIG)
-
-        self.tool_menu.Append(ID_SETTING_DOCTORS, "Edit Doctors", "Edit The Doctors")
-        self.Bind(wx.EVT_MENU, self._on_setting_doctors, id=ID_SETTING_DOCTORS)
-
-        self.tool_menu.Append(ID_SETTING_WARDS, "Edit Wards", "Edit The Wards")
-        self.Bind(wx.EVT_MENU, self._on_setting_wards, id=ID_SETTING_WARDS)
+        self.tool_menu.Append(ID_SETTINGS, "Settings", "Edit Settings")
+        self.Bind(wx.EVT_MENU, self._on_settings, id=ID_SETTINGS)
 
 
     def create_help_menu(self):
@@ -86,29 +75,11 @@ class BaseInterface(wx.Frame):
         self.SetTitle("AutoMO - {}".format(title))
 
 
-    def _on_setting_config(self, event):
-        """Edit Configuration"""
-        frame = wx.Frame(None)
-        editor = ConfigEditor(frame)
-        frame.Show()
-
-    def _on_setting_doctors(self, event):
-        """Settings for doctors"""
-        frame = wx.Frame(None)
-        fields = [
-            DbStringField("Record Card No.", 'record_card_no'),
-            DbStringField("Name", 'name'),
-            DbStringField("PMR Number", 'pmr_no')
-        ]
-        editor = ListFormEditor(frame, self.session, db.Doctor, fields)
-        frame.Show()
-
-
-    def _on_setting_wards(self, event):
-        """Settings for wards"""
-        frame = wx.Frame(None)
-        editor = WardEditor(frame, self.session)
-        frame.Show()
+    def _on_settings(self, event):
+        """AutoMO Settings"""
+        with SettingsDialog(self, self.session) as dlg:
+            dlg.CenterOnParent()
+            dlg.ShowModal()
 
 
     def  _on_about(self, event):

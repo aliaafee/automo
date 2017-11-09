@@ -22,7 +22,7 @@ class ConfigEditor(wx.Panel):
             ("Batch Import Columns", config, 'BATCH_IMPORT_COLUMNS')
         ]
 
-        sizer = wx.FlexGridSizer(2, 2, 2)
+        grid_sizer = wx.FlexGridSizer(2, 2, 2)
 
         self.controls = []
         for label, field_class, field_attr in self.fields:
@@ -30,10 +30,13 @@ class ConfigEditor(wx.Panel):
             control.ChangeValue(getattr(field_class, field_attr))
             control.Bind(wx.EVT_TEXT, self._on_change_field)
             self.controls.append(control)
-            sizer.Add(wx.StaticText(self, label=label), 0 , wx.ALIGN_CENTER_VERTICAL)
-            sizer.Add(control, 0, wx.EXPAND)
+            grid_sizer.Add(wx.StaticText(self, label=label), 0 , wx.ALIGN_CENTER_VERTICAL)
+            grid_sizer.Add(control, 0, wx.EXPAND)
         
-        sizer.AddGrowableCol(1)
+        grid_sizer.AddGrowableCol(1)
+
+        sizer = wx.BoxSizer()
+        sizer.Add(grid_sizer, 1, wx.EXPAND | wx.ALL, border=5)
 
         self.SetSizer(sizer)
 
