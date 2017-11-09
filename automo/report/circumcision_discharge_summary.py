@@ -255,14 +255,20 @@ def get_admission_summary_elements(admission, session, pagesize=A5):
         if vital.diastolic_bp is not None or vital.systolic_bp is not None:
             bp = "{0}/{1}".format(int(round(vital.systolic_bp, 0)), int(round(vital.diastolic_bp, 0)))
         vital_components = [
-            ("Pulse", int(round(vital.pulse_rate, 0)), "bpm"),
-            ("BP", bp, "mmHg"),
-            ("RR", int(round(vital.respiratory_rate, 0)), "bpm"),
-            (u"T\u00B0", round(vital.temperature, 1), u"\u00B0C")
+            ("Pulse", vital.pulse_rate, "bpm", 0),
+            ("BP", bp, "mmHg", None),
+            ("RR", vital.respiratory_rate, "bpm", 0),
+            (u"T\u00B0", vital.temperature, u"\u00B0C", 1)
         ]
-        for label, value, unit in vital_components:
+        for label, value, unit, dp in vital_components:
             if value is not None:
-                vitals_str.append(u"<b>{0}</b> {1} {2}".format(label, value, unit))
+                value_adjusted = value
+                if dp is not None:
+                    if dp == 0:
+                        value_adjusted = int(round(value, 0))
+                    else:
+                        value_adjusted = round(value, dp)
+                vitals_str.append(u"<b>{0}</b> {1} {2}".format(label, value_adjusted, unit))
         if vitals_str:
             elements.append(Paragraph(
                 u"<b>Vital Signs:</b> {}".format(", ".join(vitals_str)),
