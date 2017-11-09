@@ -17,11 +17,17 @@ class DefaultHeader(Flowable):
 
         self.logo_left = None
         if config.REPORT_HEAD_LOGO_LEFT != "":
-            self.logo_left = canvas.ImageReader(config.REPORT_HEAD_LOGO_LEFT)
+            try:
+                self.logo_left = canvas.ImageReader(config.REPORT_HEAD_LOGO_LEFT)
+            except IOError:
+                self.logo_left = None
 
         self.logo_right = None
         if config.REPORT_HEAD_LOGO_RIGHT != "":
-            self.logo_right = canvas.ImageReader(config.REPORT_HEAD_LOGO_RIGHT)
+            try:
+                self.logo_right = canvas.ImageReader(config.REPORT_HEAD_LOGO_RIGHT)
+            except IOError:
+                self.logo_right = None
 
         self.title = title
 

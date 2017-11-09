@@ -7,7 +7,10 @@ from .about import AboutDlg
 from .listformeditor import ListFormEditor
 from .wardeditor import WardEditor
 from .dbform import DbStringField
+from .configeditor import ConfigEditor
 
+
+ID_SETTING_CONFIG = wx.NewId()
 ID_SETTING_DOCTORS = wx.NewId()
 ID_SETTING_WARDS = wx.NewId()
 
@@ -59,6 +62,9 @@ class BaseInterface(wx.Frame):
 
 
     def create_tool_menu(self):
+        self.tool_menu.Append(ID_SETTING_CONFIG, "Configuration", "Edit The Configuraion")
+        self.Bind(wx.EVT_MENU, self._on_setting_config, id=ID_SETTING_CONFIG)
+
         self.tool_menu.Append(ID_SETTING_DOCTORS, "Edit Doctors", "Edit The Doctors")
         self.Bind(wx.EVT_MENU, self._on_setting_doctors, id=ID_SETTING_DOCTORS)
 
@@ -79,6 +85,12 @@ class BaseInterface(wx.Frame):
         """Set the window title"""
         self.SetTitle("AutoMO - {}".format(title))
 
+
+    def _on_setting_config(self, event):
+        """Edit Configuration"""
+        frame = wx.Frame(None)
+        editor = ConfigEditor(frame)
+        frame.Show()
 
     def _on_setting_doctors(self, event):
         """Settings for doctors"""
