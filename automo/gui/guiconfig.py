@@ -9,7 +9,9 @@ def load_config():
     """Load Configuration from file/registery"""
     global STARTUP_INTERFACE
 
-    wx_config = wx.Config("AutoMo")
+    wx_config = wx.FileConfig(appName="AutoMO", localFilename="config.ini", style=wx.CONFIG_USE_LOCAL_FILE | wx.CONFIG_USE_RELATIVE_PATH)
+
+    print wx_config.GetPath()
 
     config.DATE_FORMAT = wx_config.Read("date-format", config.DATE_FORMAT)
     config.DATETIME_FORMAT = wx_config.Read("datetime-format", config.DATETIME_FORMAT)
@@ -27,7 +29,7 @@ def load_config():
 
 def save_config():
     """Save Configuration to file/registery"""
-    wx_config = wx.Config("AutoMo")
+    wx_config = wx.FileConfig(appName="AutoMO", localFilename="config.ini", style=wx.CONFIG_USE_LOCAL_FILE | wx.CONFIG_USE_RELATIVE_PATH)
 
     wx_config.Write("date-format", config.DATE_FORMAT)
     wx_config.Write("datetime-format", config.DATETIME_FORMAT)
