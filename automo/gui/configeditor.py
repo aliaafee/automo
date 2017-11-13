@@ -19,7 +19,12 @@ class ConfigEditor(wx.Panel):
             ("Report Subtitle 2", config, 'REPORT_HEAD_SUBTITLE2'),
             ("Report Logo Right", config, 'REPORT_HEAD_LOGO_RIGHT'),
             ("Report Logo Left", config, 'REPORT_HEAD_LOGO_LEFT'),
-            ("Batch Import Columns", config, 'BATCH_IMPORT_COLUMNS')
+            ("Batch Import Columns", config, 'BATCH_IMPORT_COLUMNS'),
+            ("Circumcision Cheif Complaints", config, 'CIRCUM_CHIEF_COMPLAINT'),
+            ("Circumcision Preop Orders", config, 'CIRCUM_PREOP_ORDERS'),
+            ("Circumcision Discharge Advice", config, 'CIRCUM_DISCHARGE_ADVICE'),
+            ("Circumcision Follow up", config, 'CIRCUM_FOLLOW_UP'),
+            ("Circumcision Discharge Meds", config, 'CIRCUM_MEDS')
         ]
 
         grid_sizer = wx.FlexGridSizer(2, 2, 2)

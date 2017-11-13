@@ -1,10 +1,12 @@
 """Patient"""
+import string
 import datetime
 import dateutil.relativedelta
 
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Text
 from sqlalchemy.orm import relationship
 
+from .. import config
 from . import dbexception
 from .base import Base
 from .encounters import Encounter, Admission, CircumcisionAdmission, SurgicalProcedure
@@ -125,10 +127,10 @@ class Patient(Base):
     def admit_circumcision(self, session, doctor, bed, admission_time=None):
         new_admission = self.admit(session, doctor, bed, admission_time=admission_time,
                                    admission_class=CircumcisionAdmission)
-        new_admission.chief_complaints = "Admission for Circumcision"
-        new_admission.preoperative_orders = "Follow PAC Orders, NPO from 2am."
-        new_admission.discharge_advice = "Olive oil application QID"
-        new_admission.follow_up = "Take shower and follow up in opd on ___________ "
+        new_admission.chief_complaints = config.CIRCUM_CHIEF_COMPLAINT
+        new_admission.preoperative_orders = config.CIRCUM_PREOP_ORDERS
+        new_admission.discharge_advice = config.CIRCUM_DISCHARGE_ADVICE
+        new_admission.follow_up = config.CIRCUM_FOLLOW_UP
 
         problem = Problem()
         problem.icd10class_code = "Z41.2"
@@ -146,8 +148,11 @@ class Patient(Base):
         surgery.steps = ""
         new_admission.add_child_encounter(surgery)
 
-        new_admission.prescribe_drug(session, None, "SYP CEFO-L (50MG/5ML)", "")
-        new_admission.prescribe_drug(session, None, "SYP PARACETAMOL (250MG/5ML)", "")
+        meds = string.split(config.CIRCUM_MEDS, ";")
+
+        for med in meds:
+            if med != "":
+                new_admission.prescribe_drug(session, None, med, "")
 
         return new_admission
 

@@ -12,6 +12,12 @@ REPORT_HEAD_SUBTITLE2 = "Phone 0000000, Fax 000000, Email mail@somehospital.com"
 REPORT_HEAD_LOGO_RIGHT = ""
 REPORT_HEAD_LOGO_LEFT = ""
 
+CIRCUM_CHIEF_COMPLAINT = "Admission for Circumcision"
+CIRCUM_PREOP_ORDERS = "Followe PAC Orders, NPO from 2am. Inj Cefazolin 50mg/kg stat before incision."
+CIRCUM_DISCHARGE_ADVICE = "Olive oil application QID"
+CIRCUM_FOLLOW_UP = "Take shower and follow up in opd on ___________"
+CIRCUM_MEDS = "SYP PARACETAMOL (250MG/5ML)"
+
 BATCH_IMPORT_COLUMNS = "national_id_no,name,age,sex,weight,address,bed_number"
 
 def format_duration(duration): #from_date, to_date):

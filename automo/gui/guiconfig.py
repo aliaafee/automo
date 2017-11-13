@@ -24,6 +24,12 @@ def load_config():
     config.REPORT_HEAD_LOGO_RIGHT = wx_config.Read("report-head-logo-right", config.REPORT_HEAD_LOGO_RIGHT)
     config.REPORT_HEAD_LOGO_LEFT = wx_config.Read("report-head-logo-left", config.REPORT_HEAD_LOGO_LEFT)
 
+    config.CIRCUM_CHIEF_COMPLAINT = wx_config.Read("circum-chief-complaint", config.CIRCUM_CHIEF_COMPLAINT)
+    config.CIRCUM_PREOP_ORDERS = wx_config.Read("circum-preop-orders", config.CIRCUM_PREOP_ORDERS)
+    config.CIRCUM_DISCHARGE_ADVICE = wx_config.Read("circum-discharge-advice", config.CIRCUM_DISCHARGE_ADVICE)
+    config.CIRCUM_FOLLOW_UP = wx_config.Read("circum-follow-up", config.CIRCUM_FOLLOW_UP)
+    config.CIRCUM_MEDS = wx_config.Read("circum-meds", config.CIRCUM_MEDS)
+
     config.BATCH_IMPORT_COLUMNS = wx_config.Read("batch-import-columns", config.BATCH_IMPORT_COLUMNS)
 
 
@@ -41,5 +47,11 @@ def save_config():
     wx_config.Write("report-head-subtitle2", config.REPORT_HEAD_SUBTITLE2)
     wx_config.Write("report-head-logo-right", config.REPORT_HEAD_LOGO_RIGHT)
     wx_config.Write("report-head-logo-left", config.REPORT_HEAD_LOGO_LEFT)
+
+    wx_config.Write("circum-chief-complaint", config.CIRCUM_CHIEF_COMPLAINT)
+    wx_config.Write("circum-preop-orders", config.CIRCUM_PREOP_ORDERS)
+    wx_config.Write("circum-discharge-advice", config.CIRCUM_DISCHARGE_ADVICE)
+    wx_config.Write("circum-follow-up", config.CIRCUM_FOLLOW_UP)
+    wx_config.Write("circum-meds", config.CIRCUM_MEDS)
 
     wx_config.Write("batch-import-columns", config.BATCH_IMPORT_COLUMNS)

@@ -1,10 +1,12 @@
 """Discharge Summary Report"""
+import string
 import tempfile
 from reportlab.platypus import Paragraph, PageBreak, ListFlowable, KeepTogether
 from reportlab.platypus.flowables import HRFlowable
 from reportlab.lib.pagesizes import A5
 from reportlab.lib.units import mm
 
+from .. import config
 from .. import database as db
 from .. import config
 from .doctemplate import DocTemplate, DefaultHeader, TableExpandable
@@ -27,6 +29,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A5):
 
     weight = None
     measurements = session.query(db.Measurements)\
+                            .filter(db.Measurements.parent == admission)\
                             .filter(db.Measurements.patient == patient)\
                             .filter(db.Measurements.weight != None)\
                             .order_by(db.Measurements.start_time.desc())\
@@ -188,6 +191,7 @@ def get_admission_summary_elements(admission, session, pagesize=A5):
 
     weight = None
     measurements = session.query(db.Measurements)\
+                            .filter(db.Measurements.parent == admission)\
                             .filter(db.Measurements.patient == patient)\
                             .filter(db.Measurements.weight != None)\
                             .order_by(db.Measurements.start_time)\
@@ -245,6 +249,7 @@ def get_admission_summary_elements(admission, session, pagesize=A5):
             ))
 
     vitals = session.query(db.VitalSigns)\
+                            .filter(db.VitalSigns.parent == admission)\
                             .filter(db.VitalSigns.patient == patient)\
                             .order_by(db.VitalSigns.start_time)\
                             .limit(1)
@@ -343,6 +348,7 @@ def get_ot_note_elements(admission, session, pagesize=A5):
 
     weight = None
     measurements = session.query(db.Measurements)\
+                            .filter(db.Measurements.parent == admission)\
                             .filter(db.Measurements.patient == patient)\
                             .filter(db.Measurements.weight != None)\
                             .order_by(db.Measurements.start_time)\
@@ -412,10 +418,14 @@ def get_ot_note_elements(admission, session, pagesize=A5):
 
     elements.append(Paragraph("Post Operative Orders", stylesheet['heading_1']))
 
-    prescription = [
-        Paragraph("SYP CEFO-L (50MG/5ML) _____________________________",stylesheet['prescription-item']),
-        Paragraph("SYP PARACETAMOL (250MG/5ML) _______________________",stylesheet['prescription-item'])
-    ]
+    meds = string.split(config.CIRCUM_MEDS, ";")
+
+    prescription = []
+    for med in meds:
+        if med != "":
+            prescription.append(
+                Paragraph(med, stylesheet['prescription-item'])
+            )
 
     elements.append(ListFlowable(prescription, style=stylesheet['list-default']))
     elements.append(Paragraph(" ", stylesheet['text']))
