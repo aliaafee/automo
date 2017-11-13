@@ -301,7 +301,7 @@ class BatchPatientImporter(wx.Dialog):
                         self.patient_grid.SetCellBackgroundColour(row, 0, wx.Colour(255, 0, 0))
                         isvalid = False
                         self.validation_errors.append(
-                            "In row {0}, A patient with the same Nation ID number found in database.".format(row)
+                            "In row {0}, A patient with the same National ID number found in database.".format(row)
                         )
         #TODO: Look for duplicates in this list
         return isvalid

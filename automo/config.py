@@ -18,7 +18,7 @@ CIRCUM_DISCHARGE_ADVICE = "Olive oil application QID"
 CIRCUM_FOLLOW_UP = "Take shower and follow up in opd on ___________"
 CIRCUM_MEDS = "SYP PARACETAMOL (250MG/5ML)"
 
-BATCH_IMPORT_COLUMNS = "national_id_no,name,age,sex,weight,address,bed_number"
+BATCH_IMPORT_COLUMNS = "national_id_no,name,age,sex,weight,address,bed_number,hospital_no"
 
 def format_duration(duration): #from_date, to_date):
     """Format python relative delta duration to human readable form."""

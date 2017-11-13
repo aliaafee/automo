@@ -79,6 +79,7 @@ class CWardInterface(WardInterface):
         with BatchPatientImporter(self, self.session) as importer:
             importer.CenterOnScreen()
             importer.ShowModal()
+        self.refresh()
 
 
     def new_admission(self):
