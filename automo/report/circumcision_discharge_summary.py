@@ -257,7 +257,7 @@ def get_admission_summary_elements(admission, session, pagesize=A5):
         vital = vitals.one()
         vitals_str = []
         bp = None
-        if vital.diastolic_bp is not None or vital.systolic_bp is not None:
+        if vital.diastolic_bp is not None and vital.systolic_bp is not None:
             bp = "{0}/{1}".format(int(round(vital.systolic_bp, 0)), int(round(vital.diastolic_bp, 0)))
         vital_components = [
             ("Pulse", vital.pulse_rate, "bpm", 0),

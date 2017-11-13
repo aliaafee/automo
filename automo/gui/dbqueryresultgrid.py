@@ -205,6 +205,8 @@ class GridColumnFloat(GridColumnDefn):
 
 
     def strpvalue(self, value_str):
+        if value_str == "":
+            return None
         return float(value_str)
 
 
@@ -226,6 +228,8 @@ class GridColumnInt(GridColumnDefn):
 
 
     def strpvalue(self, value_str):
+        if value_str == "":
+            return None
         return int(value_str)
 
 
