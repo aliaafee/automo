@@ -12,8 +12,9 @@ from .dbform import DbStringField
 
 class SettingsDialog(wx.Dialog):
     """Setting Frame"""
-    def __init__(self, parent, session, size=(600, -1), **kwds):
-        super(SettingsDialog, self).__init__(parent, size=size, **kwds)
+    def __init__(self, parent, session, size=(600, 500), **kwds):
+        super(SettingsDialog, self).__init__(parent, size=size, 
+              style=wx.CLOSE_BOX | wx.RESIZE_BORDER | wx.SYSTEM_MENU | wx.CAPTION, **kwds)
         
         self.SetTitle("AutoMO Settings")
 

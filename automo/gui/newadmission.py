@@ -274,7 +274,10 @@ class ProblemSelectorPage(BasePage):
 class NewAdmissionDialog(wx.adv.Wizard):
     """New Admission Wizard"""
     def __init__(self, parent, session, patient=None, **kwds):
-        super(NewAdmissionDialog, self).__init__(parent, **kwds)
+        super(NewAdmissionDialog, self).__init__(
+            parent,
+            style=wx.CLOSE_BOX | wx.RESIZE_BORDER | wx.SYSTEM_MENU | wx.CAPTION,
+            **kwds)
 
         self.SetTitle("New Admission")
 

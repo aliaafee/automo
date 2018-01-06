@@ -5,10 +5,12 @@ from .. import config
 from . import guiconfig
 
 
-class ConfigEditor(wx.Panel):
+class ConfigEditor(wx.ScrolledWindow):
     """Configuration Editor"""
     def __init__(self, parent, **kwds):
-        super(ConfigEditor, self).__init__(parent, **kwds)
+        super(ConfigEditor, self).__init__(parent, style=wx.VSCROLL, **kwds)
+
+        self.SetScrollbars(20,20,55,40)
 
         self.fields = [
             ("Startup Interface", guiconfig, 'STARTUP_INTERFACE'),
