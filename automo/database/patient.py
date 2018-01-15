@@ -171,7 +171,7 @@ class Patient(Base):
         if discharge_time is None:
             discharge_time = datetime.datetime.now()
 
-        admission.end(discharge_time)
+        admission.end(session, discharge_time)
 
 
     def add_encounter(self, encounter):

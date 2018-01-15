@@ -50,6 +50,77 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
     elements.append(demography_table)
     elements.append(HRFlowable(width="100%"))
 
+    elements.append(Paragraph("History & Physical Examination", stylesheet['heading_1']))
+
+    if patient.allergies is not None:
+        elements.append(Paragraph("<b>Allergic to {}</b>".format(patient.allergies), stylesheet['text']))
+
+    hx_components = [
+        ("Chief Complaints", admission.chief_complaints),
+        ("History of Present Illness", admission.history),
+        ("Past History", admission.past_history)
+    ]
+
+    for label, component in hx_components:
+        if component is not None:
+            elements.append(Paragraph(
+                "<b>{0}</b> {1}".format(label, component),
+                stylesheet['text']
+            ))
+
+    vitals = session.query(db.VitalSigns)\
+                            .filter(db.VitalSigns.parent == admission)\
+                            .filter(db.VitalSigns.patient == patient)\
+                            .order_by(db.VitalSigns.start_time)\
+                            .limit(1)
+    if vitals.count() == 1:
+        vital = vitals.one()
+        vitals_str = []
+        bp = None
+        if vital.diastolic_bp is not None and vital.systolic_bp is not None:
+            bp = "{0}/{1}".format(int(round(vital.systolic_bp, 0)), int(round(vital.diastolic_bp, 0)))
+        vital_components = [
+            ("Pulse", vital.pulse_rate, "bpm", 0),
+            ("BP", bp, "mmHg", None),
+            ("RR", vital.respiratory_rate, "bpm", 0),
+            (u"T\u00B0", vital.temperature, u"\u00B0C", 1)
+        ]
+        for label, value, unit, dp in vital_components:
+            if value is not None:
+                value_adjusted = value
+                if dp is not None:
+                    if dp == 0:
+                        value_adjusted = int(round(value, 0))
+                    else:
+                        value_adjusted = round(value, dp)
+                vitals_str.append(u"<b>{0}</b> {1} {2}".format(label, value_adjusted, unit))
+        if vitals_str:
+            elements.append(Paragraph(
+                u"<b>Vital Signs:</b> {}".format(", ".join(vitals_str)),
+                stylesheet['text']
+            ))
+
+    ex_components = [
+        ("General", admission.general_inspection),
+        ("Head", admission.exam_head),
+        ("Neck", admission.exam_neck),
+        ("Chest", admission.exam_chest),
+        ("Abdomen", admission.exam_abdomen),
+        ("Genitalia", admission.exam_genitalia),
+        ("Pelvic/Rectal", admission.exam_pelvic_rectal),
+        ("Extremities", admission.exam_extremities),
+        ("Others", admission.exam_other)
+    ]
+
+    for label, component in ex_components:
+        if component is not None:
+            elements.append(Paragraph(
+                "<b>{0}</b> {1}".format(label, component),
+                stylesheet['text']
+            ))
+
+    elements.append(HRFlowable(width="100%"))
+
     elements.append(Paragraph("Procedure Details", stylesheet['heading_1']))
 
     procedures = session.query(db.SurgicalProcedure)\
@@ -57,10 +128,10 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
 
     for procedure in procedures:
         procedure_data = [
-            ["Procedure:", Paragraph(procedure.procedure_name, stylesheet['default'])],
+            ["Procedure:", Paragraph(unicode(procedure.procedure_name), stylesheet['default'])],
             ["Surgeon:", Paragraph(unicode(procedure.personnel), stylesheet['default'])],
             ["Time:", Paragraph(config.format_datetime(procedure.start_time), stylesheet['default'])],
-            ["Findings:", Paragraph(procedure.findings, stylesheet['default'])]
+            ["Findings:", Paragraph(unicode(procedure.findings), stylesheet['default'])]
         ]
         procedure_table = TableExpandable(
             procedure_data,

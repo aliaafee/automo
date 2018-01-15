@@ -16,7 +16,7 @@ from .surgerypanel import SurgeryPanel
 from .progresspanel import ProgressPanel
 from .encounternotebookform import EncounterNotebookForm
 from .encounternotebookpage import EncounterNotebookPage
-from .dbform import DbMultilineStringField, DbOptionalMultilineStringField
+from .dbform import DbMultilineStringField, DbOptionalMultilineStringField, DbRelationField, DbCheckBoxField
 from .pdfviewer import PDFViewer
 
 ID_TRANSFER_BED = wx.NewId()
@@ -91,6 +91,15 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
 
         self.investigation_panel = EncounterNotebookPage(self.notebook, self.session)
         self.notebook.AddPage(self.investigation_panel, "Investigations")
+
+        complication_fields = [
+            DbRelationField("Complication Grade", 'complication_grade', self.session.query(db.ComplicationGrade)),
+            DbCheckBoxField("Disability on Discharge", 'complication_disability'),
+            DbMultilineStringField("Complication Summary", 'complication_summary', lines=8)
+        ]
+        self.discharge_note_panel = EncounterNotebookForm(self.notebook, self.session, db.Admission,
+                                                          complication_fields)
+        self.notebook.AddPage(self.discharge_note_panel, "Complications")
 
         discharge_note_fields = [
             DbMultilineStringField("Hospital Course Summary", 'hospital_course', lines=8),

@@ -1,11 +1,13 @@
 """Clinical Encounter"""
-from sqlalchemy import Column, Integer, ForeignKey, Text, String
+from sqlalchemy import Column, Integer, ForeignKey, Text, String, Boolean
 from sqlalchemy.orm import relationship
 
 from .encounter import Encounter
 from .. import dbexception
 from ..drug import Drug
 from ..prescription import Prescription
+from ..complicationgrade import ComplicationGrade
+from .surgicalprocedure import SurgicalProcedure
 
 
 class ClinicalEncounter(Encounter):
@@ -92,10 +94,26 @@ class Admission(ClinicalEncounter):
     discharge_advice = Column(Text)
     follow_up = Column(Text)
 
+    complication_grade_id = Column(String(5), ForeignKey('complicationgrade.id'))
+    complication_grade = relationship("ComplicationGrade", foreign_keys=[complication_grade_id],
+                                      back_populates="admissions")
+    complication_summary = Column(Text)
+    complication_disability = Column(Boolean)
 
-    def end(self, end_time=None):
+
+    def end(self, session, end_time=None):
         """Ends the admission"""
-        super(Admission, self).end(end_time)
+
+        if self.complication_grade_id is None:
+            surgical_enounters = session.query(SurgicalProcedure)\
+                                    .filter(SurgicalProcedure.parent == self)
+            if surgical_enounters.count() == 0:
+                print "No surgical procedures so None complication grade allowed"
+            else:
+                raise dbexception.AutoMODatabaseError("Surgical Complication Grade should be assigned before discharge.")
+                return
+
+        super(Admission, self).end(session, end_time)
 
         self.discharged_bed = self.bed
         self.bed = None

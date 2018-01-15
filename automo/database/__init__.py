@@ -29,6 +29,7 @@ from .encounters import Encounter,\
                         CompleteBloodCount,\
                         RenalFunctionTest,\
                         LiverFunctionTest
+from .complicationgrade import ComplicationGrade
 from .notes import Note,\
                    History
 from .prescription import Prescription
