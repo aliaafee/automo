@@ -16,8 +16,6 @@ from .pdfviewer import PDFViewer
 ID_DISCHARGE_MULTIPLE = wx.NewId()
 ID_PRINT_DISCHARGE_MULTIPLE = wx.NewId()
 ID_PRINT_PRESCRIPTION_MULTIPLE = wx.NewId()
-ID_PRINT_ADMISSION_MULTIPLE = wx.NewId()
-ID_PRINT_OT_NOTE = wx.NewId()
 
 
 class WardPanel(wx.Panel):
@@ -48,10 +46,6 @@ class WardPanel(wx.Panel):
         self.SetSizer(sizer)
 
         self.print_menu = wx.Menu()
-        self.print_menu.Append(ID_PRINT_ADMISSION_MULTIPLE, "Admission Sheets", "Print Admission Sheets")
-        self.print_menu.Bind(wx.EVT_MENU, self._on_print_multiple_admission, id=ID_PRINT_ADMISSION_MULTIPLE)
-        self.print_menu.Append(ID_PRINT_OT_NOTE, "OT Note Templates", "Print OT Note Templates")
-        self.print_menu.Bind(wx.EVT_MENU, self._on_print_multiple_ot_note, id=ID_PRINT_OT_NOTE)
         self.print_menu.Append(ID_PRINT_PRESCRIPTION_MULTIPLE, "Precriptions", "Print Prescriptions")
         self.print_menu.Bind(wx.EVT_MENU, self._on_print_multiple_prescription, id=ID_PRINT_PRESCRIPTION_MULTIPLE)
 
@@ -177,62 +171,6 @@ class WardPanel(wx.Panel):
         pdf_view = PDFViewer(None, title="Print Preview - Prescriptions")
         pdf_view.viewer.UsePrintDirect = ``False``
         pdf_view.viewer.LoadFile(prescriptions_filename)
-        pdf_view.Show()
-
-
-    def _on_print_multiple_ot_note(self, event):
-        selected_beds = self.beds_list.get_all_selected_object()
-
-        if not selected_beds:
-            print "Nothing Selected"
-            return
-
-        admissions = []
-        for bed in selected_beds:
-            if bed.admission is not None:
-                admissions.append(bed.admission)
-
-        prescriptions = PyPDF2.PdfFileMerger()
-        for admission in admissions:
-            prescription = admission.generate_ot_note(self.session)
-            with open(prescription,"rb") as pdf_file:
-                prescriptions.append(pdf_file)
-
-        prescriptions_filename = tempfile.mktemp(".pdf")
-        with open(prescriptions_filename,"wb") as combined_pdf:
-            prescriptions.write(combined_pdf)
-
-        pdf_view = PDFViewer(None, title="Print Preview - OT Note Templates")
-        pdf_view.viewer.UsePrintDirect = ``False``
-        pdf_view.viewer.LoadFile(prescriptions_filename)
-        pdf_view.Show()
-
-
-    def _on_print_multiple_admission(self, event):
-        selected_beds = self.beds_list.get_all_selected_object()
-
-        if not selected_beds:
-            print "Nothing Selected"
-            return
-
-        admissions = []
-        for bed in selected_beds:
-            if bed.admission is not None:
-                admissions.append(bed.admission)
-
-        summaries = PyPDF2.PdfFileMerger()
-        for admission in admissions:
-            summary = admission.generate_admission_summary(self.session)
-            with open(summary,"rb") as pdf_file:
-                summaries.append(pdf_file)
-
-        summaries_filename = tempfile.mktemp(".pdf")
-        with open(summaries_filename,"wb") as combined_pdf:
-            summaries.write(combined_pdf)
-
-        pdf_view = PDFViewer(None, title="Print Preview - Admission Sheets")
-        pdf_view.viewer.UsePrintDirect = ``False``
-        pdf_view.viewer.LoadFile(summaries_filename)
         pdf_view.Show()
 
 

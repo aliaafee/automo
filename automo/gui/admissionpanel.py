@@ -16,7 +16,10 @@ from .surgerypanel import SurgeryPanel
 from .progresspanel import ProgressPanel
 from .encounternotebookform import EncounterNotebookForm
 from .encounternotebookpage import EncounterNotebookPage
-from .dbform import DbMultilineStringField, DbOptionalMultilineStringField, DbRelationField, DbCheckBoxField
+from .dbform import DbMultilineStringField,\
+                    DbOptionalMultilineStringField,\
+                    DbCheckBoxField,\
+                    DbOptionsRelationField
 from .pdfviewer import PDFViewer
 
 ID_TRANSFER_BED = wx.NewId()
@@ -35,7 +38,7 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
 
         self.txt_bed = DbRelationCtrl(self.info_panel, self.session)
 
-        self.notebook = wx.Notebook(self)
+        self.notebook = wx.Notebook(self, style=wx.NB_NOPAGETHEME)
         self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self._on_changing_notebook)
         self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self._on_change_notebook)
 
@@ -93,7 +96,10 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
         self.notebook.AddPage(self.investigation_panel, "Investigations")
 
         complication_fields = [
-            DbRelationField("Complication Grade", 'complication_grade', self.session.query(db.ComplicationGrade)),
+            DbOptionsRelationField("Complication Grade", 'complication_grade',
+                                   self.session.query(db.ComplicationGrade),
+                                   nonelabel="Not Selected",
+                                   value_formatter=lambda grade: "<b>GRADE {0}</b> - {1}".format(grade.id, grade.description)),
             DbCheckBoxField("Disability on Discharge", 'complication_disability'),
             DbMultilineStringField("Complication Summary", 'complication_summary', lines=8)
         ]

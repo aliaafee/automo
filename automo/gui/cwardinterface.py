@@ -1,5 +1,7 @@
 """C Ward Interface"""
+import tempfile
 import wx
+import PyPDF2
 
 from .. import database as db
 from . import events
@@ -7,8 +9,11 @@ from . import images
 from .wardinterface import WardInterface
 from .batchpatientimporter import BatchPatientImporter
 from .newadmission import NewAdmissionDialog
+from .pdfviewer import PDFViewer
 
 ID_IMPORT_PATIENTS = wx.NewId()
+ID_PRINT_ADMISSION_MULTIPLE = wx.NewId()
+ID_PRINT_OT_NOTE = wx.NewId()
 
 
 def circum_admit_patient(patient_panel):
@@ -60,6 +65,11 @@ class CWardInterface(WardInterface):
 
         self.patient_panel.admit_patient = circum_admit_patient
 
+        self.patient_list_panel.ward_panel.print_menu.Append(ID_PRINT_ADMISSION_MULTIPLE, "Admission Sheets", "Print Admission Sheets")
+        self.patient_list_panel.ward_panel.print_menu.Bind(wx.EVT_MENU, self._on_print_multiple_admission, id=ID_PRINT_ADMISSION_MULTIPLE)
+        self.patient_list_panel.ward_panel.print_menu.Append(ID_PRINT_OT_NOTE, "OT Note Templates", "Print OT Note Templates")
+        self.patient_list_panel.ward_panel.print_menu.Bind(wx.EVT_MENU, self._on_print_multiple_ot_note, id=ID_PRINT_OT_NOTE)
+
 
     def create_toolbar(self):
         super(CWardInterface, self).create_toolbar()
@@ -80,6 +90,64 @@ class CWardInterface(WardInterface):
             importer.CenterOnScreen()
             importer.ShowModal()
         self.refresh()
+
+
+    def _on_print_multiple_ot_note(self, event):
+        selected_beds = self.patient_list_panel.ward_panel.beds_list.get_all_selected_object()
+
+        if not selected_beds:
+            print "Nothing Selected"
+            return
+
+        admissions = []
+        for bed in selected_beds:
+            if bed.admission is not None:
+                admissions.append(bed.admission)
+
+        prescriptions = PyPDF2.PdfFileMerger()
+        for admission in admissions:
+            if admission.type == "circumcisionadmission":
+                prescription = admission.generate_ot_note(self.session)
+                with open(prescription,"rb") as pdf_file:
+                    prescriptions.append(pdf_file)
+
+        prescriptions_filename = tempfile.mktemp(".pdf")
+        with open(prescriptions_filename,"wb") as combined_pdf:
+            prescriptions.write(combined_pdf)
+
+        pdf_view = PDFViewer(None, title="Print Preview - OT Note Templates")
+        pdf_view.viewer.UsePrintDirect = ``False``
+        pdf_view.viewer.LoadFile(prescriptions_filename)
+        pdf_view.Show()
+
+
+    def _on_print_multiple_admission(self, event):
+        selected_beds = self.patient_list_panel.ward_panel.beds_list.get_all_selected_object()
+
+        if not selected_beds:
+            print "Nothing Selected"
+            return
+
+        admissions = []
+        for bed in selected_beds:
+            if bed.admission is not None:
+                admissions.append(bed.admission)
+
+        summaries = PyPDF2.PdfFileMerger()
+        for admission in admissions:
+            if admission.type == "circumcisionadmission":
+                summary = admission.generate_admission_summary(self.session)
+                with open(summary,"rb") as pdf_file:
+                    summaries.append(pdf_file)
+
+        summaries_filename = tempfile.mktemp(".pdf")
+        with open(summaries_filename,"wb") as combined_pdf:
+            summaries.write(combined_pdf)
+
+        pdf_view = PDFViewer(None, title="Print Preview - Admission Sheets")
+        pdf_view.viewer.UsePrintDirect = ``False``
+        pdf_view.viewer.LoadFile(summaries_filename)
+        pdf_view.Show()
 
 
     def new_admission(self):
