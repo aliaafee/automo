@@ -26,9 +26,11 @@ from .encounters import Encounter,\
                         Investigation,\
                         Imaging,\
                         Endoscopy,\
+                        Histopathology,\
                         CompleteBloodCount,\
                         RenalFunctionTest,\
-                        LiverFunctionTest
+                        LiverFunctionTest,\
+                        OtherEncounter
 from .complicationgrade import ComplicationGrade
 from .notes import Note,\
                    History

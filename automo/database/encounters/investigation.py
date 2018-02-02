@@ -56,6 +56,20 @@ class Endoscopy(Investigation):
     endoscopist = Column(String(255))
 
 
+class Histopathology(Investigation):
+    """Histopathology."""
+    id = Column(Integer, ForeignKey('investigation.id'), primary_key=True)
+    
+    __mapper_args__ = {
+        'polymorphic_identity':'histopathology'
+    }
+
+    site = Column(String(255))
+    report = Column(Text)
+    impression = Column(Text)
+    pathologist = Column(String(255))
+
+
 class CompleteBloodCount(Investigation):
     """CompleteBloodCount.
       hemoglobin (Hemoglobin) in g% 
@@ -112,3 +126,20 @@ class LiverFunctionTest(Investigation):
     alt = Column(Float)
     ast = Column(Float)
     alp = Column(Float)
+
+
+class OtherTest(Investigation):
+    """Other Test.
+      name Name of the test
+      value Result of the test, can be numerical or text
+      unit Unit of the result, if applicable"""
+
+    id = Column(Integer, ForeignKey('investigation.id'), primary_key=True)
+    
+    __mapper_args__ = {
+        'polymorphic_identity':'othertest'
+    }
+
+    name = Column(String(255))
+    value = Column(String(255))
+    unit = Column(String(255))

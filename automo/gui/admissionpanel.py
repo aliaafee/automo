@@ -14,12 +14,17 @@ from .prescriptionpanel import PrescriptionPanel
 from .bedselector import BedSelectorDialog
 from .surgerypanel import SurgeryPanel
 from .progresspanel import ProgressPanel
+from .imagingpanel import ImagingPanel
 from .encounternotebookform import EncounterNotebookForm
 from .encounternotebookpage import EncounterNotebookPage
+from .subencounters import Subencounters
 from .dbform import DbMultilineStringField,\
                     DbOptionalMultilineStringField,\
                     DbCheckBoxField,\
-                    DbOptionsRelationField
+                    DbOptionsRelationField,\
+                    DbDateTimeField,\
+                    DbStringField,\
+                    DbRelationField
 from .pdfviewer import PDFViewer
 
 ID_TRANSFER_BED = wx.NewId()
@@ -80,20 +85,74 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
         self.problems_panel = ProblemPanel(self.notebook, self.session)
         self.notebook.AddPage(self.problems_panel, "Diagnosis")
 
-        self.progress_notes_panel = ProgressPanel(self.notebook, self.session)
-        self.notebook.AddPage(self.progress_notes_panel, "Progress Notes")
+        self.subencounters = Subencounters(self.notebook, self.session)
+        progress_fields = [
+            DbDateTimeField("Time", 'examination_time', required=True),
+            DbRelationField("Doctor", 'personnel', self.session.query(db.Doctor)),
+            DbMultilineStringField("Subjective", 'subjective'),
+            DbMultilineStringField("Objective", 'objective'),
+            DbMultilineStringField("Assessment", 'assessment'),
+            DbMultilineStringField("Plan", 'plan')
+        ]
+        self.subencounters.add_subencounter_class("Progress Note", db.Progress, progress_fields)
 
-        self.surgery_panel = SurgeryPanel(self.notebook, self.session)
-        self.notebook.AddPage(self.surgery_panel, "Procedures")
+        procedure_fields = [
+            DbDateTimeField("Time Started", 'start_time', required=True),
+            DbDateTimeField("Time Completed", 'end_time', required=True),
+            DbRelationField("Surgeon", 'personnel', self.session.query(db.Doctor)),
+            DbStringField("Assistants(s)", 'assistant'),
+            DbStringField("Anesthetist(s)", 'anesthetist'),
+            DbStringField("Nurse(s)", 'nurse'),
+            DbStringField("Preop Diagnosis", 'preoperative_diagnosis'),
+            DbStringField("Postop Diagnosis", 'postoperative_diagnosis'),
+            DbStringField("Procedure Name", 'procedure_name'),
+            DbMultilineStringField("Findings", 'findings'),
+            DbMultilineStringField("Steps", 'steps'),
+        ]
+        self.subencounters.add_subencounter_class("Procedure Note", db.SurgicalProcedure, procedure_fields)
+
+        imaging_fields = [
+            DbDateTimeField("Time", 'record_time', required=True),
+            DbStringField("Imaging Type", 'imaging_type'),
+            DbStringField("Site", 'site'),
+            DbStringField("Radiologist", 'radiologist'),
+            DbMultilineStringField("Impression", 'impression'),
+            DbMultilineStringField("Report", 'report')
+        ]
+        self.subencounters.add_subencounter_class("Imaging Report", db.Imaging, imaging_fields)
+
+        endoscopy_fields = [
+            DbDateTimeField("Time", 'record_time', required=True),
+            DbStringField("Site", 'site'),
+            DbStringField("Endoscopist", 'endoscopist'),
+            DbMultilineStringField("Impression", 'impression'),
+            DbMultilineStringField("Report", 'report')
+        ]
+        self.subencounters.add_subencounter_class("Endoscopy Report", db.Endoscopy, endoscopy_fields)
+
+        histopathology_fields = [
+            DbDateTimeField("Time", 'record_time', required=True),
+            DbStringField("Site", 'site'),
+            DbStringField("Pathologist", 'pathologist'),
+            DbMultilineStringField("Impression", 'impression'),
+            DbMultilineStringField("Report", 'report')
+        ]
+        self.subencounters.add_subencounter_class("Histopathology Report", db.Histopathology, histopathology_fields)
+        
+        other_fields = [
+            DbDateTimeField("Time Started", 'start_time', required=True),
+            DbDateTimeField("Time Completed", 'end_time', required=True),
+            DbMultilineStringField("Note", 'note')
+        ]
+        self.subencounters.add_subencounter_class("Other", db.OtherEncounter, other_fields)
+
+        self.notebook.AddPage(self.subencounters, "Notes and Reports")
 
         self.measurements_panel = MeasurementsPanel(self.notebook, self.session)
         self.notebook.AddPage(self.measurements_panel, "Measurements")
 
         self.vitals_panel = VitalsPanel(self.notebook, self.session)
         self.notebook.AddPage(self.vitals_panel, "Vitals")
-
-        self.investigation_panel = EncounterNotebookPage(self.notebook, self.session)
-        self.notebook.AddPage(self.investigation_panel, "Investigations")
 
         complication_fields = [
             DbOptionsRelationField("Complication Grade", 'complication_grade',
