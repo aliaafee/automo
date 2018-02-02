@@ -71,10 +71,11 @@ def get_prescription_pdf(encounter, session):
 
     prescription = []
     for item in encounter.prescription:
-        prescription.append(Paragraph(
-            "{0} {1}".format(item.drug.name, item.drug_order),
-            stylesheet['prescription-item-big']
-        ))
+        if item.active:
+            prescription.append(Paragraph(
+                "{0} {1}".format(item.drug.name, item.drug_order),
+                stylesheet['prescription-item-big']
+            ))
     elements.append(ListFlowable(prescription, style=stylesheet['list-big']))
 
     doc = PrescriptionTemplate(filename, encounter)

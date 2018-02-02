@@ -153,10 +153,11 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
     elements.append(Paragraph("Prescription", stylesheet['heading_1']))
     prescription = []
     for item in admission.prescription:
-        prescription.append(Paragraph(
-            "{0} {1}".format(item.drug.name, item.drug_order),
-            stylesheet['prescription-item']
-        ))
+        if item.active:
+            prescription.append(Paragraph(
+                "{0} {1}".format(item.drug.name, item.drug_order),
+                stylesheet['prescription-item']
+            ))
     elements.append(ListFlowable(prescription, style=stylesheet['list-default']))
     elements.append(HRFlowable(width="100%"))
 
@@ -166,9 +167,9 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
 
     signature = [
         [
-            "Doctor:",
+            "Admitting Doctor:",
             Paragraph(unicode(admission.personnel), stylesheet['default']),
-            "Signature:",
+            "",
             ""
         ],
         [
@@ -181,7 +182,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
 
     signature_table = TableExpandable(
         signature,
-        colWidths=[None, None],
+        colWidths=[25*mm, None, 25*mm, None],
         pagesize=pagesize, rightMargin=10*mm, leftMargin=10*mm,
         style=stylesheet['table-default'])
     elements.append(signature_table)
