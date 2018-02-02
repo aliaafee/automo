@@ -10,10 +10,17 @@ from .acdbtextctrl import AcDbTextCtrl
 from .objectlistviewmod import ObjectListViewMod, EVT_OVL_CHECK_EVENT
 
 
+ID_PRESET_ADD = wx.NewId()
+ID_PRESET_REMOVE = wx.NewId()
+
+
 class PrescriptionPanel(EncounterNotebookPage):
     """Prescription Panel"""
     def __init__(self, parent, session, **kwds):
         super(PrescriptionPanel, self).__init__(parent, session, **kwds)
+
+        self.preset_add_id_object = {}
+        self.preset_remove_id_object = {}
 
         self.drug_add_panel = wx.Panel(self)
 
@@ -32,7 +39,7 @@ class PrescriptionPanel(EncounterNotebookPage):
 
         self.btn_preset = wx.Button(self.drug_add_panel, label="...", size=wx.Size(24, 24))
         self.btn_preset.SetToolTip("Add Preset")
-        self.btn_preset.Bind(wx.EVT_BUTTON, self._on_add_preset)
+        self.btn_preset.Bind(wx.EVT_BUTTON, self._on_preset_menu)
 
         grid_sizer = wx.FlexGridSizer(2, 4, 2, 2)
         grid_sizer.AddMany([
@@ -107,9 +114,84 @@ class PrescriptionPanel(EncounterNotebookPage):
         self.txt_drug_name.SetFocus()
 
     
-    def _on_add_preset(self, event):
-        pass
+    def _on_preset_menu(self, event):
+        preset_menu = wx.Menu()
 
+        self.preset_add_id_object = {}
+        menu_id = ID_PRESET_ADD * 100
+        for preset in self.session.query(db.PresetPrescription).order_by(db.PresetPrescription.name):
+            preset_menu.Append(menu_id, preset.name)
+            preset_menu.Bind(wx.EVT_MENU, self._on_select_preset, id=menu_id)
+            self.preset_add_id_object[menu_id] = preset
+            menu_id += 1
+
+        preset_menu.AppendSeparator()
+
+        preset_menu.Append(ID_PRESET_ADD, "Add Current", "Add current prescription to presets.")
+        preset_menu.Bind(wx.EVT_MENU, self._on_add_preset, id=ID_PRESET_ADD)
+
+        remove_menu = wx.Menu()
+
+        self.preset_remove_id_object = {}
+        menu_id = ID_PRESET_REMOVE  * 100
+        for preset in self.session.query(db.PresetPrescription).order_by(db.PresetPrescription.name):
+            remove_menu.Append(menu_id, preset.name)
+            self.Bind(wx.EVT_MENU, self._on_remove_preset, id=menu_id)
+            self.preset_remove_id_object[menu_id] = preset
+            menu_id += 1
+
+        preset_menu.AppendSubMenu(remove_menu, "Remove", "Remove prescription preset.")
+
+        event.GetEventObject().PopupMenu(preset_menu)
+
+
+    def _on_select_preset(self, event):
+        preset = self.preset_add_id_object[event.GetId()]
+        for medication in preset.medications:
+            print medication.drug
+            print medication.drug_order
+            self.encounter.prescribe_drug(self.session, medication.drug, "", medication.drug_order, True)
+        self.session.commit()
+        self._refresh_prescription()
+
+
+    def _on_remove_preset(self, event):
+        preset = self.preset_remove_id_object[event.GetId()]
+        self.session.delete(preset)
+        self.session.commit()
+
+
+    def _on_add_preset(self, event):
+        """Add Current Prescription to presets"""
+        name = u""
+        with wx.TextEntryDialog(self, "Name", "Add Precscription Preset") as dlg:
+            dlg.ShowModal()
+            name = dlg.GetValue()
+
+        if name == "":
+            return
+
+        if self.session.query(db.PresetPrescription).filter(db.PresetPrescription.name == name).count() != 0:
+            dlg = wx.MessageDialog(self, 'The name "{0}" exists. Cannot add'.format(name),
+                                   'Add Preset',
+                                   wx.OK | wx.ICON_INFORMATION)
+            dlg.ShowModal()
+            return
+
+        new_preset = db.PresetPrescription(name=name)
+        self.session.add(new_preset)
+        self.session.flush()
+
+        for row in self.encounter.prescription:
+            new_medication = db.PresetMedication(
+                drug = row.drug,
+                drug_order = row.drug_order
+            )
+            new_preset.medications.append(new_medication)
+
+        self.session.commit()
+
+    
     def _on_prescription_check(self, event):
         if event.value is True:
             event.object.active = True

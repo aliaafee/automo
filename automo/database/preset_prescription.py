@@ -23,8 +23,5 @@ class PresetMedication(Base):
 
     drug_id = Column(Integer, ForeignKey('drug.id'))
     drug = relationship("Drug")
-
     drug_order = Column(String(250))
-    duration = Column(Integer) #In Days
-
     active = Column(Boolean)
