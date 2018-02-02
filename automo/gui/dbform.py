@@ -104,7 +104,6 @@ class DbOptionalMultilineStringField(DbFormFieldDefn):
         else:
             self.textbox.Hide()
         self.parent.Layout()
-        self.parent.SetScrollbars(20,20,55,40)
         self.on_editor_changed(event)
 
     def create_editor(self, parent):
@@ -572,7 +571,9 @@ class DbFormPanel(wx.ScrolledWindow):
 
         self.SetSizer(sizer)
 
-        if scrollable:
+        self.scrollable = scrollable
+
+        if self.scrollable:
             self.SetScrollbars(20,20,55,40)
         else:
             sizer.AddGrowableRow(len(self.fields) - 1)
@@ -589,8 +590,13 @@ class DbFormPanel(wx.ScrolledWindow):
         for field in self.fields:
             field.set_object(db_object)
 
-        self.SetScrollbars(20,20,55,40)
         self.Layout()
+
+
+    def Layout(self):
+        super(DbFormPanel, self).Layout()
+        if self.scrollable:
+            self.SetScrollbars(20,20,55,40)
 
 
     def lock(self):
