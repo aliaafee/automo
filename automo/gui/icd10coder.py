@@ -275,7 +275,7 @@ class Icd10CategoryList(wx.html.SimpleHtmlListBox):
 
             htmls.append(html)
 
-        self.AppendItems(htmls)
+        self.SetItems(htmls)
 
 
 class Icd10Coder(wx.Dialog):
