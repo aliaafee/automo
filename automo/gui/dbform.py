@@ -656,16 +656,16 @@ class DbFormSwitcher(wx.Panel):
         """Show the appropriate form and set the data to the form"""
         self._show_form(db_object.type, db_object.__class__, fields)
         self.active_form.set_object(db_object)
+        if self.locked:
+            self.active_form.lock()
+        else:
+            self.active_form.unlock()
 
 
     def update_object(self, db_object):
         if self.active_form is None:
             return
         self.active_form.update_object(db_object)
-        if self.locked:
-            self.active_form.lock()
-        else:
-            self.active_form.unlock()
 
 
     def unlock(self):
