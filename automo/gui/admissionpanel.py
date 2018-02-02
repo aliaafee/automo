@@ -12,11 +12,7 @@ from .measurementspanel import MeasurementsPanel
 from .vitalspanel import VitalsPanel
 from .prescriptionpanel import PrescriptionPanel
 from .bedselector import BedSelectorDialog
-from .surgerypanel import SurgeryPanel
-from .progresspanel import ProgressPanel
-from .imagingpanel import ImagingPanel
 from .encounternotebookform import EncounterNotebookForm
-from .encounternotebookpage import EncounterNotebookPage
 from .subencounters import Subencounters
 from .dbform import DbMultilineStringField,\
                     DbOptionalMultilineStringField,\
@@ -85,7 +81,15 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
         self.problems_panel = ProblemPanel(self.notebook, self.session)
         self.notebook.AddPage(self.problems_panel, "Diagnosis")
 
+        self.measurements_panel = MeasurementsPanel(self.notebook, self.session)
+        self.notebook.AddPage(self.measurements_panel, "Measurements")
+
+        self.vitals_panel = VitalsPanel(self.notebook, self.session)
+        self.notebook.AddPage(self.vitals_panel, "Vitals")
+
         self.subencounters = Subencounters(self.notebook, self.session)
+        self.notebook.AddPage(self.subencounters, "Notes && Reports")
+
         progress_fields = [
             DbDateTimeField("Time", 'examination_time', required=True),
             DbRelationField("Doctor", 'personnel', self.session.query(db.Doctor)),
@@ -109,7 +113,10 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
             DbMultilineStringField("Findings", 'findings'),
             DbMultilineStringField("Steps", 'steps'),
         ]
-        self.subencounters.add_subencounter_class("Procedure Note", db.SurgicalProcedure, procedure_fields)
+        self.subencounters.add_subencounter_class("Procedure Note",
+                                                  db.SurgicalProcedure,
+                                                  procedure_fields,
+                                                  lambda v: u"{}".format(v.procedure_name))
 
         imaging_fields = [
             DbDateTimeField("Time", 'record_time', required=True),
@@ -119,7 +126,10 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
             DbMultilineStringField("Impression", 'impression'),
             DbMultilineStringField("Report", 'report')
         ]
-        self.subencounters.add_subencounter_class("Imaging Report", db.Imaging, imaging_fields)
+        self.subencounters.add_subencounter_class("Imaging Report",
+                                                  db.Imaging,
+                                                  imaging_fields,
+                                                  lambda v: u"{0} {1}".format(v.imaging_type, v.site))
 
         endoscopy_fields = [
             DbDateTimeField("Time", 'record_time', required=True),
@@ -128,7 +138,10 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
             DbMultilineStringField("Impression", 'impression'),
             DbMultilineStringField("Report", 'report')
         ]
-        self.subencounters.add_subencounter_class("Endoscopy Report", db.Endoscopy, endoscopy_fields)
+        self.subencounters.add_subencounter_class("Endoscopy Report",
+                                                  db.Endoscopy,
+                                                  endoscopy_fields,
+                                                  lambda v: u"{}".format(v.site))
 
         histopathology_fields = [
             DbDateTimeField("Time", 'record_time', required=True),
@@ -137,22 +150,21 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
             DbMultilineStringField("Impression", 'impression'),
             DbMultilineStringField("Report", 'report')
         ]
-        self.subencounters.add_subencounter_class("Histopathology Report", db.Histopathology, histopathology_fields)
+        self.subencounters.add_subencounter_class("Histopathology Report",
+                                                  db.Histopathology,
+                                                  histopathology_fields,
+                                                  lambda v: u"{}".format(v.site))
         
         other_fields = [
             DbDateTimeField("Time Started", 'start_time', required=True),
             DbDateTimeField("Time Completed", 'end_time', required=True),
+            DbStringField("Title", 'title'),
             DbMultilineStringField("Note", 'note')
         ]
-        self.subencounters.add_subencounter_class("Other", db.OtherEncounter, other_fields)
-
-        self.notebook.AddPage(self.subencounters, "Notes and Reports")
-
-        self.measurements_panel = MeasurementsPanel(self.notebook, self.session)
-        self.notebook.AddPage(self.measurements_panel, "Measurements")
-
-        self.vitals_panel = VitalsPanel(self.notebook, self.session)
-        self.notebook.AddPage(self.vitals_panel, "Vitals")
+        self.subencounters.add_subencounter_class("Other",
+                                                  db.OtherEncounter,
+                                                  other_fields,
+                                                  lambda v: u"{}".format(v.title))
 
         complication_fields = [
             DbOptionsRelationField("Complication Grade", 'complication_grade',

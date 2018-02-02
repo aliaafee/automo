@@ -1,5 +1,5 @@
 """Other Encounter"""
-from sqlalchemy import Column, Integer, ForeignKey, Text
+from sqlalchemy import Column, Integer, ForeignKey, Text, String
 
 from .encounter import Encounter
 
@@ -13,4 +13,5 @@ class OtherEncounter(Encounter):
         'polymorphic_identity':'otherencounter'
     }
 
+    title = Column(String(255))
     note = Column(Text())

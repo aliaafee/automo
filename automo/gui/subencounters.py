@@ -21,6 +21,7 @@ class Subencounters(EncounterNotebookPage):
 
         self.subencounter_classes = {}
         self.subencounter_fields = {}
+        self.subencounter_subtitle_decorators = {}
         self.subencounter_list_decorators = {}
         self.subencounter_titles = {}
 
@@ -55,11 +56,12 @@ class Subencounters(EncounterNotebookPage):
         self.add_menu = wx.Menu()
 
 
-    def add_subencounter_class(self, title, subencounter_class, subencounter_fields, list_decorator=None):
+    def add_subencounter_class(self, title, subencounter_class, subencounter_fields, subtitle_decorator=None, list_decorator=None):
         type_name = subencounter_class().__mapper_args__['polymorphic_identity']
 
         self.subencounter_classes[type_name] = subencounter_class
         self.subencounter_fields[type_name] = subencounter_fields
+        self.subencounter_subtitle_decorators[type_name] = subtitle_decorator
         self.subencounter_list_decorators[type_name] = list_decorator
         self.subencounter_titles[type_name] = title
 
@@ -69,7 +71,7 @@ class Subencounters(EncounterNotebookPage):
         self.add_menu.Bind(wx.EVT_MENU, self._on_add_subencounter, id=add_menu_id)
 
 
-    def _default_list_decorator(self, encounter_object, title):
+    def _default_list_decorator(self, encounter_object, title, subtitle_decorator=None):
         date_str = config.format_date(encounter_object.start_time)
         html = u'<font size="2"><table width="100%">'\
                     '<tr>'\
@@ -77,9 +79,18 @@ class Subencounters(EncounterNotebookPage):
                         '<td valign="top"><b>{0}</b></td>'\
                         '<td valign="top" width="100%"><b>{1}</b></td>'\
                     '</tr>'\
+                    '{2}'\
                 '</table></font>'
 
-        return html.format(date_str, title)
+        subtitle = ""
+        if subtitle_decorator is not None:
+            subtitle_html = u'<tr>'\
+                                '<td></td>'\
+                                '<td colspan="2">{}</td>'\
+                            '</tr>'
+            subtitle = subtitle_html.format(subtitle_decorator(encounter_object))
+
+        return html.format(date_str, title, subtitle)
 
 
     def subencounter_list_decorator(self, encounter_object, query_string):
@@ -87,10 +98,14 @@ class Subencounters(EncounterNotebookPage):
         type_name = encounter_object.type
 
         if type_name not in self.subencounter_list_decorators.keys():
-            return self._default_list_decorator(encounter_object, self.subencounter_titles[type_name])
+            return self._default_list_decorator(encounter_object,
+                                                self.subencounter_titles[type_name],
+                                                self.subencounter_subtitle_decorators[type_name])
 
         if self.subencounter_list_decorators[type_name] is None:
-            return self._default_list_decorator(encounter_object, self.subencounter_titles[type_name])
+            return self._default_list_decorator(encounter_object,
+                                                self.subencounter_titles[type_name],
+                                                self.subencounter_subtitle_decorators[type_name])
 
         return self.subencounter_list_decorators[type_name](encounter_object, query_string)
 
