@@ -167,10 +167,7 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
                                                   lambda v: u"{}".format(v.title))
 
         complication_fields = [
-            DbOptionsRelationField("Complication Grade", 'complication_grade',
-                                   self.session.query(db.ComplicationGrade),
-                                   nonelabel="Not Selected",
-                                   value_formatter=lambda grade: "<b>GRADE {0}</b> - {1}".format(grade.id, grade.description)),
+            DbRelationField("Complication Grade", 'complication_grade', self.session.query(db.ComplicationGrade)),
             DbCheckBoxField("Disability on Discharge", 'complication_disability'),
             DbMultilineStringField("Complication Summary", 'complication_summary', lines=8)
         ]
