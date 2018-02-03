@@ -7,6 +7,7 @@ from . import images
 from .encounternotebookpage import EncounterNotebookPage
 from .icd10coder import Icd10Coder
 from .dblistbox import DbListBox
+from .problempickerdialog import ProblemPickerDialog
 
 
 def problems_decorator(problem_object):
@@ -53,7 +54,7 @@ class ProblemPanel(EncounterNotebookPage):
     def __init__(self, parent, session, **kwds):
         super(ProblemPanel, self).__init__(parent, session, **kwds)
 
-        self.toolbar.SetWindowStyleFlag(wx.TB_HORZ_TEXT)
+        self.toolbar.SetWindowStyleFlag(wx.TB_HORZ_TEXT | wx.TB_FLAT | wx.TB_NODIVIDER)
 
         self.toolbar.AddTool(
             wx.ID_ADD,
@@ -67,7 +68,7 @@ class ProblemPanel(EncounterNotebookPage):
             ID_PRE_EXISTING,
             label="Add Pre-existing",
             bitmap=images.get("add_condition"),
-            shortHelp="Add Pre-existing Problem"
+            shortHelp="Add Pre-existing Condition"
         )
         self.Bind(wx.EVT_TOOL, self._on_add_preexisting_problem, id=ID_PRE_EXISTING)
 
@@ -109,8 +110,17 @@ class ProblemPanel(EncounterNotebookPage):
 
 
     def _on_add_preexisting_problem(self, event):
-        #TODO: Add Pre-existing problem
-        pass
+        with ProblemPickerDialog(self, self.session, self.encounter, problems_decorator) as dlg:
+            dlg.CenterOnScreen()
+            if dlg.ShowModal() == wx.ID_OK:
+                selected_problems = dlg.get_selected_problems()
+                for problem in selected_problems:
+                    self.encounter.add_problem(problem)
+                self.session.commit()
+                self.set_encounter(self.encounter)
+
+                new_event = events.EncounterChangedEvent(events.ID_ENCOUNTER_CHANGED, object=problem) 
+                wx.PostEvent(self, new_event)
 
 
     def _on_add_quick(self, event):
