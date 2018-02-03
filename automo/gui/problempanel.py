@@ -45,11 +45,15 @@ def problems_decorator(problem_object):
         modifer_str
     )
 
+ID_PRE_EXISTING = wx.NewId()
+
 
 class ProblemPanel(EncounterNotebookPage):
     """Problem Panel"""
     def __init__(self, parent, session, **kwds):
         super(ProblemPanel, self).__init__(parent, session, **kwds)
+
+        self.toolbar.SetWindowStyleFlag(wx.TB_HORZ_TEXT)
 
         self.toolbar.AddTool(
             wx.ID_ADD,
@@ -58,6 +62,14 @@ class ProblemPanel(EncounterNotebookPage):
             shortHelp="Add Condition"
         )
         self.Bind(wx.EVT_TOOL, self._on_add_problem, id=wx.ID_ADD)
+
+        self.toolbar.AddTool(
+            ID_PRE_EXISTING,
+            label="Add Pre-existing",
+            bitmap=images.get("add_condition"),
+            shortHelp="Add Pre-existing Problem"
+        )
+        self.Bind(wx.EVT_TOOL, self._on_add_preexisting_problem, id=ID_PRE_EXISTING)
 
         self.toolbar.Realize()
 
@@ -94,6 +106,11 @@ class ProblemPanel(EncounterNotebookPage):
 
             new_event = events.EncounterChangedEvent(events.ID_ENCOUNTER_CHANGED, object=new_problem) 
             wx.PostEvent(self, new_event)
+
+
+    def _on_add_preexisting_problem(self, event):
+        #TODO: Add Pre-existing problem
+        pass
 
 
     def _on_add_quick(self, event):
