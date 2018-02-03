@@ -2,6 +2,7 @@
 import wx
 
 from .. import database as db
+from . import images
 from . import events
 from .basedialog import BaseDialog
 from .pydatepickerctrl import PyDatePickerCtrl
@@ -10,13 +11,14 @@ from .pydatetimepickerctrl import PyDateTimePickerCtrl, EVT_DATETIME_CHANGED
 
 
 class DbFormFieldDefn(object):
-    def __init__(self, label, str_attr, required=False, editable=True):
+    def __init__(self, label, str_attr, required=False, editable=True, help_text=None):
         self.label = label
         self.str_attr = str_attr
         self.editable = editable
         self.editor = None
         self.db_object = None
         self.required = required
+        self.help_text = help_text
 
     def create_editor(self, parent):
         self.editor = wx.TextCtrl(parent)
@@ -46,6 +48,17 @@ class DbFormFieldDefn(object):
         else:
             label = self.label
         return wx.StaticText(parent, label=label)
+
+    def create_help_button(self, parent):
+        if self.help_text is None:
+            return None
+        help_button = wx.BitmapButton(parent, bitmap=images.get('help_24'),
+                                      style=wx.BU_AUTODRAW | wx.BORDER_NONE, size=wx.Size(21, 21))
+        help_button.Bind(wx.EVT_BUTTON, self._on_help_button)
+        return help_button
+
+    def _on_help_button(self, event):
+        wx.MessageBox(self.help_text, "Field Help")
 
     def set_editor_value(self, value):
         if value is None:
@@ -398,8 +411,8 @@ class DbFloatField(DbFormFieldDefn):
 
 
 class DbEnumField(DbFormFieldDefn):
-    def __init__(self, label, str_attr, choices, required=False, editable=True):
-        super(DbEnumField, self).__init__(label, str_attr, required, editable)
+    def __init__(self, label, str_attr, choices, required=False, editable=True, help_text=None):
+        super(DbEnumField, self).__init__(label, str_attr, required, editable, help_text)
         self.choices = choices
 
     def create_editor(self, parent):
@@ -432,8 +445,8 @@ class DbEnumField(DbFormFieldDefn):
 
 
 class DbRelationField(DbEnumField):
-    def __init__(self, label, str_attr, db_choices_query, value_formatter=None, required=False, editable=True):
-        super(DbRelationField, self).__init__(label, str_attr, [], required, editable)
+    def __init__(self, label, str_attr, db_choices_query, value_formatter=None, required=False, editable=True, help_text=None):
+        super(DbRelationField, self).__init__(label, str_attr, [], required, editable, help_text)
         self.db_choices_query = db_choices_query
         self.value_formatter = value_formatter
         if value_formatter is None:
@@ -561,13 +574,21 @@ class DbFormPanel(wx.ScrolledWindow):
         self.db_object_class = db_object_class
         self.fields = fields
 
-        sizer = wx.FlexGridSizer(len(self.fields), 2, 4, 4)
+        sizer = wx.FlexGridSizer(len(self.fields), 3, 4, 4)
         for field in self.fields:
             label = field.create_label(self)
-            editor = field.create_editor(self)
             sizer.Add(label, 0)#, wx.ALIGN_CENTER_VERTICAL)
+
+            help_button = field.create_help_button(self)
+            if help_button is None:
+                sizer.AddSpacer(1)
+            else:
+                sizer.Add(help_button, 0, wx.EXPAND)
+            
+            editor = field.create_editor(self)
             sizer.Add(editor, 0, wx.EXPAND)
-        sizer.AddGrowableCol(1)
+
+        sizer.AddGrowableCol(2)
 
         self.SetSizer(sizer)
 
