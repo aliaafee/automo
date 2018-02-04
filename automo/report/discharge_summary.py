@@ -29,17 +29,20 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
     demography = [
         [
             'Name:', Paragraph("<b>{}</b>".format(patient.name), stylesheet['default']),
-            "Hospital No:", Paragraph("<b>{}</b>".format(patient.hospital_no), stylesheet['default'])
+            "Age/Sex:", Paragraph("<b>{0} / {1}</b>".format(config.format_duration(patient.age), patient.sex), stylesheet['default'])
+        ],
+        [
+            "Hospital No:", Paragraph("<b>{}</b>".format(patient.hospital_no), stylesheet['default']),
+            "National ID:", Paragraph("<b>{}</b>".format(patient.national_id_no), stylesheet['default'])
         ],
         [
             'Address:', Paragraph("<b>{}</b>".format(address), stylesheet['default']),
-            "Age/Sex:", Paragraph("<b>{0} / {1}</b>".format(config.format_duration(patient.age), patient.sex), stylesheet['default'])
-        ],
+        ]
     ]
 
     patient_details.append(TableExpandable(
         demography,
-        colWidths=[18*mm, None, 22*mm, 28*mm],
+        colWidths=[18*mm, None, 18*mm, 20*mm],
         pagesize=pagesize, rightMargin=right_margin+sidebar_width, leftMargin=left_margin,
         style=stylesheet['table-default']))
 
@@ -168,7 +171,8 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
     reports = []
     reports.append(Paragraph("All enclosed", stylesheet['text']))
     result = session.query(db.Investigation)\
-                .filter(db.Investigation.parent == admission)
+                .filter(db.Investigation.parent == admission)\
+                .order_by(db.Investigation.start_time)
     for report in result:
         if report.type in report_fields.keys():
             site = report.site
@@ -176,6 +180,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
                 site = "{0} {1}".format(report.imaging_type, report.site)
             reports.append(Paragraph("<b>{0}</b> {1}".format(report.type.title(), site), stylesheet['text']))
             table_content = [
+                ["Time", config.format_datetime(report.start_time)],
                 [report_fields[report.type][0].title(), getattr(report, report_fields[report.type][0])],
                 ["Impression", report.impression]
             ]
@@ -191,7 +196,8 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
     treatment = Paragraph("Conservative Management", stylesheet['text'])
 
     procedures = session.query(db.SurgicalProcedure)\
-                    .filter(db.SurgicalProcedure.parent == admission)
+                    .filter(db.SurgicalProcedure.parent == admission)\
+                    .order_by(db.SurgicalProcedure.start_time)
     if procedures.count() > 0:
         treatment = []
         for procedure in procedures:
