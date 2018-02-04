@@ -91,8 +91,8 @@ class PageNumberCanvasMaker(canvas.Canvas):
         self.pagesize = kwargs['pagesize']
 
         w, h = self.pagesize
-        self.page_number_position = (w - 10*mm, 12*mm)
-        self.head_position = h - 15*mm
+        self.page_number_position = (w - 20*mm, 22*mm)
+        self.head_position = h - 25*mm
 
 
     def showPage(self):
@@ -117,11 +117,11 @@ class PageNumberCanvasMaker(canvas.Canvas):
         """Add the page number, dont draw page number if only one page"""
         self.saveState()
 
-        self.line(10*mm, 15*mm, self.page_number_position[0], 15*mm)
+        self.line(20*mm, 25*mm, self.page_number_position[0], 25*mm)
 
         if page_count > 1:
             if self._pageNumber > 1:
-                self.line(10*mm, self.head_position, self.page_number_position[0], self.head_position)
+                self.line(20*mm, self.head_position, self.page_number_position[0], self.head_position)
 
             page = "Page {0} of {1}".format(self._pageNumber, page_count)
             
@@ -146,21 +146,21 @@ class DocTemplate(SimpleDocTemplate):
         self.first_page_footer = ""
 
         self.pagesize = pagesize
-        self.header_position = pagesize[1] - 14*mm
+        self.header_position = pagesize[1] - 24*mm
 
 
     def onFirstPage(self, this_canvas, document):
         this_canvas.saveState()
         this_canvas.setFont('Helvetica', 7)
-        this_canvas.drawString(10*mm, 12*mm, self.first_page_footer)
+        this_canvas.drawString(20*mm, 22*mm, self.first_page_footer)
         this_canvas.restoreState()
 
 
     def onLaterPages(self, this_canvas, document):
         this_canvas.saveState()
         this_canvas.setFont('Helvetica', 7)
-        this_canvas.drawString(10*mm, 12*mm, self.page_footer)
-        this_canvas.drawString(10*mm, self.header_position, self.page_header)
+        this_canvas.drawString(20*mm, 22*mm, self.page_footer)
+        this_canvas.drawString(20*mm, self.header_position, self.page_header)
         this_canvas.restoreState()
 
     

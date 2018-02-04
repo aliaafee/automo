@@ -28,17 +28,13 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
         address = unicode(patient.permanent_address.line_1)
     demography = [
         [
-            'Name:', Paragraph(patient.name, stylesheet['default']),
-            "Hospital No:", patient.hospital_no
+            'Name:', Paragraph("<b>{}</b>".format(patient.name), stylesheet['default']),
+            "Hospital No:", Paragraph("<b>{}</b>".format(patient.hospital_no), stylesheet['default'])
         ],
         [
-            'Address:', Paragraph(address, stylesheet['default']),
-            "Age/Sex:", "{0} / {1}".format(config.format_duration(patient.age), patient.sex)
+            'Address:', Paragraph("<b>{}</b>".format(address), stylesheet['default']),
+            "Age/Sex:", Paragraph("<b>{0} / {1}</b>".format(config.format_duration(patient.age), patient.sex), stylesheet['default'])
         ],
-        [
-            'Admitted:', config.format_date(admission.start_time),
-            'Discharged:', config.format_date(admission.end_time)
-        ]
     ]
 
     patient_details.append(TableExpandable(
@@ -189,6 +185,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
                 pagesize=pagesize, rightMargin=right_margin+sidebar_width, leftMargin=left_margin,
                 style=stylesheet['table-default'])
             reports.append(report_table)
+            reports.append(HRFlowable(width="100%"))
 
     #Treatment########################################################
     treatment = Paragraph("Conservative Management", stylesheet['text'])
@@ -233,6 +230,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
                     stylesheet['default']   
                 )
             )
+            treatment.append(HRFlowable(width="100%"))
 
     #Hospital Course########################################################
     hospital_course = Paragraph(unicode(admission.hospital_course), stylesheet['default'])
@@ -252,7 +250,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
     discharge_advice = Paragraph(unicode(admission.discharge_advice), stylesheet['default'])
 
     #Followup
-    follow_up = Paragraph(unicode(admission.discharge_advice), stylesheet['default'])
+    follow_up = Paragraph(unicode(admission.follow_up), stylesheet['default'])
 
 
     #Combine to one main table
@@ -261,68 +259,75 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
             Paragraph("Patient", stylesheet['heading_1']),
             patient_details
         ],
-        [""],
+        None,
         [
             Paragraph("Admission", stylesheet['heading_1']),
             admission_details
         ],
-        [""],
+        None,
         [
             Paragraph("Diagnosis", stylesheet['heading_1']),
             diagnosis
         ],
-        [""],
+        None,
         [
             Paragraph("History & Examination", stylesheet['heading_1']),
             history_examination
         ],
-        [""],
+        None,
         [
             Paragraph("Investigations", stylesheet['heading_1']),
-            reports
-        ],
-        [""],
-        [
+            reports[0]
+        ]
+    ]
+
+    if len(reports) > 1:
+        for item in reports[1:]:
+            main_contents.append(["", item])
+
+    main_contents.append(None)
+
+    main_contents.append([
             Paragraph("Treatment", stylesheet['heading_1']),
-            treatment
-        ],
-        [""],
+            treatment[0]
+        ])
+
+    if len(treatment) > 1:
+        for item in treatment[1:]:
+            main_contents.append(["", item])
+
+    main_contents.extend([
+        None,
         [
             Paragraph("Hospital Course", stylesheet['heading_1']),
             hospital_course
         ],
-        [""],
+        None,
         [
             Paragraph("Prescription", stylesheet['heading_1']),
             prescription
         ],
-        [""],
+        None,
         [
             Paragraph("Advice on Discharge", stylesheet['heading_1']),
             discharge_advice
         ],
-        [""],
+        None,
         [
             Paragraph("Follow up", stylesheet['heading_1']),
             follow_up
         ],
-        [""],
+        None,
         [
             Paragraph("Admitting Surgeon", stylesheet['heading_1']),
             Paragraph(unicode(admission.personnel), stylesheet['default'])
         ],
-        [""],
+        None,
         [
             Paragraph("Discharge Prepared by", stylesheet['heading_1']),
             ""
         ]
-    ]
-
-    main_table = TableExpandable(
-        main_contents,
-        colWidths=[sidebar_width, None],
-        pagesize=pagesize, rightMargin=right_margin, leftMargin=left_margin,
-        style=stylesheet['table-default'])
+    ])
 
     elements = []
     if admission.is_active():
@@ -330,7 +335,22 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
     else:
         elements.append(DefaultHeader(title="DISCHARGE SUMMARY"))
 
-    elements.append(main_table)
+    elements.append(Paragraph('<para alignment="center">Department of Surgery</para>', stylesheet['heading_1']))
+
+    elements.append(Paragraph('&nbsp;', stylesheet['default']))
+
+    elements.append(Paragraph('&nbsp;', stylesheet['default']))
+
+    for row in main_contents:
+        if row is None:
+            elements.append(HRFlowable(width="100%"))
+        else:
+            table = TableExpandable(
+                [row],
+                colWidths=[sidebar_width, None],
+                pagesize=pagesize, rightMargin=right_margin, leftMargin=left_margin,
+                style=stylesheet['table-default'])
+            elements.append(table)
 
     return elements
 
@@ -533,10 +553,10 @@ def generate_discharge_summary(admission, session, pagesize=A4):
         page_footer=page_footer,
         page_header="Discharge Summary",
         pagesize=pagesize,
-        rightMargin=10*mm,
-        leftMargin=10*mm,
-        topMargin=15*mm,
-        bottomMargin=15*mm
+        rightMargin=20*mm,
+        leftMargin=20*mm,
+        topMargin=25*mm,
+        bottomMargin=25*mm
     )
     doc.build(get_discharge_summary_elements(admission, session, pagesize))
 
