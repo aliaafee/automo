@@ -13,15 +13,85 @@ from .stylesheet import get_stylesheet
 
 
 def get_discharge_summary_elements(admission, session, pagesize=A4):
+    right_margin = 20*mm
+    left_margin = 20*mm
+    sidebar_width = 40*mm
+
     patient = admission.patient
 
     stylesheet = get_stylesheet()
 
-    #Patient Details
-    patient_details = Paragraph("Name etec etc", stylesheet['default'])
+    #Patient Details######################################################
+    patient_details = []
+    address = ""
+    if patient.permanent_address:
+        address = unicode(patient.permanent_address.line_1)
+    demography = [
+        [
+            'Name:', Paragraph(patient.name, stylesheet['default']),
+            "Hospital No:", patient.hospital_no
+        ],
+        [
+            'Address:', Paragraph(address, stylesheet['default']),
+            "Age/Sex:", "{0} / {1}".format(config.format_duration(patient.age), patient.sex)
+        ],
+        [
+            'Admitted:', config.format_date(admission.start_time),
+            'Discharged:', config.format_date(admission.end_time)
+        ]
+    ]
 
-    #Diagnosis
-    diagnosis = ""
+    patient_details.append(TableExpandable(
+        demography,
+        colWidths=[18*mm, None, 22*mm, 28*mm],
+        pagesize=pagesize, rightMargin=right_margin+sidebar_width, leftMargin=left_margin,
+        style=stylesheet['table-default']))
+
+    #Admission############################################################
+    admission_details = []
+    bed = admission.discharged_bed
+    if admission.is_active():
+        bed = admission.bed
+        
+    admission_data = [
+        [
+            'Admitted:', config.format_date(admission.start_time),
+            'Discharged:', config.format_date(admission.end_time)
+        ],
+        [
+            'Ward:', unicode(bed.ward),
+            'Bed:', unicode(bed)
+        ]
+    ]
+
+    admission_details.append(TableExpandable(
+        admission_data,
+        colWidths=[18*mm, None, 22*mm, 28*mm],
+        pagesize=pagesize, rightMargin=right_margin+sidebar_width, leftMargin=left_margin,
+        style=stylesheet['table-default']))
+
+    #Diagnosis############################################################
+    diagnosis = []
+    problem_strs = []
+    for problem in admission.problems:
+        code = [problem.icd10class.code]
+        preferred = [problem.icd10class.preferred_plain]
+        for modifer_cls in [problem.icd10modifier_class, problem.icd10modifier_extra_class]:
+            if modifer_cls is not None:
+                code.append(modifer_cls.code_short)
+                preferred.append(modifer_cls.preferred)
+        code_str = "".join(code)
+        preferred_str = ", ".join(preferred)
+        comment_str = ""
+        if problem.comment is not None:
+            comment_str = "({})".format(problem.comment)
+        problem_strs.append("<b>{0} - {1}</b>{2}".format(code_str, preferred_str, comment_str))
+    diagnosis.append(
+        Paragraph(
+            "<b>;</b>".join(problem_strs),
+            stylesheet['default']
+        )
+    )
 
     #History and examination##############################################
     history_examination = []
@@ -116,7 +186,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
             report_table = TableExpandable(
                 table_content,
                 colWidths=[20*mm, None],
-                pagesize=pagesize, rightMargin=40*mm, leftMargin=10*mm,
+                pagesize=pagesize, rightMargin=right_margin+sidebar_width, leftMargin=left_margin,
                 style=stylesheet['table-default'])
             reports.append(report_table)
 
@@ -148,7 +218,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
             info_table = TableExpandable(
                 info_content,
                 colWidths=[20*mm, None, 20*mm, None],
-                pagesize=pagesize, rightMargin=40*mm, leftMargin=10*mm,
+                pagesize=pagesize, rightMargin=right_margin+sidebar_width, leftMargin=left_margin,
                 style=stylesheet['table-default'])
             treatment.append(info_table)
             treatment.append(
@@ -188,57 +258,78 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
     #Combine to one main table
     main_contents = [
         [
+            Paragraph("Patient", stylesheet['heading_1']),
+            patient_details
+        ],
+        [""],
+        [
+            Paragraph("Admission", stylesheet['heading_1']),
+            admission_details
+        ],
+        [""],
+        [
             Paragraph("Diagnosis", stylesheet['heading_1']),
             diagnosis
         ],
+        [""],
         [
             Paragraph("History & Examination", stylesheet['heading_1']),
             history_examination
         ],
+        [""],
         [
             Paragraph("Investigations", stylesheet['heading_1']),
             reports
         ],
+        [""],
         [
             Paragraph("Treatment", stylesheet['heading_1']),
             treatment
         ],
+        [""],
         [
             Paragraph("Hospital Course", stylesheet['heading_1']),
             hospital_course
         ],
+        [""],
         [
             Paragraph("Prescription", stylesheet['heading_1']),
             prescription
         ],
+        [""],
         [
             Paragraph("Advice on Discharge", stylesheet['heading_1']),
             discharge_advice
         ],
+        [""],
         [
             Paragraph("Follow up", stylesheet['heading_1']),
             follow_up
         ],
+        [""],
         [
-            Paragraph("Admitting Surgeon", stylesheet['default']),
+            Paragraph("Admitting Surgeon", stylesheet['heading_1']),
             Paragraph(unicode(admission.personnel), stylesheet['default'])
         ],
+        [""],
         [
-            Paragraph("Discharge Prepared by", stylesheet['default']),
+            Paragraph("Discharge Prepared by", stylesheet['heading_1']),
             ""
         ]
     ]
 
     main_table = TableExpandable(
         main_contents,
-        colWidths=[30*mm, None],
-        pagesize=pagesize, rightMargin=10*mm, leftMargin=10*mm,
+        colWidths=[sidebar_width, None],
+        pagesize=pagesize, rightMargin=right_margin, leftMargin=left_margin,
         style=stylesheet['table-default'])
 
     elements = []
-    elements.append(DefaultHeader(title="DISCHARGE SUMMARY"))
-    elements.append(Paragraph("Patient Details", stylesheet['heading_1']))
-    elements.append(patient_details)
+    if admission.is_active():
+        elements.append(DefaultHeader(title="!!DRAFT!! DISCHARGE SUMMARY !!DRAFT!!"))
+    else:
+        elements.append(DefaultHeader(title="DISCHARGE SUMMARY"))
+
     elements.append(main_table)
 
     return elements
