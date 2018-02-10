@@ -8,8 +8,8 @@ from .shellinterface import ShellInterface
 from .wardinterface import WardInterface
 from .cwardinterface import CWardInterface
 
-GUI_INTERFACES_NAMES = ['Ward', 'Circum Ward', 'Python Shell']
-GUI_INTERFACES_CODES = ['gui-ward', 'gui-cward', 'gui-shell']
+GUI_INTERFACES_NAMES = ['Ward', 'Circum Ward', 'Python Shell', 'Discharges']
+GUI_INTERFACES_CODES = ['gui-ward', 'gui-cward', 'gui-shell', 'gui-discharge']
 
 
 class LoginDlg(wx.Dialog):

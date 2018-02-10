@@ -24,3 +24,7 @@ ID_PATIENT_INFO_CHANGED = wx.NewId()
 """Emitted when patient selection changed"""
 PatientSelectedEvent, EVT_AM_PATIENT_SELECTED = wx.lib.newevent.NewCommandEvent()
 ID_PATIENT_SELECTED = wx.NewId()
+
+"""Emitted when encounter selection changed"""
+EncounterSelectedEvent, AM_ENCOUNTER_SELECTED = wx.lib.newevent.NewCommandEvent()
+ID_ENCOUNTER_SELECTED = wx.NewId()

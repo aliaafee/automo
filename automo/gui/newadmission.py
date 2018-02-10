@@ -170,7 +170,7 @@ ID_REMOVE = wx.NewId()
 class ProblemSelectorPage(BasePage):
     """Problems Selector"""
     def __init__(self, parent, session):
-        super(ProblemSelectorPage, self).__init__(parent, session, "Add Diagnosis")
+        super(ProblemSelectorPage, self).__init__(parent, session, "Diagnosis")
 
         self.all_problems = [] #self.session.query(db.Problem).filter(db.Problem.patient == self.patient).all()
         self.selected_problems = []

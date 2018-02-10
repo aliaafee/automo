@@ -25,10 +25,8 @@ class PDFViewer(sc.SizedFrame):
         self.viewer = wx.lib.pdfviewer.pdfViewer(pane_cont, wx.NewId(), wx.DefaultPosition,
                                 wx.DefaultSize,
                                 wx.HSCROLL|wx.VSCROLL|wx.SUNKEN_BORDER)
-        self.viewer.UsePrintDirect = ``False``
+        self.viewer.UsePrintDirect = False
         self.viewer.SetSizerProps(expand=True, proportion=1)
-
-        print "hi{}".format(wx.lib.pdfviewer.viewer.VERBOSE)
 
 
         self.buttonpanel.viewer = self.viewer

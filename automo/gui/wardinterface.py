@@ -166,7 +166,6 @@ class WardInterface(BaseInterface):
 
 
     def _on_patient_info_changed(self, event):
-        print "here"
         #if type(event.object) == db.Patient:
         self.patient_list_panel.refresh_all()
         #elif type(event.object) == db.Bed:
