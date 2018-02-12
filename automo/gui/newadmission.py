@@ -39,6 +39,9 @@ class BasePage(wx.adv.WizardPage):
     def set(self):
         pass
 
+    def must_skip(self):
+        return False
+
     def SetNext(self, next):
         self.next = next
 
@@ -273,6 +276,12 @@ class ProblemSelectorPage(BasePage):
                     self._update_all_problems()
             self.Layout()
             self._update_selected_problems()
+
+    def is_valid(self):
+        if not self.selected_problems:
+            self.error_message = "Select at least one diagnosis."
+            return False
+        return True
 
     def get_problems(self):
         return self.selected_problems

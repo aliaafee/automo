@@ -1,6 +1,7 @@
 """Discharge Interface"""
 import wx
 
+from .. import database as db
 from . import images
 from . import events
 from .shellinterface import ShellInterface
@@ -84,8 +85,36 @@ class DischargeInterface(BaseInterface):
 
 
     def _on_new_discharge(self, event):
-        dlg = DischargeWizard(self, self.session)
-        dlg.ShowModal()
+        with DischargeWizard(self, self.session) as dlg:
+            done = False
+            while not done:
+                dlg.ShowModal()
+                if dlg.GetReturnCode() == wx.ID_OK:
+                    try:
+                        admission = dlg.get_admission()
+                        self.session.add(admission)
+                    except db.dbexception.AutoMODatabaseError as e:
+                        self.session.rollback()
+                        with wx.MessageDialog(None,
+                            "Database Error Occured. {}".format(e.message),
+                            "Database Error",
+                            wx.OK | wx.ICON_EXCLAMATION) as err_dlg:
+                            err_dlg.ShowModal()
+                    except Exception as e:
+                        self.session.rollback()
+                        with wx.MessageDialog(None,
+                            "Error Occured. {}".format(e.message),
+                            "Error",
+                            wx.OK | wx.ICON_EXCLAMATION) as err_dlg:
+                            err_dlg.ShowModal()
+                    else:
+                        self.session.commit()
+                        self.discharge_list_panel.refresh_all()
+                        done = True
+                else:
+                    done = True
+
+
 
 
     def _on_encounter_selected(self, event):

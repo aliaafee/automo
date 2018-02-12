@@ -1,5 +1,6 @@
 """Discharge Summary Report"""
 import tempfile
+import dateutil.relativedelta
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Paragraph, PageBreak, Table, TableStyle, ListFlowable, Image
 from reportlab.platypus.flowables import HRFlowable
@@ -23,13 +24,14 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
 
     #Patient Details######################################################
     patient_details = []
+    age = patient.get_age(now=admission.start_time)
     address = ""
     if patient.permanent_address:
         address = unicode(patient.permanent_address.line_1)
     demography = [
         [
             'Name:', Paragraph("<b>{}</b>".format(patient.name), stylesheet['default']),
-            "Age/Sex:", Paragraph("<b>{0} / {1}</b>".format(config.format_duration(patient.age), patient.sex), stylesheet['default'])
+            "Age/Sex:", Paragraph("<b>{0} / {1}</b>".format(config.format_duration(age), patient.sex), stylesheet['default'])
         ],
         [
             "Hospital No:", Paragraph("<b>{}</b>".format(patient.hospital_no), stylesheet['default']),
@@ -51,11 +53,16 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
     bed = admission.discharged_bed
     if admission.is_active():
         bed = admission.bed
+    duration_str = ""
+    if admission.end_time is not None:
+        duration = dateutil.relativedelta.relativedelta(admission.end_time, admission.start_time)
+        duration_str = config.format_duration_verbose(duration)
         
     admission_data = [
         [
             'Admitted:', config.format_date(admission.start_time),
-            'Discharged:', config.format_date(admission.end_time)
+            'Discharged:', config.format_date(admission.end_time),
+            'Duration:', Paragraph(duration_str, stylesheet['default'])
         ],
         [
             'Ward:', unicode(bed.ward),
@@ -65,7 +72,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
 
     admission_details.append(TableExpandable(
         admission_data,
-        colWidths=[18*mm, None, 22*mm, 28*mm],
+        colWidths=[18*mm, None, 18*mm, None, 12*mm, None],
         pagesize=pagesize, rightMargin=right_margin+sidebar_width, leftMargin=left_margin,
         style=stylesheet['table-default']))
 
@@ -193,7 +200,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
             reports.append(HRFlowable(width="100%"))
 
     #Treatment########################################################
-    treatment = Paragraph("Conservative Management", stylesheet['text'])
+    treatment = [Paragraph("Conservative Management", stylesheet['text'])]
 
     procedures = session.query(db.SurgicalProcedure)\
                     .filter(db.SurgicalProcedure.parent == admission)\

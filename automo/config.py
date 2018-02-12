@@ -37,6 +37,23 @@ def format_duration(duration): #from_date, to_date):
     return "{0}y".format(duration.years)
 
 
+def format_duration_verbose(duration): #from_date, to_date):
+    """Format python relative delta duration to human readable form."""
+    if duration is None:
+        return ""
+    if duration.years < 1:
+        if duration.months < 1:
+            if duration.days < 1:
+                if duration.hours < 1:
+                    return "{0}minutes {1}seconds".format(duration.minutes, duration.seconds)
+                return "{0}hours".format(duration.hours)
+            return "{0}days".format(duration.days)
+        return "{0}months {1}days".format(duration.months, duration.days)
+    if duration.years < 5 and duration.months > 0:
+        return "{0}years {1}months".format(duration.years, duration.months)
+    return "{0}years".format(duration.years)
+
+
 def parse_duration(duration_str):
     """Parse duration in the form _y _m _d to relativedelta.
       if string contains only a number it is interpreted as years"""
