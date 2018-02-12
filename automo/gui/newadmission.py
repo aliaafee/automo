@@ -56,6 +56,8 @@ class PatientSelectorPage(BasePage):
     """Select the patient, TODO: Handle Duplicate Patients"""
     def __init__(self, parent, session):
         super(PatientSelectorPage, self).__init__(parent, session, "Select Patient")
+
+        self.new_patient = db.Patient()
         
         self.notebook = wx.Notebook(self)
 
@@ -88,7 +90,8 @@ class PatientSelectorPage(BasePage):
     def get_patient(self):
         active_page = self.notebook.GetPage(self.notebook.GetSelection())
         if active_page == self.new_patient_panel:
-            return self.new_patient_panel.get_object()
+            self.new_patient_panel.update_object(self.new_patient)
+            return self.new_patient
         else:
             return self.old_patient_panel.get_selected()
 
@@ -172,6 +175,8 @@ class ProblemSelectorPage(BasePage):
     def __init__(self, parent, session):
         super(ProblemSelectorPage, self).__init__(parent, session, "Diagnosis")
 
+        self.patient = None
+
         self.all_problems = [] #self.session.query(db.Problem).filter(db.Problem.patient == self.patient).all()
         self.selected_problems = []
 
@@ -246,26 +251,28 @@ class ProblemSelectorPage(BasePage):
         self.selected_problems_list.set_items(self.selected_problems)
 
     def set(self):
-        self.selected_problems = []
         patient = self.Parent.get_patient()
-        self.lbl_existing.Hide()
-        self.all_problems_list.Hide()
-        self.toolbar.EnableTool(ID_ADD_EXISTING, False)
-        self.toolbar.SetToolNormalBitmap(ID_ADD_EXISTING, self.blank)
-        self.toolbar.SetToolShortHelp(ID_ADD_EXISTING, "")
-        self.toolbar.SetToolNormalBitmap(ID_REMOVE, self.delete_image)
-        if patient in self.session:
-            self.all_problems = self.session.query(db.Problem).filter(db.Problem.patient == patient).all()
-            if self.all_problems:
-                self.lbl_existing.Show()
-                self.all_problems_list.Show()
-                self.toolbar.EnableTool(ID_ADD_EXISTING, True)
-                self.toolbar.SetToolNormalBitmap(ID_ADD_EXISTING, self.left_arrow)
-                self.toolbar.SetToolShortHelp(ID_ADD_EXISTING, "Add Existing Problem")
-                self.toolbar.SetToolNormalBitmap(ID_REMOVE, self.right_arrow)
-                self._update_all_problems()
-        self.Layout()
-        self._update_selected_problems()
+        if patient != self.patient:
+            self.selected_problems = []
+            self.patient = patient
+            self.lbl_existing.Hide()
+            self.all_problems_list.Hide()
+            self.toolbar.EnableTool(ID_ADD_EXISTING, False)
+            self.toolbar.SetToolNormalBitmap(ID_ADD_EXISTING, self.blank)
+            self.toolbar.SetToolShortHelp(ID_ADD_EXISTING, "")
+            self.toolbar.SetToolNormalBitmap(ID_REMOVE, self.delete_image)
+            if patient in self.session:
+                self.all_problems = self.session.query(db.Problem).filter(db.Problem.patient == patient).all()
+                if self.all_problems:
+                    self.lbl_existing.Show()
+                    self.all_problems_list.Show()
+                    self.toolbar.EnableTool(ID_ADD_EXISTING, True)
+                    self.toolbar.SetToolNormalBitmap(ID_ADD_EXISTING, self.left_arrow)
+                    self.toolbar.SetToolShortHelp(ID_ADD_EXISTING, "Add Existing Problem")
+                    self.toolbar.SetToolNormalBitmap(ID_REMOVE, self.right_arrow)
+                    self._update_all_problems()
+            self.Layout()
+            self._update_selected_problems()
 
     def get_problems(self):
         return self.selected_problems

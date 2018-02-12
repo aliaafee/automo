@@ -3,7 +3,14 @@ import wx
 import wx.adv
 
 from .. import database as db
-from .dbform import DbFormPanel, DbDateTimeField, DbRelationField, DbMultilineStringField, DbOptionalMultilineStringField, DbFloatField
+from .dbform import DbFormPanel,\
+                    DbDateTimeField,\
+                    DbRelationField,\
+                    DbMultilineStringField,\
+                    DbOptionalMultilineStringField,\
+                    DbFloatField,\
+                    DbCheckBoxField,\
+                    DbOptionsRelationField
 from .newadmission import BasePage
 from .newadmission import PatientSelectorPage
 from .newadmission import DoctorBedSelectorPage
@@ -30,6 +37,7 @@ class FormPage(BasePage):
     def update_db_object(self, db_object):
         self.form_panel.update_object(db_object)
     
+
 
 
 class AdmissionDetails(BasePage):
@@ -60,11 +68,14 @@ class AdmissionDetails(BasePage):
         self.form_panel.update_object(admission)
 
 
+
+
 class DischargeWizard(wx.adv.Wizard):
     """Discharge Wizard"""
-    def __init__(self, parent, session, patient=None, **kwds):
+    def __init__(self, parent, session, size=(800, 600), **kwds):
         super(DischargeWizard, self).__init__(
             parent,
+            size=size,
             style=wx.CLOSE_BOX | wx.RESIZE_BORDER | wx.SYSTEM_MENU | wx.CAPTION,
             **kwds)
 
@@ -75,11 +86,10 @@ class DischargeWizard(wx.adv.Wizard):
         self.pages = []
 
         self.session = session
-        self.patient = patient
+        self.patient = None
 
-        if self.patient is None:
-            self.patient_selector = PatientSelectorPage(self, session)
-            self.add_page(self.patient_selector)
+        self.patient_selector = PatientSelectorPage(self, session)
+        self.add_page(self.patient_selector)
 
         fields = [
             DbRelationField("Admitting Doctor", 'personnel', self.session.query(db.Doctor), required=True),
@@ -146,6 +156,17 @@ class DischargeWizard(wx.adv.Wizard):
         self.course = FormPage(self, session, "Hospital Course Summary", db.Admission, fields, False)
         self.add_page(self.course)
 
+        fields = [
+            DbOptionsRelationField("Complication Grade",
+                                   'complication_grade',
+                                   self.session.query(db.ComplicationGrade),
+                                   value_formatter=lambda v:"Grade {0} - {1}".format(v.id, v.description)),
+            DbCheckBoxField("Disability on Discharge", 'complication_disability'),
+            DbMultilineStringField("Complication Summary", 'complication_summary', lines=8)
+        ]
+        self.complication = FormPage(self, session, "Surgical Complication Grade", db.ComplicationGrade, fields)
+        self.add_page(self.complication)
+
         self.prescription = BasePage(self, session, "Prescription")
         self.add_page(self.prescription)
 
@@ -174,8 +195,6 @@ class DischargeWizard(wx.adv.Wizard):
 
 
     def get_patient(self):
-        if self.patient is not None:
-            return self.patient
         return self.patient_selector.get_patient()
 
 
