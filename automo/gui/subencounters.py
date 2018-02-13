@@ -120,7 +120,6 @@ class Subencounters(EncounterNotebookPage):
 
 
     def _on_add_subencounter(self, event):
-        print "here"
         if self.encounter is None:
             return
 
