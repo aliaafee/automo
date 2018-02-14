@@ -174,14 +174,15 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
             DbCheckBoxField("Disability on Discharge", 'complication_disability'),
             DbMultilineStringField("Complication Summary", 'complication_summary', lines=8)
         ]
-        self.discharge_note_panel = EncounterNotebookForm(self.notebook, self.session, db.Admission,
+        self.complication_panel = EncounterNotebookForm(self.notebook, self.session, db.Admission,
                                                           complication_fields)
-        self.notebook.AddPage(self.discharge_note_panel, "Complications")
+        self.notebook.AddPage(self.complication_panel, "Complications")
 
         discharge_note_fields = [
             DbMultilineStringField("Hospital Course Summary", 'hospital_course', lines=8),
             DbMultilineStringField("Discharge Advice", 'discharge_advice', lines=8),
-            DbMultilineStringField("Follow Up", 'follow_up', lines=8)
+            DbMultilineStringField("Follow Up", 'follow_up', lines=8),
+            DbStringField("Discharge Prepared By", 'written_by')
         ]
         self.discharge_note_panel = EncounterNotebookForm(self.notebook, self.session, db.Admission,
                                                           discharge_note_fields)

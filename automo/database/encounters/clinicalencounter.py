@@ -41,6 +41,8 @@ class ClinicalEncounter(Encounter):
     prescription = relationship("Prescription", back_populates="clinicalencounter",
                                 cascade="all, delete, delete-orphan")
 
+    written_by = Column(String(255))
+
     def prescribe_drug(self, session, drug, drug_str, drug_order, active=True):
         """Precribe medication. Drug can be passed as an object, or object can be None
           and a string name of Drug can be passed. If this string name not found in drug list
@@ -91,9 +93,6 @@ class Admission(ClinicalEncounter):
     discharged_bed = relationship("Bed", foreign_keys=[discharged_bed_id],
                                   back_populates="previous_admissions")
 
-    #admission_note = Column(Text)
-    #progress_note = Column(Text)
-    #discharge_note = Column(Text)
     hospital_course = Column(Text)
     discharge_advice = Column(Text)
     follow_up = Column(Text)

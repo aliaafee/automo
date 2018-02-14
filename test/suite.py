@@ -131,10 +131,10 @@ class PatientTest(BaseTest):
         with self.assertRaises(db.dbexception.AutoMODatabaseError):
             self.patients[0].get_current_encounter(self.session)
 
-        self.patients[0].encounters[0].end()
+        self.patients[0].encounters[0].end(self.session)
         self.assertNotEqual(None, self.patients[0].get_current_encounter(self.session))
 
-        self.patients[0].encounters[1].end()
+        self.patients[0].encounters[1].end(self.session)
         self.assertEqual(None, self.patients[0].get_current_encounter(self.session))
 
         self.session.commit()

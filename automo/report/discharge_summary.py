@@ -361,7 +361,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
         None,
         [
             Paragraph("Discharge Prepared by", stylesheet['heading_1']),
-            ""
+            Paragraph(unicode(admission.written_by), stylesheet['default'])
         ]
     ])
 

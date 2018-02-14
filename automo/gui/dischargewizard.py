@@ -433,7 +433,8 @@ class DischargeWizard(wx.adv.Wizard):
 
         fields = [
             DbMultilineStringField("Advice", 'discharge_advice', lines=8),
-            DbMultilineStringField("Follow Up", 'follow_up', lines=8)
+            DbMultilineStringField("Follow Up", 'follow_up', lines=8),
+            DbStringField("Discharge Prepared By", 'written_by', required=True)
         ]
         self.advice_page = FormPage(self, session, "Discharge Advice", db.Admission, fields)
         self.add_page(self.advice_page)
