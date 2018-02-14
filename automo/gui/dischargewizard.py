@@ -2,6 +2,7 @@
 from datetime import datetime
 import wx
 import wx.adv
+from ObjectListView import ObjectListView, ColumnDefn, OLVEvent
 
 from .. import database as db
 from .. import config
@@ -18,12 +19,17 @@ from .dbform import DbFormPanel,\
                     DbOptionsRelationField,\
                     DbFormSwitcher
 from .dblistbox import DbListBox
+from .acdbtextctrl import AcDbTextCtrl
+from .objectlistviewmod import ObjectListViewMod, EVT_OVL_CHECK_EVENT
+from .baseprescriptionpanel import BasePrescriptionPanel
 from .newadmission import BasePage
 from .newadmission import PatientSelectorPage
 from .newadmission import DoctorBedSelectorPage
 from .newadmission import ProblemSelectorPage
 
 ID_REMOVE = wx.NewId()
+ID_PRESET_ADD = wx.NewId()
+ID_PRESET_REMOVE = wx.NewId()
 
 
 class FormPage(BasePage):
@@ -49,7 +55,37 @@ class FormPage(BasePage):
 
     def update_db_object(self, db_object):
         self.form_panel.update_object(db_object)
-    
+
+
+
+class PrescriptionPage(BasePage, BasePrescriptionPanel):
+    """Prescription Page"""
+    def __init__(self, parent, session, title):
+        BasePage.__init__(self, parent, session, title)
+        BasePrescriptionPanel.__init__(self, parent, session)
+
+        self.prescription = []
+
+
+    def add_item(self, selected_drug, selected_drug_str, order_str, active=True):
+        new_presc = db.ClinicalEncounter._create_new_prescription(db.ClinicalEncounter(), self.session, selected_drug, selected_drug_str, order_str, active)
+        self.prescription.append(new_presc)
+
+
+    def remove_item(self, item):
+        self.prescription.remove(item)
+
+
+    def get_prescription(self):
+        return self.prescription
+
+
+    def set_item_active(self, item, state=True):
+        item.active = state
+
+
+    def set_item_order(self, item, drug_order):
+        item.drug_order = drug_order
 
 
 class ComplicationsPage(FormPage):
@@ -392,7 +428,7 @@ class DischargeWizard(wx.adv.Wizard):
         self.complication_page = ComplicationsPage(self, session) #FormPage(self, session, "Surgical Complication Grade", db.ComplicationGrade, fields)
         self.add_page(self.complication_page)
 
-        self.prescription_page = BasePage(self, session, "Prescription")
+        self.prescription_page = PrescriptionPage(self, session, "Prescription")
         self.add_page(self.prescription_page)
 
         fields = [

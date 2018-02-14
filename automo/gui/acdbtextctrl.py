@@ -89,11 +89,14 @@ class AcDbTextCtrl(DbTextCtrl):
                 self.popup.Show(False)
                 return
 
+        if self.candidates_table is None:
+            return
+        
         # select candidates from database
         result = self.session.query(self.candidates_table)\
-                             .filter(self.candidates_table.name.like("%{0}%".format(txt)))\
-                             .order_by(self.candidates_table.name)\
-                             .limit(self.max_results)
+                            .filter(self.candidates_table.name.like("%{0}%".format(txt)))\
+                            .order_by(self.candidates_table.name)\
+                            .limit(self.max_results)
 
         self.select_candidates = []
         for candidate in result:
@@ -287,7 +290,7 @@ class ACPopup(wx.PopupWindow):
         left_x, upper_y = parent_screen_position
 
         _, height = parent_size
-        _, popup_height = self.GetSizeTuple()
+        _, popup_height = self.GetSize()
 
         if wx.Platform == "__WXMSW__":
             left_x -= 2
