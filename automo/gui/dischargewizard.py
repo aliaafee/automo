@@ -401,15 +401,16 @@ class DischargeWizard(wx.adv.Wizard):
         self.surgical_procedures_page = SubencountersPage(self, session, "Surgical Procedures")
         self.add_page(self.surgical_procedures_page)
         fields = [
+            DbStringField("Procedure Name", 'procedure_name'),
+            DbCheckBoxField("Emergency", 'emergency'),
+            DbStringField("Preop Diagnosis", 'preoperative_diagnosis'),
+            DbStringField("Postop Diagnosis", 'postoperative_diagnosis'),
             DbDateTimeField("Time Started", 'start_time', required=True),
             DbDateTimeField("Time Completed", 'end_time', required=True),
             DbRelationField("Surgeon", 'personnel', self.session.query(db.Doctor)),
             DbStringField("Assistants(s)", 'assistant'),
             DbStringField("Anesthetist(s)", 'anesthetist'),
             DbStringField("Nurse(s)", 'nurse'),
-            DbStringField("Preop Diagnosis", 'preoperative_diagnosis'),
-            DbStringField("Postop Diagnosis", 'postoperative_diagnosis'),
-            DbStringField("Procedure Name", 'procedure_name'),
             DbMultilineStringField("Findings", 'findings'),
             DbMultilineStringField("Steps", 'steps'),
         ]

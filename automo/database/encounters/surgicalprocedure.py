@@ -1,5 +1,5 @@
 """Surgical Procedure"""
-from sqlalchemy import Column, Integer, ForeignKey, Text
+from sqlalchemy import Column, Integer, ForeignKey, Text, Boolean
 
 from .encounter import Encounter
 
@@ -20,6 +20,8 @@ class SurgicalProcedure(Encounter):
     assistant = Column(Text())
     anesthetist = Column(Text())
     nurse = Column(Text())
+
+    emergency = Column(Boolean)
 
     preoperative_diagnosis = Column(Text())
 
