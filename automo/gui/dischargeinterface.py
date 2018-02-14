@@ -109,12 +109,11 @@ class DischargeInterface(BaseInterface):
                             err_dlg.ShowModal()
                     else:
                         self.session.commit()
-                        self.discharge_list_panel.refresh_all()
+                        self.discharge_list_panel.refresh()
+                        self.discharge_panel.set_admission(admission)
                         done = True
                 else:
                     done = True
-
-
 
 
     def _on_encounter_selected(self, event):

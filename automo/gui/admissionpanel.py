@@ -270,7 +270,7 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
         filename = self.encounter.get_prescription_pdf(self.session)
 
         pdf_view = PDFViewer(None, title="Print Preview - Prescription")
-        pdf_view.viewer.UsePrintDirect = ``False``
+        pdf_view.viewer.UsePrintDirect = False
         pdf_view.viewer.LoadFile(filename)
         pdf_view.Show()
 

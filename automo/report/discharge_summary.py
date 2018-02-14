@@ -25,9 +25,21 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
     #Patient Details######################################################
     patient_details = []
     age = patient.get_age(now=admission.start_time)
-    address = ""
-    if patient.permanent_address:
-        address = unicode(patient.permanent_address.line_1)
+    address_str = ""
+    address = patient.permanent_address if patient.permanent_address is not None else patient.current_address
+    if address is not None:
+        address_str = ", ".join(
+            [ v for v in
+                [
+                    address.line_1,
+                    address.line_2,
+                    address.city,
+                    address.region,
+                    address.country
+                ] 
+            if v is not None]
+        )
+
     demography = [
         [
             'Name:', Paragraph("<b>{}</b>".format(patient.name), stylesheet['default']),
@@ -38,7 +50,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
             "National ID:", Paragraph("<b>{}</b>".format(patient.national_id_no), stylesheet['default'])
         ],
         [
-            'Address:', Paragraph("<b>{}</b>".format(address), stylesheet['default']),
+            'Address:', Paragraph("<b>{}</b>".format(address_str), stylesheet['default']),
         ]
     ]
 
