@@ -38,8 +38,11 @@ class PatientSearchPanel(wx.Panel):
         if str_search != "":
             items = items.filter(
                 or_(
-                    db.Patient.hospital_no.like("%{0}%".format(str_search)),
-                    db.Patient.name.like("%{0}%".format(str_search))
+                    or_(
+                        db.Patient.hospital_no.like("%{0}%".format(str_search)),
+                        db.Patient.national_id_no.like("%{0}%".format(str_search))
+                    ),
+                    db.Patient.name.like("%{}%".format(str_search))
                 )
             )
 
@@ -82,31 +85,38 @@ class PatientSearchPanel(wx.Panel):
         return string.replace(text, " ", "&nbsp;")
 
 
+    def _higlight_query(self, value, query_string):
+        str_value = unicode(value)
+        result = re.search(re.escape(query_string), str_value, re.IGNORECASE)
+        if result is not None:
+            group = unicode(result.group())
+            str_value = string.replace(str_value, group, u'<b>' + group + u'</b>', 1)
+        return str_value
+
+
     def _patient_decorator(self, patient, query_string):
         str_hospital_no = unicode(patient.hospital_no)
+        str_national_id_no = unicode(patient.national_id_no)
         str_name = unicode(patient.name)
 
         if len(query_string) != 0:
-            result = re.search(re.escape(query_string), str_hospital_no, re.IGNORECASE)
-            if result is not None:
-                group = unicode(result.group())
-                str_hospital_no = string.replace(str_hospital_no, group, u'<b>' + group + u'</b>', 1)
-            result = re.search(re.escape(query_string), str_name, re.IGNORECASE)
-            if result is not None:
-                group = unicode(result.group())
-                str_name = string.replace(str_name, group, u'<b>' + group + u'</b>', 1)
+            str_hospital_no = self._higlight_query(str_hospital_no, query_string)
+            str_national_id_no = self._higlight_query(str_national_id_no, query_string)
+            str_name = self._higlight_query(str_name, query_string)
     
         html = '<font size="2">'\
                     '<table width="100%">'\
                         '<tr>'\
                             '<td valign="top" width="40">{0}</td>'\
-                            '<td valign="top" width="100%">{1}</td>'\
-                            '<td valign="top">{2}/{3}</td>'\
+                            '<td valign="top" width="40">{1}</td>'\
+                            '<td valign="top" width="100%">{2}</td>'\
+                            '<td valign="top">{3}/{4}</td>'\
                         '</tr>'\
                     '</table>'\
                 '</font>'
         return html.format(
             str_hospital_no,
+            str_national_id_no,
             str_name,
             self._non_breaking(config.format_duration(patient.age)),
             patient.sex
