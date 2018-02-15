@@ -504,9 +504,15 @@ class DischargeWizard(wx.adv.Wizard):
         for procedure in procedures:
             admission.add_child_encounter(procedure)
 
-        #TODO Add Prescription
+        prescription = self.get_prescription()
+        for item in prescription:
+            admission.prescription.append(item)
 
         return admission
+
+    
+    def get_prescription(self):
+        return self.prescription_page.get_prescription()
 
 
     def get_surgical_procedures(self):

@@ -1,3 +1,3 @@
 cd ..
-automo-win\dist\automo.exe
+automo-win\dist\automo\automo.exe
 pause
