@@ -1,8 +1,12 @@
 """AutoMO Command Line Interface"""
 import sys
 import getopt
+import code
+from datetime import datetime, date
+from dateutil.relativedelta import relativedelta as duration
 
 import automo
+from automo import database as db
 
 
 def app_license():
@@ -30,6 +34,34 @@ def usage():
     print "       Import ICD10 2016 Classification from ClaML xml file"
 
 
+def start_cli(uri, interface, debug):
+    """start cli interface"""
+    automo.start(uri, debug)
+
+    if interface == 'shell':
+        session = db.Session()
+        patients = session.query(db.Patient)
+        beds = session.query(db.Bed)
+        doctors = session.query(db.Doctor)
+        nurses = session.query(db.Nurse)
+        shell_locals = {
+            'patient': patients,
+            'bed': beds,
+            'doctor' : doctors,
+            'nurse' : nurses,
+            'session': session,
+            'query': session.query,
+            'db': db,
+            'quit': sys.exit,
+            'duration' : duration,
+            'datetime' : datetime,
+            'date' : date
+        }
+        code.interact(local=shell_locals)
+    else:
+        print "Interface '{}' is not available".format(interface)
+
+
 def main(argv):
     """starts the app, also reads command line arguments"""
     database_uri = automo.DEFAULT_DB_URI
@@ -55,9 +87,7 @@ def main(argv):
             debug = True
 
     if interface in automo.CLI_INTERFACES:
-        automo.start_cli(database_uri, interface, debug)
-    elif interface in automo.GUI_INTERFACES:
-        automo.start_gui(database_uri, interface, debug)
+        start_cli(database_uri, interface, debug)
     else:
         usage()
         sys.exit(2)
