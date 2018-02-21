@@ -11,6 +11,13 @@ from .wardinterface import WardInterface
 from .cwardinterface import CWardInterface
 from .dischargeinterface import DischargeInterface
 
+INTERFACES = {
+    'gui-shell' : ShellInterface,
+    'gui-ward' : WardInterface,
+    'gui-cward' : CWardInterface,
+    'gui-discharge' : DischargeInterface
+}
+
 
 class AutoMOApp(wx.App):
     """The Main wx App Object"""
@@ -40,19 +47,12 @@ class AutoMOApp(wx.App):
                 else:
                     return False
 
-        if self.interface == 'gui-shell':
-            self.main_frame = ShellInterface(None)
-        elif self.interface == 'gui-ward':
-            self.main_frame = WardInterface(None)
-        elif self.interface == 'gui-cward':
-            self.main_frame = CWardInterface(None)
-        elif self.interface == 'gui-discharge':
-            self.main_frame = DischargeInterface(None)
-        else:
-            return False
+        MainFrame = INTERFACES[self.interface]
 
+        self.main_frame = MainFrame(None)
         self.main_frame.Bind(wx.EVT_CLOSE, self._on_main_frame_close)
         self.main_frame.Show()
+
         return True
 
 

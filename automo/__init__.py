@@ -19,7 +19,6 @@ from . import report
 DEFAULT_DB_URI = "sqlite:///patient-data.db"
 
 CLI_INTERFACES = ['shell']
-GUI_INTERFACES = ['gui-shell', 'gui-ward', 'gui-cward']
 
 
 def start(uri, debug=False):

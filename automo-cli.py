@@ -25,7 +25,6 @@ def usage():
     print "       Set the interface to start with."
     print "       available interfaces:"
     print '           cli: "{}"'.format('", "'.join(automo.CLI_INTERFACES))
-    print '           gui: "{}"'.format('", "'.join(automo.GUI_INTERFACES))
     print "    -h, --help"
     print "       Displays this help"
     print "    -d, --debug"
