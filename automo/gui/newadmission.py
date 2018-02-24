@@ -74,9 +74,9 @@ class PatientSelectorPage(BasePage):
     def is_valid(self):
         active_page = self.notebook.GetPage(self.notebook.GetSelection())
         if active_page == self.new_patient_panel:
-            blanks, blanks_lst = self.new_patient_panel.check()
-            if blanks:
-                self.error_message = "Following fields cannot be empty\n{}".format("\n".join(blanks_lst))
+            invalid, lst_invalid = self.new_patient_panel.check()
+            if invalid:
+                self.error_message = "Following fields are not valid:\n\n{}".format("\n".join(lst_invalid))
                 return False
             return True
         else:

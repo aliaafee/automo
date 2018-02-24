@@ -42,9 +42,9 @@ class FormPage(BasePage):
 
 
     def is_valid(self):
-        blanks, lst_blanks = self.form_panel.check()
-        if blanks:
-            self.error_message = "These fields cannot be empty\n\n{}".format("\n".join(lst_blanks))
+        invalid, lst_invalid = self.form_panel.check()
+        if invalid:
+            self.error_message = "Following fields are not valid:\n\n{}".format("\n".join(lst_invalid))
             return False
         return True
 

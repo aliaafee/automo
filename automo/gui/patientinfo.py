@@ -10,7 +10,8 @@ from .dbform import DbFormPanel,\
                     DbDateTimeField,\
                     DbAddressField,\
                     DbEnumField,\
-                    DbOptionalMultilineStringField
+                    DbOptionalMultilineStringField,\
+                    DbDurationField
 
 
 class PatientInfoPanelSmall(wx.Panel):
@@ -207,7 +208,7 @@ class PatientFormPanel(DbFormPanel):
             DbStringField("Hospital No.", "hospital_no", required=True),
             DbStringField("National Id No.", "national_id_no", required=True),
             DbStringField("Name", "name", required=True),
-            DbDateTimeField("Date of Birth", "time_of_birth", required=True),
+            DbDurationField("Age (_y _m _d)", "age", required=True),
             DbEnumField("Sex", "sex", ["M", "F"], required=True),
             DbOptionalMultilineStringField("Known Allergies", "allergies", lines=3),
             DbStringField("Phone No.", "phone_no"),

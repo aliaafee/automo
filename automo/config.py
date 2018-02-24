@@ -86,7 +86,7 @@ def parse_duration(duration_str):
     if not isvalid:
         raise ValueError("No valid duration found in string.")
 
-    return relativedelta(years=years, months=months, days=days)
+    return relativedelta(years=years, months=months, days=days, hours=0, minutes=0, seconds=0, microseconds=0)
 
 
 def format_date(date_object):

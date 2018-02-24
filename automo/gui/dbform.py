@@ -1,6 +1,7 @@
 """Database Form for Data Input/Modification"""
 import wx
 
+from .. import config
 from .. import database as db
 from . import images
 from . import events
@@ -85,6 +86,12 @@ class DbFormFieldDefn(object):
 
     def get_value(self):
         return self.get_editor_value()
+
+    def is_valid(self):
+        if self.required:
+            if self.get_value() is None:
+                return False, "cannot be blank"
+        return True, ""
 
 
 class DbStringField(DbFormFieldDefn):
@@ -410,6 +417,39 @@ class DbFloatField(DbFormFieldDefn):
             return None
 
 
+
+class DbDurationField(DbFormFieldDefn):
+    def __init__(self, label, str_attr, required=False, editable=True):
+        super(DbDurationField, self).__init__(label, str_attr, required, editable)
+
+    def set_editor_value(self, value):
+        duration_str = config.format_duration(value)
+        self.editor.SetValue(duration_str)
+
+    def get_editor_value(self):
+        duration_str = self.editor.GetValue()
+        if duration_str == "":
+            return None
+
+        try:
+            return config.parse_duration(duration_str)
+        except ValueError:
+            return None
+
+    def is_valid(self):
+        duration_str = self.editor.GetValue()
+        if duration_str == "" and self.required:
+            return False, "cannot be blank"
+
+        try:
+            duration =  config.parse_duration(duration_str)
+        except ValueError:
+            return False, "invalid duration format use __y __m __d"
+
+        return True, ""
+
+
+
 class DbEnumField(DbFormFieldDefn):
     def __init__(self, label, str_attr, choices, required=False, editable=True, help_text=None):
         super(DbEnumField, self).__init__(label, str_attr, required, editable, help_text)
@@ -631,13 +671,14 @@ class DbFormPanel(wx.ScrolledWindow):
 
 
     def check(self):
-        blanks = False
-        lst_blanks = []
+        invalid = False
+        lst_invalid = []
         for field in self.fields:
-            if field.required and field.get_value() is None:
-                blanks = True
-                lst_blanks.append(field.label)
-        return blanks, lst_blanks
+            valid, message = field.is_valid()
+            if not valid:
+                invalid = True
+                lst_invalid.append("   {0} ({1})".format(field.label, message))
+        return invalid, lst_invalid
 
 
     def update_object(self, db_object):
