@@ -38,6 +38,8 @@ class Doctor(Personnel):
     #                                   foreign_keys="Prescription.stopped_by_id")
 
     def __repr__(self):
+        if self.pmr_no is None:
+            return "{0}".format(self.name)
         return "{0} ({1})".format(self.name, self.pmr_no)
 
 
@@ -52,4 +54,5 @@ class Nurse(Personnel):
     pnr_no = Column(String(250))
 
     def __repr__(self):
+        
         return "{0} ({1})".format(self.name, self.pnr_no)

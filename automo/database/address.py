@@ -20,3 +20,16 @@ class Address(Base):
     
     current_residents = relationship("Patient", back_populates="current_address",
                                        foreign_keys="Patient.current_address_id")
+
+    def __repr__(self):
+        return ", ".join(
+            [ v for v in
+                [
+                    self.line_1,
+                    self.line_2,
+                    self.city,
+                    self.region,
+                    self.country
+                ] 
+            if v is not None]
+        )
