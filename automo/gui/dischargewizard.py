@@ -326,7 +326,6 @@ class DischargeWizard(wx.adv.Wizard):
         self.add_page(self.history_page)
 
         fields = [
-            DbDateTimeField("Time", 'record_time'),
             DbFloatField("Pulse (bmp)", 'pulse_rate'),
             DbFloatField("Resp (bmp)", 'respiratory_rate'),
             DbFloatField("SBP (mmHg)", 'systolic_bp'),
@@ -337,7 +336,6 @@ class DischargeWizard(wx.adv.Wizard):
         self.add_page(self.vitals_page)
 
         fields = [
-            DbDateTimeField("Time", 'record_time'),
             DbFloatField("Weight (kg)", 'weight'),
             DbFloatField("Height (m)", 'height')
         ]
@@ -482,12 +480,14 @@ class DischargeWizard(wx.adv.Wizard):
 
         vitals = db.VitalSigns()
         self.vitals_page.update_db_object(vitals)
-        if vitals.record_time is not None:
+        if any([vitals.pulse_rate, vitals.respiratory_rate, vitals.diastolic_bp, vitals.systolic_bp, vitals.temperature]):
+            vitals.record_time = admission.start_time
             admission.add_child_encounter(vitals)
 
-        measurements = db.VitalSigns()
+        measurements = db.Measurements()
         self.measurements_page.update_db_object(measurements)
-        if measurements.record_time is not None:
+        if any([measurements.weight, measurements.height]):
+            measurements.record_time = admission.start_time
             admission.add_child_encounter(measurements)
 
         problems = self.get_problems()
