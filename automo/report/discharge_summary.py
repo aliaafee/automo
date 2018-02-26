@@ -37,15 +37,15 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
 
     demography = [
         [
-            'Name:', Paragraph("<b>{}</b>".format(patient.name), stylesheet['default']),
-            "Age/Sex:", Paragraph("<b>{0} / {1}</b>".format(config.format_duration(age), patient.sex), stylesheet['default'])
+            'Name:', Paragraph(u"<b>{}</b>".format(patient.name), stylesheet['default']),
+            "Age/Sex:", Paragraph(u"<b>{0} / {1}</b>".format(config.format_duration(age), patient.sex), stylesheet['default'])
         ],
         [
-            "Hospital No:", Paragraph("<b>{}</b>".format(patient.hospital_no), stylesheet['default']),
-            "National ID:", Paragraph("<b>{}</b>".format(patient.national_id_no), stylesheet['default'])
+            "Hospital No:", Paragraph(u"<b>{}</b>".format(patient.hospital_no), stylesheet['default']),
+            "National ID:", Paragraph(u"<b>{}</b>".format(patient.national_id_no), stylesheet['default'])
         ],
         [
-            'Address:', Paragraph("<b>{}</b>".format(address_str), stylesheet['default']),
+            'Address:', Paragraph(u"<b>{}</b>".format(address_str), stylesheet['default']),
         ]
     ]
 
@@ -97,8 +97,8 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
         preferred_str = ", ".join(preferred)
         comment_str = ""
         if problem.comment is not None:
-            comment_str = "({})".format(problem.comment)
-        problem_strs.append("<b>{0} - {1}</b>{2}".format(code_str, preferred_str, comment_str))
+            comment_str = u"({})".format(problem.comment)
+        problem_strs.append(u"<b>{0} - {1}</b>{2}".format(code_str, preferred_str, comment_str))
     diagnosis.append(
         Paragraph(
             "<b>;</b>".join(problem_strs),
@@ -109,7 +109,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
     #History and examination##############################################
     history_examination = []
     if patient.allergies is not None:
-        history_examination.append(Paragraph("<b>Allergic to {}</b>".format(patient.allergies), stylesheet['text']))
+        history_examination.append(Paragraph(u"<b>Allergic to {}</b>".format(patient.allergies), stylesheet['text']))
 
     hx_components = [
         ("Chief Complaints", admission.chief_complaints),
@@ -120,7 +120,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
     for label, component in hx_components:
         if component is not None:
             history_examination.append(Paragraph(
-                "<b>{0}</b> {1}".format(label, component),
+                u"<b>{0}</b> {1}".format(label, component),
                 stylesheet['text']
             ))
 
@@ -134,7 +134,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
         vitals_str = []
         bp = None
         if vital.diastolic_bp is not None and vital.systolic_bp is not None:
-            bp = "{0}/{1}".format(int(round(vital.systolic_bp, 0)), int(round(vital.diastolic_bp, 0)))
+            bp = u"{0}/{1}".format(int(round(vital.systolic_bp, 0)), int(round(vital.diastolic_bp, 0)))
         vital_components = [
             ("Pulse", vital.pulse_rate, "bpm", 0),
             ("BP", bp, "mmHg", None),
@@ -194,7 +194,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
     for label, component in ex_components:
         if component is not None:
             history_examination.append(Paragraph(
-                "<b>{0}</b> {1}".format(label, component),
+                u"<b>{0}</b> {1}".format(label, component),
                 stylesheet['text']
             ))
 
@@ -214,8 +214,8 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
         if report.type in report_fields.keys():
             site = report.site
             if report.type == 'imaging':
-                site = "{0} {1}".format(report.imaging_type, report.site)
-            reports.append(Paragraph("<b>{0}</b> {1}".format(report.type.title(), site), stylesheet['text']))
+                site = u"{0} {1}".format(report.imaging_type, report.site)
+            reports.append(Paragraph(u"<b>{0}</b> {1}".format(report.type.title(), site), stylesheet['text']))
             table_content = [
                 ["Time", config.format_datetime(report.start_time)],
                 [report_fields[report.type][0].title(), getattr(report, report_fields[report.type][0])],
@@ -246,7 +246,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
                 ],
                 [
                     "Surgeon",
-                    Paragraph("<b>{}</b>".format(procedure.personnel), stylesheet['text']),
+                    Paragraph(u"<b>{}</b>".format(procedure.personnel), stylesheet['text']),
                     "Assistant(s)",
                     Paragraph(unicode(procedure.assistant), stylesheet['text'])
                 ],
@@ -263,13 +263,13 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
             treatment.append(info_table)
             treatment.append(
                 Paragraph(
-                    "<b>Findings</b> {}".format(procedure.findings),
+                    u"<b>Findings</b> {}".format(procedure.findings),
                     stylesheet['default']   
                 )
             )
             treatment.append(
                 Paragraph(
-                    "<b>Procedure</b> {}".format(procedure.steps),
+                    u"<b>Procedure</b> {}".format(procedure.steps),
                     stylesheet['default']   
                 )
             )
@@ -284,7 +284,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
     for item in admission.prescription:
         if item.active:
             prescription_list.append(Paragraph(
-                "{0} {1}".format(item.drug.name, item.drug_order),
+                u"{0} {1}".format(item.drug.name, item.drug_order),
                 stylesheet['prescription-item']
             ))
     prescription.append(ListFlowable(prescription_list, style=stylesheet['list-default']))
@@ -407,7 +407,7 @@ def generate_discharge_summary(admission, session, pagesize=A4):
     if len(patient_name) > 20:
         patient_name = patient_name[0:20] + "..."
 
-    page_footer = "{0}, {1}, {2} / {3}".format(
+    page_footer = u"{0}, {1}, {2} / {3}".format(
         admission.patient.hospital_no,
         patient_name,
         config.format_duration(admission.patient.age),
