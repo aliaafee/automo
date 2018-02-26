@@ -6,19 +6,13 @@ Electronic Medical Record.
 
 Copyright (C) 2017 Ali Aafee
 """
-import sys
-import code
-from datetime import datetime, date
-from dateutil.relativedelta import relativedelta as duration
 
 from ._version import __version__
-from . import icd10claml
 from . import database as db
+from . import icd10claml
 from . import report
 
 DEFAULT_DB_URI = "sqlite:///patient-data.db"
-
-CLI_INTERFACES = ['shell']
 
 
 def start(uri, debug=False):

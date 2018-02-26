@@ -8,6 +8,8 @@ from dateutil.relativedelta import relativedelta as duration
 import automo
 from automo import database as db
 
+INTERFACES = ['shell']
+
 
 def app_license():
     """App license"""
@@ -24,7 +26,7 @@ def usage():
     print "    -f, --interface (Option is required)"
     print "       Set the interface to start with."
     print "       available interfaces:"
-    print '           cli: "{}"'.format('", "'.join(automo.CLI_INTERFACES))
+    print '           cli: "{}"'.format('", "'.join(INTERFACES))
     print "    -h, --help"
     print "       Displays this help"
     print "    -d, --debug"
