@@ -104,12 +104,12 @@ class DoctorBedSelectorPage(BasePage):
     def __init__(self, parent, session):
         super(DoctorBedSelectorPage, self).__init__(parent, session, "Select Bed")
 
-        self.cmb_doctor = DbComboBox(self, self.session)
+        self.cmb_doctor = DbComboBox(self)
         self.cmb_doctor.set_items(
             self.session.query(db.Doctor)
         )
 
-        self.cmb_ward = DbComboBox(self, self.session)
+        self.cmb_ward = DbComboBox(self)
         self.cmb_ward.Bind(wx.EVT_COMBOBOX, self._on_change_ward)
         self.cmb_ward.set_items(
             self.session.query(db.Ward)

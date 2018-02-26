@@ -16,7 +16,7 @@ class BedSelectorPanel(wx.Panel):
         self.empty_beds = empty_beds
         self.current_bed = current_bed
 
-        self.cmb_ward = DbComboBox(self, self.session)
+        self.cmb_ward = DbComboBox(self)
         self.cmb_ward.Bind(wx.EVT_COMBOBOX, self._on_change_ward)
         self.cmb_ward.set_items(
             self.session.query(db.Ward)

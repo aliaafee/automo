@@ -42,6 +42,20 @@ class DbListBox(wx.html.HtmlListBox):
         self.Refresh()
 
 
+    def set_selected_item(self, selected_item):
+        if not self.items:
+            return
+
+        list_index = 0
+        for item in self.items:
+            if item == selected_item:
+                self.SetSelection(list_index)
+                return
+            list_index += 1
+
+        self.SetSelection(-1)
+
+
     def set_items(self, items, extra_row_value=None):
         """Set the sqlalchemy query result."""
         self.items = items

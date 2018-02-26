@@ -364,8 +364,7 @@ class Icd10Coder(wx.Dialog):
         self.lbl_modifier = wx.StaticText(self, label="Modifier")
         self.lbl_modifier.Hide()
         foot_sizer.Add(self.lbl_modifier, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx. LEFT, border=5)
-        self.cmb_modifier = DbComboBox(self, self.session,
-                                       self._modifier_decorator, size=(200, -1))
+        self.cmb_modifier = DbComboBox(self, self._modifier_decorator, size=(200, -1))
         self.cmb_modifier.Hide()
         foot_sizer.Add(self.cmb_modifier, 0,
                        wx.EXPAND | wx.BOTTOM | wx.RIGHT | wx. LEFT, border=5)
@@ -374,8 +373,7 @@ class Icd10Coder(wx.Dialog):
         self.lbl_modifier_extra.Hide()
         foot_sizer.Add(self.lbl_modifier_extra, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx. LEFT,
                        border=5)
-        self.cmb_modifier_extra = DbComboBox(self, self.session,
-                                             self._modifier_decorator, size=(200, -1))
+        self.cmb_modifier_extra = DbComboBox(self, self._modifier_decorator, size=(200, -1))
         self.cmb_modifier_extra.Hide()
         foot_sizer.Add(self.cmb_modifier_extra, 0,
                        wx.EXPAND | wx.BOTTOM | wx.RIGHT | wx. LEFT, border=5)
@@ -528,12 +526,12 @@ class Icd10Coder(wx.Dialog):
 
     def _on_ok(self, event):
         if self.category_list.get_selected_category() is None:
-            print "TODO: Error message nothing selected"
+            print("TODO: Error message nothing selected")
             self.EndModal(wx.ID_CANCEL)
             return
 
         if self.chk_favourites.GetValue() is True:
-            print "TODO: Add this problem to favorites"
+            print("TODO: Add this problem to favorites")
 
         self.EndModal(wx.ID_OK)
 
@@ -659,7 +657,7 @@ class Icd10Coder(wx.Dialog):
                 if link_class is not None:
                     self.set_category(link_class, update_tree=True)
 
-        print "Clicked a link href={0}".format(link_info.GetHref())
+        print("Clicked a link href={0}".format(link_info.GetHref()))
 
 
     def _update_browser_title(self, icd10class):

@@ -33,7 +33,7 @@ class WardPanel(wx.Panel):
         self.toolbar.Bind(wx.EVT_TOOL, self._on_discharge_multiple, id=ID_DISCHARGE_MULTIPLE)
         self.toolbar.Bind(wx.EVT_TOOL, self._on_print, id=wx.ID_PRINT)
 
-        self.cmb_ward = DbComboBox(self, self.session)
+        self.cmb_ward = DbComboBox(self)
         self.cmb_ward.Bind(wx.EVT_COMBOBOX, self._on_change_ward)
 
         self.beds_list = DbQueryResultBox(self, self._bed_decorator, style=wx.LB_MULTIPLE)

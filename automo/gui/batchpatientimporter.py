@@ -69,7 +69,7 @@ class BatchPatientImporter(wx.Dialog):
         self.cmd_cancel.Bind(wx.EVT_BUTTON, self._on_cancel)
 
         self.lbl_doctor = wx.StaticText(self, label="Admitting Doctor")
-        self.cmb_doctor = DbComboBox(self, self.session, size=(200, -1))
+        self.cmb_doctor = DbComboBox(self, size=(200, -1))
         self.cmb_doctor.set_items(self.session.query(db.Doctor).all())
 
         self.lbl_ward = wx.StaticText(self, label="Ward")
