@@ -557,11 +557,12 @@ class Icd10Coder(wx.Dialog):
                 group = unicode(result.group())
                 code_str = string.replace(code_str, group, u'<b>' + group + u'</b>', 1)
 
-        if len(query_string) != 0:
-            result = re.search(re.escape(query_string), title_str, re.IGNORECASE)
+        for word in query_string.split():
+            result = re.search(re.escape(word), title_str, re.IGNORECASE)
             if result is not None:
                 group = unicode(result.group())
                 title_str = string.replace(title_str, group, u'<b>' + group + u'</b>', 1)
+
 
         return u'<font size="2"><table><tr><td width="45" valign="top">{0}</td><td>{1}</td></tr></table></font>'.format(
             code_str, title_str
@@ -589,20 +590,32 @@ class Icd10Coder(wx.Dialog):
 
     def _on_change_filter(self, event):
         """ search and display results """
+        str_search = self.txt_search.GetValue()
+
+        if str_search == "":
+            self.result_list.clear()
+            return
+
         items = self.session.query(db.Icd10Class)
 
-        str_search = self.txt_search.GetValue()
-        if str_search != "":
-            items = items.filter(db.Icd10Class.kind == "category").filter(
-                or_(
-                    db.Icd10Class.code.like("%{0}%".format(str_search)),
-                    db.Icd10Class.preferred_plain.like("%{0}%".format(str_search))
+        and_filters = []
+
+        if str_search:
+            for word in str_search.split():
+                if word:
+                    and_filters.append(db.Icd10Class.preferred_plain.like("%{}%".format(word)))
+
+        items = items.filter(db.Icd10Class.kind == "category").filter(
+            or_(
+                db.Icd10Class.code.like("%{0}%".format(str_search)),
+                and_(
+                    *and_filters
                 )
             )
+        )
 
-            self.result_list.set_result(items, str_search)
-        else:
-            self.result_list.clear()
+        self.result_list.set_result(items, str_search)
+            
 
 
     def _on_result_selected(self, event):
@@ -690,7 +703,6 @@ class Icd10Coder(wx.Dialog):
 
 
     def _on_change_category(self, event):
-        print "Category Changed"
         current_class = self.category_list.get_selected_category()
 
         if current_class is None:
