@@ -2,7 +2,7 @@
 import tempfile
 import dateutil.relativedelta
 from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Paragraph, PageBreak, Table, TableStyle, ListFlowable, Image
+from reportlab.platypus import SimpleDocTemplate, Paragraph, PageBreak, Table, TableStyle, ListFlowable, Image, Spacer
 from reportlab.platypus.flowables import HRFlowable
 from reportlab.lib.pagesizes import A5, A4, cm, A3
 from reportlab.lib.units import mm
@@ -51,7 +51,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
 
     patient_details.append(TableExpandable(
         demography,
-        colWidths=[18*mm, None, 18*mm, 20*mm],
+        colWidths=[22*mm, None, 20*mm, 24*mm],
         pagesize=pagesize, rightMargin=right_margin+sidebar_width, leftMargin=left_margin,
         style=stylesheet['table-default']))
 
@@ -67,19 +67,19 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
         
     admission_data = [
         [
-            'Admitted:', config.format_date(admission.start_time),
-            'Discharged:', config.format_date(admission.end_time),
-            'Duration:', Paragraph(duration_str, stylesheet['default'])
+            'Admitted:', Paragraph(u"<b>{}</b>".format(config.format_date(admission.start_time)), stylesheet['default']),
+            'Discharged:', Paragraph(u"<b>{}</b>".format(config.format_date(admission.end_time)), stylesheet['default']),
+            'Duration:', Paragraph(u"<b>{}</b>".format(duration_str), stylesheet['default'])
         ],
         [
-            'Ward:', unicode(bed.ward),
-            'Bed:', unicode(bed)
+            'Ward:', Paragraph(u"<b>{}</b>".format(unicode(bed.ward)), stylesheet['default']),
+            'Bed:', Paragraph(u"<b>{}</b>".format(unicode(bed)), stylesheet['default'])
         ]
     ]
 
     admission_details.append(TableExpandable(
         admission_data,
-        colWidths=[18*mm, None, 18*mm, None, 12*mm, None],
+        colWidths=[20*mm, None, 21*mm, None, 16*mm, None],
         pagesize=pagesize, rightMargin=right_margin+sidebar_width, leftMargin=left_margin,
         style=stylesheet['table-default']))
 
@@ -313,16 +313,24 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
             diagnosis
         ],
         None,
-        [
-            Paragraph("History & Examination", stylesheet['heading_1']),
-            history_examination
-        ],
+    ]
+
+    if len(history_examination):
+        main_contents.append([Paragraph("History & Examination", stylesheet['heading_1']), history_examination[0]])
+        if len(history_examination) > 1:
+            for item in history_examination[1:]:
+                main_contents.append(["", [item, Spacer(1*mm, 1*mm)]])
+
+    else:
+        main_contents.append([Paragraph("History & Examination", stylesheet['heading_1']), ""])
+
+    main_contents.extend([
         None,
         [
             Paragraph("Investigations", stylesheet['heading_1']),
             reports[0]
         ]
-    ]
+    ])
 
     if len(reports) > 1:
         for item in reports[1:]:
@@ -367,7 +375,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
         ],
         None,
         [
-            Paragraph("Discharge Prepared by", stylesheet['heading_1']),
+            Paragraph("Written by", stylesheet['heading_1']),
             Paragraph(unicode(admission.written_by), stylesheet['default'])
         ]
     ])
