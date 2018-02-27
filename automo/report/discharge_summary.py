@@ -238,11 +238,11 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
     if procedures.count() > 0:
         treatment = []
         for procedure in procedures:
-            treatment.append(Paragraph(unicode(procedure.procedure_name), stylesheet['heading_1']))
+            treatment.append(Paragraph(u"<u>{}</u>".format(unicode(procedure.procedure_name)), stylesheet['heading_3']))
             info_content = [
                 [
                     "Date",
-                    config.format_date(procedure.start_time)
+                    Paragraph(u"<b>{}</b>".format(config.format_date(procedure.start_time)), stylesheet['text']),
                 ],
                 [
                     "Surgeon",

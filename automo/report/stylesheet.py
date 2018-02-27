@@ -72,6 +72,15 @@ def get_stylesheet():
         spaceBefore=10
     )
 
+    styles['heading_3'] = ParagraphStyle(
+        'heading_3',
+        parent=styles['default'],
+        fontName='Helvetica-Bold',
+        fontSize=10,
+        leading=12,
+        spaceBefore=10
+    )
+
     styles['table-default'] = TableStyle([
         ('FONT', (0, 0), (-1, -1), styles['default'].fontName),
         ('FONTSIZE', (0, 0), (-1, -1), styles['default'].fontSize),
