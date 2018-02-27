@@ -11,8 +11,8 @@ def get_stylesheet():
     styles['default'] = ParagraphStyle(
         'default',
         fontName='Helvetica',
-        fontSize=8,
-        leading=10,
+        fontSize=9,
+        leading=12,
         leftIndent=0,
         rightIndent=0,
         firstLineIndent=0,

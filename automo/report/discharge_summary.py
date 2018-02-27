@@ -51,7 +51,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
 
     patient_details.append(TableExpandable(
         demography,
-        colWidths=[22*mm, None, 20*mm, 24*mm],
+        colWidths=[19*mm, None, 18*mm, 24*mm],
         pagesize=pagesize, rightMargin=right_margin+sidebar_width, leftMargin=left_margin,
         style=stylesheet['table-default']))
 
@@ -79,7 +79,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
 
     admission_details.append(TableExpandable(
         admission_data,
-        colWidths=[20*mm, None, 21*mm, None, 16*mm, None],
+        colWidths=[19*mm, None, 20*mm, None, 16*mm, None],
         pagesize=pagesize, rightMargin=right_margin+sidebar_width, leftMargin=left_margin,
         style=stylesheet['table-default']))
 
@@ -217,7 +217,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
                 site = u"{0} {1}".format(report.imaging_type, report.site)
             reports.append(Paragraph(u"<b>{0}</b> {1}".format(report.type.title(), site), stylesheet['text']))
             table_content = [
-                ["Time", config.format_datetime(report.start_time)],
+                ["Date", config.format_date(report.start_time)],
                 [report_fields[report.type][0].title(), getattr(report, report_fields[report.type][0])],
                 ["Impression", report.impression]
             ]
@@ -241,8 +241,8 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
             treatment.append(Paragraph(unicode(procedure.procedure_name), stylesheet['heading_1']))
             info_content = [
                 [
-                    "Time",
-                    config.format_datetime(procedure.start_time)
+                    "Date",
+                    config.format_date(procedure.start_time)
                 ],
                 [
                     "Surgeon",
@@ -316,7 +316,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
     ]
 
     if len(history_examination):
-        main_contents.append([Paragraph("History & Examination", stylesheet['heading_1']), history_examination[0]])
+        main_contents.append([Paragraph("History & Examination", stylesheet['heading_1']), [history_examination[0], Spacer(1*mm, 1*mm)]])
         if len(history_examination) > 1:
             for item in history_examination[1:]:
                 main_contents.append(["", [item, Spacer(1*mm, 1*mm)]])
@@ -428,8 +428,8 @@ def generate_discharge_summary(admission, session, pagesize=A4):
         pagesize=pagesize,
         rightMargin=20*mm,
         leftMargin=20*mm,
-        topMargin=25*mm,
-        bottomMargin=25*mm
+        topMargin=20*mm,
+        bottomMargin=20*mm
     )
     doc.build(get_discharge_summary_elements(admission, session, pagesize))
 

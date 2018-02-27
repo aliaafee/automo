@@ -92,7 +92,7 @@ class PageNumberCanvasMaker(canvas.Canvas):
 
         w, h = self.pagesize
         self.page_number_position = (w - 20*mm, 22*mm)
-        self.head_position = h - 25*mm
+        self.head_position = h - 20*mm
 
 
     def showPage(self):
@@ -146,7 +146,7 @@ class DocTemplate(SimpleDocTemplate):
         self.first_page_footer = ""
 
         self.pagesize = pagesize
-        self.header_position = pagesize[1] - 24*mm
+        self.header_position = pagesize[1] - 19*mm
 
 
     def onFirstPage(self, this_canvas, document):
