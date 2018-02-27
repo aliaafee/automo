@@ -9,7 +9,6 @@ from .basedialog import BaseDialog
 from .pydatepickerctrl import PyDatePickerCtrl
 from .pydatetimepickerctrl import PyDateTimePickerCtrl, EVT_DATETIME_CHANGED
 from .dbcombobox import DbComboBox
-from .dblistbox import DbListBox
 
 
 class DbFormFieldDefn(object):
@@ -499,25 +498,30 @@ class DbBedField(DbFormFieldDefn):
             self.wards_list
         )
 
-        self.beds_list = DbListBox(self.editor, self._bed_decorator, size=(-1, 100))
-        self.beds_list.Bind(wx.EVT_LISTBOX, self.on_editor_changed)
+        self.cmb_bed = DbComboBox(self.editor)
+        self.cmb_bed.Bind(wx.EVT_COMBOBOX, self.on_editor_changed)
 
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self.cmb_ward, 0 , wx.EXPAND)
-        sizer.Add(self.beds_list, 1, wx.EXPAND)
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        sizer.Add(self.cmb_ward, 1 , wx.EXPAND)
+        sizer.Add(self.cmb_bed, 1, wx.EXPAND)
 
         self.editor.SetSizer(sizer)
 
         return self.editor
 
-    def _on_change_ward(self, event):
+    def _update_cmb_bed(self):
         selected_ward = self.cmb_ward.get_selected_item()
         
         if selected_ward is None:
-            self.beds_list.clear()
-            return
+            self.cmb_bed.clear()
+        else:
+            self.cmb_bed.set_items(selected_ward.beds)
 
-        self.beds_list.set_items(selected_ward.beds)
+        self.cmb_bed.SetSelection(-1)
+
+    def _on_change_ward(self, event):
+        self._update_cmb_bed()
+        self.on_editor_changed(event)
 
     def _bed_decorator(self, bed):
         html = '<font size="2">'\
@@ -531,23 +535,23 @@ class DbBedField(DbFormFieldDefn):
 
     def lock_editor(self):
         self.cmb_ward.Disable()
-        self.beds_list.Disable()
+        self.cmb_bed.Disable()
 
     def unlock_editor(self):
         self.cmb_ward.Enable()
-        self.beds_list.Enable()
+        self.cmb_bed.Enable()
 
     def set_editor_value(self, value):
         if value is None:
-            self.beds_list.SetSelection(-1)
+            self.cmb_bed.SetSelection(-1)
             return
 
         self.cmb_ward.set_selected_item(value.ward)
-        self._on_change_ward(None)
-        self.beds_list.set_selected_item(value)
+        self._update_cmb_bed()
+        self.cmb_bed.set_selected_item(value)
 
     def get_editor_value(self):
-        return self.beds_list.get_selected_object()
+        return self.cmb_bed.get_selected_item()
 
 
 class DbRelationField(DbEnumField):

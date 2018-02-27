@@ -79,7 +79,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
 
     admission_details.append(TableExpandable(
         admission_data,
-        colWidths=[19*mm, None, 20*mm, None, 16*mm, None],
+        colWidths=[16*mm, None, 20*mm, None, 16*mm, None],
         pagesize=pagesize, rightMargin=right_margin+sidebar_width, leftMargin=left_margin,
         style=stylesheet['table-default']))
 
