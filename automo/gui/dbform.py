@@ -6,8 +6,8 @@ from .. import database as db
 from . import images
 from . import events
 from .basedialog import BaseDialog
-from .pydatepickerctrl import PyDatePickerCtrl
-from .pydatetimepickerctrl import PyDateTimePickerCtrl, EVT_DATETIME_CHANGED
+from .pydatepickerctrl import PyDatePickerCtrl, EVT_DATETIME_CHANGED
+from .pydatetimepickerctrl import PyDateTimePickerCtrl
 from .dbcombobox import DbComboBox
 
 
@@ -597,11 +597,11 @@ class DbDateField(DbFormFieldDefn):
         super(DbDateField, self).__init__(label, str_attr, required, editable)
 
     def create_editor(self, parent):
-        self.editor = PyDatePickerCtrl(parent, style=wx.DP_DROPDOWN | wx.DP_ALLOWNONE)
+        self.editor = PyDatePickerCtrl(parent)
         if not self.editable:
             self.editor.Disable()
         else:
-            self.editor.Bind(wx.EVT_DATE_CHANGED, self.on_editor_changed)
+            self.editor.Bind(EVT_DATETIME_CHANGED, self.on_editor_changed)
         return self.editor
 
     def lock_editor(self):

@@ -13,6 +13,7 @@ from .investigation import Investigation,\
                            Imaging,\
                            Endoscopy,\
                            Histopathology,\
+                           OtherReport,\
                            CompleteBloodCount,\
                            RenalFunctionTest,\
                            LiverFunctionTest

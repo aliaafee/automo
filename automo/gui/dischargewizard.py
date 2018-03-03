@@ -18,7 +18,8 @@ from .dbform import DbFormPanel,\
                     DbStringField,\
                     DbOptionsRelationField,\
                     DbFormSwitcher,\
-                    DbBedField
+                    DbBedField,\
+                    DbDateField
 from .dblistbox import DbListBox
 from .acdbtextctrl import AcDbTextCtrl
 from .objectlistviewmod import ObjectListViewMod, EVT_OVL_CHECK_EVENT
@@ -362,7 +363,7 @@ class DischargeWizard(wx.adv.Wizard):
         self.add_page(self.investigations_page)
 
         imaging_fields = [
-            DbDateTimeField("Time", 'record_time', required=True),
+            DbDateField("Date", 'record_time', required=True),
             DbStringField("Imaging Type", 'imaging_type'),
             DbStringField("Site", 'site'),
             DbStringField("Radiologist", 'radiologist'),
@@ -375,7 +376,7 @@ class DischargeWizard(wx.adv.Wizard):
                                                   lambda v: u"{0} {1}".format(v.imaging_type, v.site))
 
         endoscopy_fields = [
-            DbDateTimeField("Time", 'record_time', required=True),
+            DbDateField("Time", 'record_time', required=True),
             DbStringField("Site", 'site'),
             DbStringField("Endoscopist", 'endoscopist'),
             DbMultilineStringField("Impression", 'impression'),
@@ -387,7 +388,7 @@ class DischargeWizard(wx.adv.Wizard):
                                                   lambda v: u"{}".format(v.site))
 
         histopathology_fields = [
-            DbDateTimeField("Time", 'record_time', required=True),
+            DbDateField("Time", 'record_time', required=True),
             DbStringField("Site", 'site'),
             DbStringField("Pathologist", 'pathologist'),
             DbMultilineStringField("Impression", 'impression'),
@@ -397,6 +398,18 @@ class DischargeWizard(wx.adv.Wizard):
                                                   db.Histopathology,
                                                   histopathology_fields,
                                                   lambda v: u"{}".format(v.site))
+
+        otherreport_fields = [
+            DbDateField("Time", 'record_time', required=True),
+            DbStringField("Name", 'name'),
+            DbStringField("Reported by", 'reported_by'),
+            DbMultilineStringField("Impression", 'impression'),
+            DbMultilineStringField("Report", 'report')
+        ]
+        self.investigations_page.add_subencounter_class("Other Report",
+                                                  db.OtherReport,
+                                                  otherreport_fields,
+                                                  lambda v: u"{}".format(v.name))
 
         self.surgical_procedures_page = SubencountersPage(self, session, "Surgical Procedures")
         self.add_page(self.surgical_procedures_page)

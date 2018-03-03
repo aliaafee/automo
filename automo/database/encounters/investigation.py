@@ -70,6 +70,20 @@ class Histopathology(Investigation):
     pathologist = Column(String(255))
 
 
+class OtherReport(Investigation):
+    """Report of Investigation Not Applicable Elsewhere."""
+    id = Column(Integer, ForeignKey('investigation.id'), primary_key=True)
+    
+    __mapper_args__ = {
+        'polymorphic_identity':'otherreport'
+    }
+
+    name = Column(String(255))
+    report = Column(Text)
+    impression = Column(Text)
+    reported_by = Column(String(255))
+
+
 class CompleteBloodCount(Investigation):
     """CompleteBloodCount.
       hemoglobin (Hemoglobin) in g% 
@@ -143,3 +157,4 @@ class OtherTest(Investigation):
     name = Column(String(255))
     value = Column(String(255))
     unit = Column(String(255))
+

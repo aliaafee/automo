@@ -1,4 +1,5 @@
 """Discharge Summary Report"""
+import datetime
 import tempfile
 import dateutil.relativedelta
 from reportlab.lib import colors
@@ -203,7 +204,8 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
     report_fields = {
         'imaging':['radiologist', 'impression', 'report'],
         'endoscopy':['endoscopist', 'impression', 'report'],
-        'histopathology':['pathologist', 'impression', 'report']
+        'histopathology':['pathologist', 'impression', 'report'],
+        'otherreport':['reported_by', 'impression', 'report']
     }
     reports = []
     reports.append(Paragraph("All enclosed", stylesheet['text']))
@@ -212,10 +214,14 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
                 .order_by(db.Investigation.start_time)
     for report in result:
         if report.type in report_fields.keys():
-            site = report.site
-            if report.type == 'imaging':
-                site = u"{0} {1}".format(report.imaging_type, report.site)
-            reports.append(Paragraph(u"<b>{0}</b> {1}".format(report.type.title(), site), stylesheet['text']))
+            if report.type == 'otherreport':
+                reports.append(Paragraph(u"<b>{0}</b>".format(report.name), stylesheet['text']))
+            else:
+                site = report.site
+                if report.type == 'imaging':
+                    site = u"{0} {1}".format(report.imaging_type, report.site)
+                
+                reports.append(Paragraph(u"<b>{0}</b> {1}".format(report.type.title(), site), stylesheet['text']))
             table_content = [
                 ["Date", config.format_date(report.start_time)],
                 [report_fields[report.type][0].title(), getattr(report, report_fields[report.type][0])],
@@ -242,7 +248,13 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
             info_content = [
                 [
                     "Date",
-                    Paragraph(u"<b>{}</b>".format(config.format_date(procedure.start_time)), stylesheet['text']),
+                    Paragraph(
+                        u"<b>{}</b> at {}".format(
+                            config.format_date(procedure.start_time),
+                            datetime.datetime.strftime(procedure.start_time, "%H:%M")
+                        ),
+                        stylesheet['text']
+                    ),
                 ],
                 [
                     "Surgeon",

@@ -27,6 +27,7 @@ from .encounters import Encounter,\
                         Imaging,\
                         Endoscopy,\
                         Histopathology,\
+                        OtherReport,\
                         CompleteBloodCount,\
                         RenalFunctionTest,\
                         LiverFunctionTest,\

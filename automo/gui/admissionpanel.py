@@ -155,6 +155,18 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
                                                   db.Histopathology,
                                                   histopathology_fields,
                                                   lambda v: u"{}".format(v.site))
+
+        otherreport_fields = [
+            DbDateTimeField("Time", 'record_time', required=True),
+            DbStringField("Name", 'name'),
+            DbStringField("Reported by", 'reported_by'),
+            DbMultilineStringField("Impression", 'impression'),
+            DbMultilineStringField("Report", 'report')
+        ]
+        self.subencounters.add_subencounter_class("Other Report",
+                                                  db.OtherReport,
+                                                  otherreport_fields,
+                                                  lambda v: u"{}".format(v.name))
         
         other_fields = [
             DbDateTimeField("Time Started", 'start_time', required=True),
@@ -162,7 +174,7 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
             DbStringField("Title", 'title'),
             DbMultilineStringField("Note", 'note')
         ]
-        self.subencounters.add_subencounter_class("Other",
+        self.subencounters.add_subencounter_class("Other Note",
                                                   db.OtherEncounter,
                                                   other_fields,
                                                   lambda v: u"{}".format(v.title))
