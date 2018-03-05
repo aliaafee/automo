@@ -398,7 +398,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
     else:
         elements.append(DefaultHeader(title="DISCHARGE SUMMARY"))
 
-    elements.append(Paragraph('<para alignment="center">Department of Surgery</para>', stylesheet['heading_1']))
+    elements.append(Paragraph('<para alignment="center">{}</para>'.format(config.REPORT_HEAD_SUBTITLE3), stylesheet['heading_1']))
 
     elements.append(Paragraph('&nbsp;', stylesheet['default']))
 

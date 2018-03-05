@@ -19,6 +19,7 @@ class ConfigEditor(wx.ScrolledWindow):
             ("Report Title", config, 'REPORT_HEAD_TITLE'),
             ("Report Subtitle 1", config, 'REPORT_HEAD_SUBTITLE1'),
             ("Report Subtitle 2", config, 'REPORT_HEAD_SUBTITLE2'),
+            ("Report Subtitle 3", config, 'REPORT_HEAD_SUBTITLE3'),
             ("Report Logo Right", config, 'REPORT_HEAD_LOGO_RIGHT'),
             ("Report Logo Left", config, 'REPORT_HEAD_LOGO_LEFT'),
             ("Batch Import Columns", config, 'BATCH_IMPORT_COLUMNS'),

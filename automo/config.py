@@ -6,9 +6,11 @@ from dateutil.relativedelta import relativedelta
 DATE_FORMAT = "%d/%m/%Y"
 DATETIME_FORMAT = "%d/%m/%Y %H:%M:%S"
 
+REPORT_HEAD_SUPTITLE = ""
 REPORT_HEAD_TITLE = "SOME MEMORIAL HOSPITAL"
 REPORT_HEAD_SUBTITLE1 = "Street Address of Hospital, City, 20041, Country"
 REPORT_HEAD_SUBTITLE2 = "Phone 0000000, Fax 000000, Email mail@somehospital.com"
+REPORT_HEAD_SUBTITLE3 = "Department of Surgery"
 REPORT_HEAD_LOGO_RIGHT = ""
 REPORT_HEAD_LOGO_LEFT = ""
 
