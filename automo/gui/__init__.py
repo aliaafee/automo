@@ -4,6 +4,7 @@ import traceback
 import wx
 
 from . import guiconfig
+from . import configloader
 from .login import LoginDlg
 from .baseinterface import BaseInterface
 from .shellinterface import ShellInterface
@@ -31,7 +32,7 @@ class AutoMOApp(wx.App):
         """Initializes the App"""
         sys.excepthook = self.exception_handler
 
-        guiconfig.load_config()
+        configloader.load_config()
 
         self.interface = guiconfig.STARTUP_INTERFACE
 
@@ -40,7 +41,6 @@ class AutoMOApp(wx.App):
                 logindlg.CenterOnScreen()
                 if logindlg.ShowModal() == wx.ID_OK:
                     interface = logindlg.get_interface()
-                    print interface
                     if interface is not None:
                         guiconfig.STARTUP_INTERFACE = interface
                         self.interface = guiconfig.STARTUP_INTERFACE
@@ -68,6 +68,6 @@ class AutoMOApp(wx.App):
 
 
     def _on_main_frame_close(self, event):
-        guiconfig.save_config()
+        configloader.save_config()
 
         event.Skip(True)
