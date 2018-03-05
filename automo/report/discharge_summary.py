@@ -223,9 +223,9 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
                 
                 reports.append(Paragraph(u"<b>{0}</b> {1}".format(report.type.title(), site), stylesheet['text']))
             table_content = [
-                ["Date", config.format_date(report.start_time)],
-                [report_fields[report.type][0].title(), getattr(report, report_fields[report.type][0])],
-                ["Impression", report.impression]
+                ["Date:", config.format_date(report.start_time)],
+                [report_fields[report.type][0].title() + ":", getattr(report, report_fields[report.type][0])],
+                ["Impression:", Paragraph(unicode(report.impression), stylesheet['text'])]
             ]
             report_table = TableExpandable(
                 table_content,
@@ -247,7 +247,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
             treatment.append(Paragraph(u"<u>{}</u>".format(unicode(procedure.procedure_name)), stylesheet['heading_3']))
             info_content = [
                 [
-                    "Date",
+                    "Date:",
                     Paragraph(
                         u"<b>{}</b> at {}".format(
                             config.format_date(procedure.start_time),
@@ -257,13 +257,13 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
                     ),
                 ],
                 [
-                    "Surgeon",
+                    "Surgeon:",
                     Paragraph(u"<b>{}</b>".format(procedure.personnel), stylesheet['text']),
-                    "Assistant(s)",
+                    "Assistant(s):",
                     Paragraph(unicode(procedure.assistant), stylesheet['text'])
                 ],
                 [
-                    "Anesthetist",
+                    "Anesthetist:",
                     Paragraph(unicode(procedure.anesthetist), stylesheet['text'])
                 ]
             ]
