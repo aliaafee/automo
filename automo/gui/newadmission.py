@@ -15,7 +15,7 @@ from .icd10coder import Icd10Coder
 
 class BasePage(wx.adv.WizardPage):
     """Base for all Wizard Pages"""
-    def __init__(self, parent, session, title):
+    def __init__(self, parent, session, title=""):
         super(BasePage, self).__init__(parent)
         self.next = self.prev = None
         self.sizer = wx.BoxSizer(wx.VERTICAL)

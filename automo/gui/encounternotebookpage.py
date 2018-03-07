@@ -3,7 +3,7 @@ import wx
 
 class EncounterNotebookPage(wx.Panel):
     """Encounter Notebook Page"""
-    def __init__(self, parent, session, **kwds):
+    def __init__(self, parent, session, toolbar=True, **kwds):
         super(EncounterNotebookPage, self).__init__(parent, **kwds)
 
         self.session = session
@@ -11,11 +11,12 @@ class EncounterNotebookPage(wx.Panel):
 
         self.editable = True
 
-        self.toolbar = wx.ToolBar(self, style=wx.TB_FLAT | wx.TB_NODIVIDER)
-
         self.sizer = wx.BoxSizer(wx.VERTICAL)
 
-        self.sizer.Add(self.toolbar, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx.LEFT, border=5)
+        self.toolbar = None
+        if toolbar:
+            self.toolbar = wx.ToolBar(self, style=wx.TB_FLAT | wx.TB_NODIVIDER)
+            self.sizer.Add(self.toolbar, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx.LEFT, border=5)
 
         self.SetSizer(self.sizer)
 

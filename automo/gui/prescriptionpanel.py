@@ -14,11 +14,12 @@ from .baseprescriptionpanel import BasePrescriptionPanel
 ID_PRESET_ADD = wx.NewId()
 ID_PRESET_REMOVE = wx.NewId()
 
-class PrescriptionPanel(EncounterNotebookPage, BasePrescriptionPanel):
+class PrescriptionPanel(BasePrescriptionPanel, EncounterNotebookPage):
     def __init__(self, parent, session, **kwds):
-        EncounterNotebookPage.__init__(self, parent, session, **kwds)
+        super(PrescriptionPanel, self).__init__(parent, session, toolbar=True, **kwds)
+
         self.toolbar.Realize()
-        BasePrescriptionPanel.__init__(self, parent, session)
+        self.toolbar.Show()
 
         self.editable_on()
 

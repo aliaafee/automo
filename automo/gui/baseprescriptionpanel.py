@@ -17,6 +17,7 @@ ID_PRESET_REMOVE = wx.NewId()
 class BasePrescriptionPanel(object):
     """Prescription Panel"""
     def __init__(self, parent, session, **kwds):
+        super(BasePrescriptionPanel, self).__init__(parent, session, **kwds)
         self.session = session
 
         self.preset_add_id_object = {}

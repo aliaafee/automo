@@ -60,11 +60,10 @@ class FormPage(BasePage):
 
 
 
-class PrescriptionPage(BasePage, BasePrescriptionPanel):
+class PrescriptionPage(BasePrescriptionPanel, BasePage):
     """Prescription Page"""
-    def __init__(self, parent, session, title):
-        BasePage.__init__(self, parent, session, title)
-        BasePrescriptionPanel.__init__(self, parent, session)
+    def __init__(self, parent, session, title, **kwds):
+        super(PrescriptionPage, self).__init__(parent, session, title=title, **kwds)
 
         self.prescription = []
 
