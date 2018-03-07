@@ -127,7 +127,7 @@ class DischargeListPanel(wx.Panel):
             return
         patient = selected_discharge.patient
 
-        discharge_frame = wx.Frame(None, size=(800, 600))
+        discharge_frame = wx.Dialog(None, size=(800, 600))
         discharge_panel = DischargeEditor(discharge_frame, self.session)
 
         discharge_frame.SetTitle(
@@ -140,7 +140,19 @@ class DischargeListPanel(wx.Panel):
         discharge_frame.SetIcon(images.get_app_icon())
 
         discharge_panel.set(selected_discharge)
-        discharge_frame.Show()
+
+        discharge_frame.CenterOnParent()
+        discharge_frame.ShowModal()
+
+        if discharge_panel.is_unsaved():
+            discharge_panel.save_changes()
+
+        selection = self.discharge_list.GetSelection()
+        self.discharge_list.RefreshAll()
+        self.discharge_list.SetSelection(selection)
+
+        event = events.EncounterSelectedEvent(events.ID_ENCOUNTER_SELECTED, object=selected_discharge)
+        wx.PostEvent(self, event)
 
 
     def _on_change_filter(self, event):

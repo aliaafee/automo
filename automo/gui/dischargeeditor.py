@@ -81,8 +81,9 @@ class DischargeEditor(BaseClinicalEncounterPanel):
         self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self._on_changing_notebook)
         self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self._on_change_notebook)
 
-
         self.create_notebook()
+
+        self.notebook.SetSelection(1)
 
         self.sizer.Add(self.notebook, 1, wx.EXPAND)
 
@@ -246,6 +247,26 @@ class DischargeEditor(BaseClinicalEncounterPanel):
             active_page.save_changes()
             print "Changes saved"
             #event.Veto() and return to cancel switch to new tab
+
+
+    def is_unsaved(self):
+        """Check to see if any changes have been saved, must do before closing"""
+        if self.encounter is None:
+            return False
+
+        active_page = self.notebook.GetPage(self.notebook.GetSelection())
+        if active_page.is_unsaved():
+            return True
+        return False
+
+
+    def save_changes(self):
+        """Save changes"""
+        if self.encounter is None:
+            return
+
+        active_page = self.notebook.GetPage(self.notebook.GetSelection())
+        active_page.save_changes()
 
 
     def set(self, encounter, *args, **kwds):
