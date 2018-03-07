@@ -658,8 +658,7 @@ class DbAddressField(DbFormFieldDefn):
         self.editor = DbFormPanel(parent, db.Address, self.fields, scrollable=False, style=wx.BORDER_THEME)
         if self.editable:
             self.editor.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_LISTBOX))
-        else:
-            self.editor.Bind(events.EVT_AM_DB_FORM_CHANGED, self.on_editor_changed)
+        self.editor.Bind(events.EVT_AM_DB_FORM_CHANGED, self.on_editor_changed)
         return self.editor
 
     def lock_editor(self):

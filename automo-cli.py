@@ -87,7 +87,7 @@ def main(argv):
         if opt in ("-d", "--debug"):
             debug = True
 
-    if interface in automo.CLI_INTERFACES:
+    if interface in INTERFACES:
         start_cli(database_uri, interface, debug)
     else:
         usage()
