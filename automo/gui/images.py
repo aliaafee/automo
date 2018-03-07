@@ -4,14 +4,25 @@ import cStringIO
 import base64
 import wx
 
+_APP_ICON = None
+_IMAGE_CACHE = {}
 
 def get(image_name):
     """Converts a base64 bitmap into a wx.Bitmap"""
-    image = base64.b64decode(_IMAGE[image_name])
-    stream = cStringIO.StringIO(image)
+    global _IMAGE_CACHE
+    if not _IMAGE_CACHE.has_key(image_name):
+        image = base64.b64decode(_IMAGE[image_name])
+        stream = cStringIO.StringIO(image)
+        _IMAGE_CACHE[image_name] = wx.Bitmap(wx.Image(stream))
+    return _IMAGE_CACHE[image_name]
 
-    return wx.Bitmap(wx.Image(stream))
 
+def get_app_icon():
+    global _APP_ICON
+    if _APP_ICON is None:
+        _APP_ICON = wx.Icon()
+        _APP_ICON.CopyFromBitmap(get('icon_16'))
+    return _APP_ICON
 
 _IMAGE = {}
 

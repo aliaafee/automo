@@ -309,7 +309,6 @@ class DischargeWizard(wx.adv.Wizard):
 
         fields = [
             DbRelationField("Admitting Doctor", 'personnel', self.session.query(db.Doctor), required=True),
-            #DbRelationField("Bed", 'discharged_bed', self.session.query(db.Bed), required=True),
             DbBedField("Bed", 'discharged_bed', self.session.query(db.Ward), required=True),
             DbDateTimeField("Admission Time", 'start_time', required=True),
             DbDateTimeField("Discharge Time", 'end_time', required=True)

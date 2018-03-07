@@ -8,12 +8,14 @@ from sqlalchemy import or_
 from .. import config
 from .. import database as db
 
+from . import images
 from . import events
 from .dbqueryresultbox import DbQueryResultBox
 from .patientpanel import PatientPanel
+from .dischargeeditor import DischargeEditor
 
 ID_OPEN_PATIENT = wx.NewId()
-
+ID_EDIT_DISCHARGE = wx.NewId()
 
 class DischargeListPanel(wx.Panel):
     """Discharge list Panel"""
@@ -35,8 +37,10 @@ class DischargeListPanel(wx.Panel):
         self.SetSizer(sizer)
 
         self.context_menu = wx.Menu()
-        self.context_menu.Append(ID_OPEN_PATIENT, "Patient File", "Open Patient File in New Window")
-        self.context_menu.Bind(wx.EVT_MENU, self._on_patient_file, id=ID_OPEN_PATIENT)
+        self.context_menu.Append(ID_EDIT_DISCHARGE, "Edit Discharge", "Open Discharge Editor")
+        self.context_menu.Bind(wx.EVT_MENU, self._on_discharge_edit, id=ID_EDIT_DISCHARGE)
+        #self.context_menu.Append(ID_OPEN_PATIENT, "Patient File", "Open Patient File in New Window")
+        #self.context_menu.Bind(wx.EVT_MENU, self._on_patient_file, id=ID_OPEN_PATIENT)
 
         self.refresh()
 
@@ -115,6 +119,28 @@ class DischargeListPanel(wx.Panel):
             patient_frame.SetTitle("{0} - {1} - AutoMO".format(patient_panel.patient.hospital_no, patient_panel.patient.name))
         patient_frame.Bind(events.EVT_AM_PATIENT_INFO_CHANGED, _on_patient_changed)
         patient_frame.Show()
+
+
+    def _on_discharge_edit(self, event):
+        selected_discharge = self.get_selected()
+        if selected_discharge is None:
+            return
+        patient = selected_discharge.patient
+
+        discharge_frame = wx.Frame(None, size=(800, 600))
+        discharge_panel = DischargeEditor(discharge_frame, self.session)
+
+        discharge_frame.SetTitle(
+            "Edit Discharge Summary - {hospital_no} - {name} {age}/{sex}".format(
+                age=config.format_duration(patient.age),
+                **vars(patient)
+            )
+        )
+
+        discharge_frame.SetIcon(images.get_app_icon())
+
+        discharge_panel.set(selected_discharge)
+        discharge_frame.Show()
 
 
     def _on_change_filter(self, event):

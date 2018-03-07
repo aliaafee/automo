@@ -21,9 +21,7 @@ class BaseInterface(wx.Frame):
             size=wx.Size(800, 600)
             )
 
-        _icon = wx.Icon()
-        _icon.CopyFromBitmap(images.get('icon_16'))
-        self.SetIcon(_icon)
+        self.SetIcon(images.get_app_icon())
 
         if session is None:
             self.session = db.Session()

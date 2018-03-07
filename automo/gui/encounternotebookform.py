@@ -9,7 +9,7 @@ from .dbform import DbFormPanel
 
 class EncounterNotebookForm(EncounterNotebookPage):
     """Form to edit fields of encounter"""
-    def __init__(self, parent, session, db_encounter_class, fields, **kwds):
+    def __init__(self, parent, session, db_encounter_class, fields, scrollable=True, **kwds):
         super(EncounterNotebookForm, self).__init__(parent, session, **kwds)
 
         self.db_encounter_class = db_encounter_class
@@ -23,7 +23,7 @@ class EncounterNotebookForm(EncounterNotebookPage):
         self.toolbar.Bind(wx.EVT_TOOL, self._on_save, id=wx.ID_SAVE)
 
         self.form = DbFormPanel(self, self.db_encounter_class,
-                                self.fields, scrollable=True)
+                                self.fields, scrollable=scrollable)
         self.form.Bind(events.EVT_AM_DB_FORM_CHANGED, self._on_field_changed)
 
         self.sizer.Add(self.form, 1, wx.EXPAND | wx.ALL, border=5)
