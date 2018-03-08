@@ -437,7 +437,7 @@ class Icd10Coder(wx.Dialog):
         self.set_category(self.selected_icd10class, update_tree=update_tree)
 
         if self.selected_start_time is None:
-            self.selected_start_time = datetime.date.today()
+            self.selected_start_time = datetime.datetime.now()
 
         self.date_picker.set_pydatetime(self.selected_start_time)
 
