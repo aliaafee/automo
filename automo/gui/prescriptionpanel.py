@@ -23,6 +23,15 @@ class PrescriptionPanel(BasePrescriptionPanel, EncounterNotebookPage):
 
         self.editable_on()
 
+
+    def _on_prescription_check(self, event):
+        super(PrescriptionPanel, self)._on_prescription_check(event)
+        self.session.commit()
+
+
+    def _on_prescription_order_edit(self, event):
+        super(PrescriptionPanel, self)._on_prescription_order_edit(event)
+        self.session.commit()
     
     def add_item(self, selected_drug, selected_drug_str, order_str, active=True):
         self.encounter.prescribe_drug(self.session, selected_drug, selected_drug_str, order_str, active)

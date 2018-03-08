@@ -218,16 +218,12 @@ class BasePrescriptionPanel(object):
     def _on_prescription_check(self, event):
         if event.value is True:
             self.set_item_active(event.object, True)
-            #event.object.active = True
         else:
             self.set_item_active(event.object, False)
-            #event.object.active = False
-        #self.session.commit()
 
 
     def _on_prescription_order_edit(self, event):
-        #self.session.commit()
-        self.set_item_order(event.object, event.object.drug_order)
+        pass
 
 
     def _on_prescription_context(self, event):
