@@ -1,5 +1,5 @@
 """Personnel"""
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 
 from .base import Base
@@ -18,6 +18,8 @@ class Personnel(Base):
 
     record_card_no = Column(String(250))
     name = Column(String(250))
+
+    active = Column(Boolean)
 
     encounters = relationship("Encounter", back_populates="personnel")
 

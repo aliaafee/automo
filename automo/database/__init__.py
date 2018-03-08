@@ -2,6 +2,7 @@
   Classes should be imported from this, and not from individual
   module files"""
 
+import sqlalchemy.exc
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
@@ -45,6 +46,21 @@ from .preset_prescription import PresetMedication, PresetPrescription
 
 Session = sessionmaker()
 
+
+def dirty_upgrade(engine):
+    try:
+        engine.execute("SELECT active FROM personnel")
+    except sqlalchemy.exc.OperationalError:
+        print "Creating Personnel Active Column"
+        engine.execute("ALTER TABLE personnel ADD COLUMN active BOOLEAN;")
+
+    try:
+        engine.execute("SELECT active FROM ward")
+    except sqlalchemy.exc.OperationalError:
+        print "Creating Ward Active Column"
+        engine.execute("ALTER TABLE ward ADD COLUMN active BOOLEAN;")
+
+
 def StartEngine(uri, echo, client_version):
     """Initializes the database Engine and creates tables as needed.
       TODO: Check that client_version matches the database version"""
@@ -52,5 +68,8 @@ def StartEngine(uri, echo, client_version):
     engine = create_engine(uri, echo=echo)
 
     Base.metadata.create_all(engine)
+
+    #Dirty Upgrade
+    dirty_upgrade(engine)
 
     Session.configure(bind=engine)
