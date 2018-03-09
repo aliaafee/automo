@@ -144,6 +144,37 @@ class PatientTest(BaseTest):
             self.patients[0].admit(self.session, self.nurses[0], self.beds[0])
 
 
+        drugs = self.session.query(db.Drug).all()
+        
+        #Prescribe by drug object
+        self.patients[0].encounters[0].prescribe_drug(self.session, drugs[0], "", "Order", active=True)
+        self.assertEqual(drugs[0], self.patients[0].encounters[0].prescription[0].drug)
+        self.assertEqual("Order", self.patients[0].encounters[0].prescription[0].drug_order)
+        self.assertEqual(True, self.patients[0].encounters[0].prescription[0].active)
+
+        #Prescribe by drug string that exists in drug list
+        self.patients[0].encounters[0].prescribe_drug(self.session, None, "INJ NEWMED", "Order", active=True)
+        self.assertEqual(drugs[0], self.patients[0].encounters[0].prescription[1].drug)
+
+        #Prescribe by drug string that doesnot exist in drug list, should auto add to drug list
+        self.patients[0].encounters[0].prescribe_drug(self.session, None, "INJ NEWMED Varient", "Order", active=True)
+        drugs = self.session.query(db.Drug).all()
+        self.assertEqual(drugs[2], self.patients[0].encounters[0].prescription[2].drug)
+
+        #Add anothe varient drug
+        self.patients[0].encounters[0].prescribe_drug(self.session, None, "INJ NEWMED Varient2", "Order", active=True)
+        drugs = self.session.query(db.Drug).all()
+
+        #Remove all duplicate varients, will merge all varients to one drug, and change
+        #Prescriptions to also the one drug
+        drugs[0].merge_with(self.session, [drugs[2], drugs[3]])
+        drugs = self.session.query(db.Drug).all()
+        self.assertEqual(len(drugs), 2)
+        for presc in self.patients[0].encounters[0].prescription:
+            self.assertEqual(drugs[0], presc.drug)
+
+
+
 
 
 class EncounterTest(BaseTest):

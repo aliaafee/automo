@@ -8,6 +8,7 @@ from .configeditor import ConfigEditor
 from .listformeditor import ListFormEditor
 from .wardeditor import WardEditor
 from .dbform import DbStringField, DbCheckBoxField
+from .drughistoryeditor import DrugHistoryEditor
 
 
 class SettingsDialog(wx.Dialog):
@@ -33,6 +34,9 @@ class SettingsDialog(wx.Dialog):
 
         ward_editor = WardEditor(self.listbook, self.session)
         self.listbook.AddPage(ward_editor, "Ward and Beds")
+
+        drug_history = DrugHistoryEditor(self.listbook, self.session)
+        self.listbook.AddPage(drug_history, "Drugs")
 
         config_editor = ConfigEditor(self.listbook)
         self.listbook.AddPage(config_editor, "Configuration")

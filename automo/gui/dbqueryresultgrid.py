@@ -365,6 +365,13 @@ class DbQueryResultGrid(wx.grid.Grid):
             self.items_cache[start+index] = item
 
 
+    def get_selected_row_objects(self):
+        objects = []
+        for index in self.GetSelectedRows():
+            objects.append(self.get_object(index))
+        return objects
+
+
     def get_object(self, index):
         """Return the object at the given index"""
         if index < 0 or index > self.query_result_count - 1:
