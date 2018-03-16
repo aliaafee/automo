@@ -1,7 +1,7 @@
 """DbTextCtrl"""
 import wx
 
-from .events import DbCtrlChangedEvent
+from ..events import DbCtrlChangedEvent
 
 
 class DbTextCtrl(wx.TextCtrl):

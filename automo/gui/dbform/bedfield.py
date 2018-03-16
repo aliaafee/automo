@@ -1,6 +1,6 @@
 import wx
 
-from ..dbcombobox import DbComboBox
+from ..widgets import DbComboBox
 from .field import Field
 
 

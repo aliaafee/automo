@@ -1,7 +1,7 @@
 """DbRelationCombo"""
 import wx
 
-from .events import DbCtrlChangedEvent
+from ..events import DbCtrlChangedEvent
 
 
 class DbRelationCombo(wx.ComboBox):

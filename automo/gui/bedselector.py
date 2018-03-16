@@ -2,8 +2,7 @@
 import wx
 
 from .. import database as db
-from .dbcombobox import DbComboBox
-from .dbqueryresultbox import DbQueryResultBox
+from .widgets import DbComboBox, DbQueryResultBox
 from .basedialog import BaseDialog
 
 

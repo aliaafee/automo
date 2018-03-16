@@ -3,8 +3,8 @@ import math
 import wx.grid
 import wx
 
-from .. import config
-from . import events
+from ... import config
+from .. import events
 
 
 class StringRenderer(wx.grid.GridCellRenderer):

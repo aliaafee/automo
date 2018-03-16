@@ -4,8 +4,7 @@ import wx
 from ... import database as db
 from .. import events
 from .. import images
-from ..dbdatetimepicker import DbDateTimePicker
-from ..dbrelationcombo import DbRelationCombo
+from ..widgets import DbDateTimePicker, DbRelationCombo
 
 ID_LOCK = wx.NewId()
 

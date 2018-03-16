@@ -6,7 +6,7 @@ from . import events
 from . import images
 from .dbform import StringField, CheckBoxField
 from .listformeditor import ListFormEditor
-from .dbqueryresultgrid import DbQueryResultGrid, GridColumnString
+from .widgets import DbQueryResultGrid, GridColumnString
 from .basedialog import BaseDialog
 
 ID_ADD_BEDS = wx.NewId()

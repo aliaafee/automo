@@ -3,7 +3,7 @@ import datetime
 import wx
 
 from .pydatetimepickerctrl import PyDateTimePickerCtrl, EVT_DATETIME_CHANGED
-from .events import DbCtrlChangedEvent
+from ..events import DbCtrlChangedEvent
 
 
 class DbDateTimePicker(PyDateTimePickerCtrl):

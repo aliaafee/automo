@@ -3,7 +3,7 @@ import wx
 
 from .. import database as db
 from . import images
-from .dbqueryresultgrid import DbQueryResultGrid, GridColumnDateTime, GridColumnFloat
+from .widgets import DbQueryResultGrid, GridColumnDateTime, GridColumnFloat
 from .dbform import FormDialog, DateTimeField, FloatField
 
 

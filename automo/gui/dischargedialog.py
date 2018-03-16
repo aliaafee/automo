@@ -3,7 +3,7 @@ import datetime
 import wx
 
 from .basedialog import BaseDialog
-from .pydatetimepickerctrl import PyDateTimePickerCtrl
+from .widgets import PyDateTimePickerCtrl
 
 
 class DischargeDialog(BaseDialog):

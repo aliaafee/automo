@@ -9,8 +9,7 @@ from .. import database as db
 
 from . import images
 from . import events
-from .dbcombobox import DbComboBox
-from .dbqueryresultbox import DbQueryResultBox
+from .widgets import DbComboBox, DbQueryResultBox
 from .pdfviewer import PDFViewer
 
 ID_DISCHARGE_MULTIPLE = wx.NewId()

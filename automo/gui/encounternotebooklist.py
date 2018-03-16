@@ -5,7 +5,7 @@ import wx
 from .. import config
 from . import images
 from . import events
-from .dbqueryresultbox import DbQueryResultBox
+from .widgets import DbQueryResultBox
 from .dbform import FormPanel
 from .encounternotebookpage import EncounterNotebookPage
 

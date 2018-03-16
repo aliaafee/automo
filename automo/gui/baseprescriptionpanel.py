@@ -1,13 +1,10 @@
 """Base Prescription Panel"""
-import datetime
 import wx
 from ObjectListView import ObjectListView, ColumnDefn, OLVEvent
 
 from . import images
 from .. import database as db
-from encounternotebookpage import EncounterNotebookPage
-from .acdbtextctrl import AcDbTextCtrl
-from .objectlistviewmod import ObjectListViewMod, EVT_OVL_CHECK_EVENT
+from .widgets import AcDbTextCtrl, ObjectListViewMod, EVT_OVL_CHECK_EVENT
 
 
 ID_PRESET_ADD = wx.NewId()

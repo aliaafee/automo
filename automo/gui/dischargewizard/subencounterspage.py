@@ -6,7 +6,7 @@ from ... import config
 from .. import events
 from .. import images
 from .. import dbform as fm
-from ..dblistbox import DbListBox
+from ..widgets import DbListBox
 from ..newadmissionwizard.basepage import BasePage
 
 

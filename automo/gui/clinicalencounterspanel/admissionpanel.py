@@ -5,7 +5,7 @@ from ... import database as db
 from ... import config
 from .. import events
 from .. import images
-from ..dbrelationctrl import DbRelationCtrl
+from ..widgets import DbRelationCtrl
 from .baseclinicalencounterpanel import BaseClinicalEncounterPanel
 from ..problempanel import ProblemPanel
 from ..measurementspanel import MeasurementsPanel

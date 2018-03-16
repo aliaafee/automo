@@ -5,8 +5,8 @@ from bs4 import BeautifulSoup
 import wx
 import wx.richtext
 
-import images
-from .events import DbCtrlChangedEvent
+from .. import images
+from ..events import DbCtrlChangedEvent
 
 
 class DbRichTextCtrl(wx.Panel):

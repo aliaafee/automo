@@ -8,7 +8,7 @@ from .. import config
 from .. import database as db
 
 from . import events
-from .dbqueryresultbox import DbQueryResultBox
+from .widgets import DbQueryResultBox
 
 
 class PatientSearchPanel(wx.Panel):

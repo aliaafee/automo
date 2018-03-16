@@ -7,7 +7,7 @@ import wx.grid
 from .. import config
 from .. import database as db
 from . import images
-from .dbcombobox import DbComboBox
+from .widgets import DbComboBox
 
 COL_INT = 0
 COL_STR = 1

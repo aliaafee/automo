@@ -3,7 +3,7 @@ import wx
 
 from . import images
 from . import events
-from .dbqueryresultbox import DbQueryResultBox
+from .widgets import DbQueryResultBox
 from .dbform import FormPanel
 
 

@@ -4,7 +4,7 @@ import wx
 from .. import database as db
 from . import images
 from . import events
-from .dbqueryresultgrid import DbQueryResultGrid, GridColumnString
+from .widgets import DbQueryResultGrid, GridColumnString
 
 
 class DrugHistoryEditor(wx.Panel):

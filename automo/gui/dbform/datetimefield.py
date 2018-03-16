@@ -1,5 +1,4 @@
-from ..pydatetimepickerctrl import PyDateTimePickerCtrl
-from ..pydatepickerctrl import EVT_DATETIME_CHANGED
+from ..widgets import PyDateTimePickerCtrl, EVT_DATETIME_CHANGED
 from .field import Field
 
 

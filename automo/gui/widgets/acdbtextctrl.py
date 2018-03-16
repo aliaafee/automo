@@ -12,9 +12,9 @@ Find the original at https://github.com/RajaS/ACTextCtrl
 """
 import wx
 
+from ..events import DbCtrlChangedEvent
 from .dbtextctrl import DbTextCtrl
 from .dbqueryresultbox import DbQueryResultBox
-from .events import DbCtrlChangedEvent
 
 
 class AcDbTextCtrl(DbTextCtrl):

@@ -6,7 +6,7 @@ from . import events
 from . import images
 from .encounternotebookpage import EncounterNotebookPage
 from .icd10coder import Icd10Coder
-from .dblistbox import DbListBox
+from .widgets import DbListBox
 from .problempickerdialog import ProblemPickerDialog
 
 

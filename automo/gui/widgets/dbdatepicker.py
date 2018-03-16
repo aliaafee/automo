@@ -5,13 +5,13 @@ import datetime
 import wx
 
 from .pydatepickerctrl import PyDatePickerCtrl
-from .events import DbCtrlChangedEvent
+from ..events import DbCtrlChangedEvent
 
 
 class DbDatePicker(PyDatePickerCtrl):
     """Date picker ctrl that automatically updates database entry, on text change"""
-    def __init__(self, parent, session, style=wx.DP_DROPDOWN, **kwds):
-        super(DbDatePicker, self).__init__(parent, style=style, **kwds)
+    def __init__(self, parent, session,**kwds):
+        super(DbDatePicker, self).__init__(parent, **kwds)
 
         self.session = session
 

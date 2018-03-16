@@ -6,7 +6,7 @@ from .. import config
 from .. import database as db
 from . import images
 from . import events
-from .dbqueryresultbox import DbQueryResultBox
+from .widgets import DbQueryResultBox
 from .dbform import FormSwitcher
 from .encounternotebookpage import EncounterNotebookPage
 

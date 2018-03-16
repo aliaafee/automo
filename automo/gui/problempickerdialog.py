@@ -4,8 +4,7 @@ import wx
 
 from .. import database as db
 from .basedialog import BaseDialog
-from .dblistbox import DbListBox
-from .pydatetimepickerctrl import PyDateTimePickerCtrl
+from .widgets import DbListBox, PyDateTimePickerCtrl
 
 
 class ProblemPickerDialog(BaseDialog):

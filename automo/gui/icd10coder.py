@@ -9,9 +9,7 @@ from sqlalchemy import or_, and_
 from sqlalchemy.orm.exc import NoResultFound
 
 from .. import database as db
-from .dbqueryresultbox import DbQueryResultBox
-from .dbcombobox import DbComboBox
-from .pydatepickerctrl import PyDatePickerCtrl
+from .widgets import DbQueryResultBox, DbComboBox, PyDatePickerCtrl
 
 
 class Icd10ChapterTree(wx.TreeCtrl):
