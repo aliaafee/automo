@@ -1,10 +1,10 @@
 """List with form view for data editing"""
 import wx
 
-from . import images
-from . import events
-from .widgets import DbQueryResultBox
-from .dbform import FormPanel
+from .. import images
+from .. import events
+from ..widgets import DbQueryResultBox
+from ..dbform import FormPanel
 
 
 class ListFormEditor(wx.Panel):

@@ -1,10 +1,10 @@
 """Drug History Editor"""
 import wx
 
-from .. import database as db
-from . import images
-from . import events
-from .widgets import DbQueryResultGrid, GridColumnString
+from ... import database as db
+from .. import images
+from .. import events
+from ..widgets import DbQueryResultGrid, GridColumnString
 
 
 class DrugHistoryEditor(wx.Panel):

@@ -1,13 +1,13 @@
 """Editor for wards and beds"""
 import wx
 
-from .. import database as db
-from . import events
-from . import images
-from .dbform import StringField, CheckBoxField
+from ... import database as db
+from .. import events
+from .. import images
+from ..dbform import StringField, CheckBoxField
+from ..widgets import DbQueryResultGrid, GridColumnString
+from ..basedialog import BaseDialog
 from .listformeditor import ListFormEditor
-from .widgets import DbQueryResultGrid, GridColumnString
-from .basedialog import BaseDialog
 
 ID_ADD_BEDS = wx.NewId()
 

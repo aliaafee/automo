@@ -1,7 +1,7 @@
 """Configuration Editor"""
 import wx
 
-from .configloader import CONFIG_FIELDS
+from ..configloader import CONFIG_FIELDS
 
 EDITABLE_FIELDS = [
     'default-interface',

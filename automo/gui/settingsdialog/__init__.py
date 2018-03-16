@@ -1,13 +1,13 @@
 """Settings Frame"""
 import wx
 
-from .. import database as db
-from .basedialog import BaseDialog
-from . import images
+from ... import database as db
+from ..basedialog import BaseDialog
+from .. import images
+from ..dbform import StringField, CheckBoxField
 from .configeditor import ConfigEditor
 from .listformeditor import ListFormEditor
 from .wardeditor import WardEditor
-from .dbform import StringField, CheckBoxField
 from .drughistoryeditor import DrugHistoryEditor
 
 
