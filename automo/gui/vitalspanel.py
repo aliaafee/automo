@@ -4,7 +4,7 @@ import wx
 from .. import database as db
 from . import images
 from .dbqueryresultgrid import DbQueryResultGrid, GridColumnDateTime, GridColumnFloat
-from .dbform import DbFormDialog, DbDateTimeField, DbFloatField
+from .dbform import FormDialog, DateTimeField, FloatField
 
 
 class VitalsPanel(wx.Panel):
@@ -40,14 +40,14 @@ class VitalsPanel(wx.Panel):
 
     def _on_add(self, event):
         fields = [
-            DbDateTimeField("Time", 'record_time', required=True),
-            DbFloatField("Pulse (bmp)", 'pulse_rate'),
-            DbFloatField("Resp (bmp)", 'respiratory_rate'),
-            DbFloatField("SBP (mmHg)", 'systolic_bp'),
-            DbFloatField("DBP (mmHg)", 'diastolic_bp'),
-            DbFloatField(u"Temp (\u00B0C)", 'temperature')
+            DateTimeField("Time", 'record_time', required=True),
+            FloatField("Pulse (bmp)", 'pulse_rate'),
+            FloatField("Resp (bmp)", 'respiratory_rate'),
+            FloatField("SBP (mmHg)", 'systolic_bp'),
+            FloatField("DBP (mmHg)", 'diastolic_bp'),
+            FloatField(u"Temp (\u00B0C)", 'temperature')
         ]
-        with DbFormDialog(self, db.VitalSigns, fields, size=(500, 200), title="Add Vital Signs") as dlg:
+        with FormDialog(self, db.VitalSigns, fields, size=(500, 200), title="Add Vital Signs") as dlg:
             dlg.CenterOnParent()
             if dlg.ShowModal() == wx.ID_OK:
                 new_vitals = dlg.get_object()

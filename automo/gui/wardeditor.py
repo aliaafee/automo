@@ -4,7 +4,7 @@ import wx
 from .. import database as db
 from . import events
 from . import images
-from .dbform import DbStringField, DbCheckBoxField
+from .dbform import StringField, CheckBoxField
 from .listformeditor import ListFormEditor
 from .dbqueryresultgrid import DbQueryResultGrid, GridColumnString
 from .basedialog import BaseDialog
@@ -16,9 +16,9 @@ class WardEditor(ListFormEditor):
     """Editor for wards and beds"""
     def __init__(self, parent, session, **kwds):
         fields = [
-            DbStringField("Ward Name", 'name'),
-            DbStringField("Bed Prefix", 'bed_prefix'),
-            DbCheckBoxField("Active", 'active')
+            StringField("Ward Name", 'name'),
+            StringField("Bed Prefix", 'bed_prefix'),
+            CheckBoxField("Active", 'active')
         ]
 
         super(WardEditor, self).__init__(parent, session, db.Ward, fields, **kwds)

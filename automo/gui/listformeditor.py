@@ -4,7 +4,7 @@ import wx
 from . import images
 from . import events
 from .dbqueryresultbox import DbQueryResultBox
-from .dbform import DbFormPanel
+from .dbform import FormPanel
 
 
 class ListFormEditor(wx.Panel):
@@ -28,7 +28,7 @@ class ListFormEditor(wx.Panel):
 
         self._left_panel = wx.Panel(splitter, style=wx.BORDER_THEME)
 
-        self.data_form = DbFormPanel(self._left_panel, self.db_class, fields, scrollable=False)
+        self.data_form = FormPanel(self._left_panel, self.db_class, fields, scrollable=False)
         self.data_form.Bind(events.EVT_AM_DB_FORM_CHANGED, self._on_field_changed)
 
         left_sizer = wx.BoxSizer(wx.VERTICAL)

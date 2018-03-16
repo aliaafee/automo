@@ -7,7 +7,7 @@ from .. import database as db
 from . import images
 from . import events
 from .dbqueryresultbox import DbQueryResultBox
-from .dbform import DbFormSwitcher
+from .dbform import FormSwitcher
 from .encounternotebookpage import EncounterNotebookPage
 
 
@@ -41,7 +41,7 @@ class Subencounters(EncounterNotebookPage):
         self.subencounter_list.Bind(wx.EVT_LISTBOX, self._on_subencounter_selected)
         self.subencounter_list.Bind(wx.EVT_RIGHT_DOWN, self._on_subencounter_context)
 
-        self.subencounter_form = DbFormSwitcher(splitter, session, style=wx.BORDER_THEME)
+        self.subencounter_form = FormSwitcher(splitter, session, style=wx.BORDER_THEME)
         self.subencounter_form.Bind(events.EVT_AM_DB_FORM_CHANGED, self._on_field_changed)
 
         splitter.SplitVertically(self.subencounter_list, self.subencounter_form, 200)

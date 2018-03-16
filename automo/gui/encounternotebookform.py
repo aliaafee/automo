@@ -4,7 +4,7 @@ import wx
 from . import images
 from . import events
 from .encounternotebookpage import EncounterNotebookPage
-from .dbform import DbFormPanel
+from .dbform import FormPanel
 
 
 class EncounterNotebookForm(EncounterNotebookPage):
@@ -22,7 +22,7 @@ class EncounterNotebookForm(EncounterNotebookPage):
 
         self.toolbar.Bind(wx.EVT_TOOL, self._on_save, id=wx.ID_SAVE)
 
-        self.form = DbFormPanel(self, self.db_encounter_class,
+        self.form = FormPanel(self, self.db_encounter_class,
                                 self.fields, scrollable=scrollable)
         self.form.Bind(events.EVT_AM_DB_FORM_CHANGED, self._on_field_changed)
 

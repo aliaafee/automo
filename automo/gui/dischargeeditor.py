@@ -11,38 +11,21 @@ from .measurementspanel import MeasurementsPanel
 from .subencounters import Subencounters
 from .prescriptionpanel import PrescriptionPanel
 from .problempanel import ProblemPanel
-from .dbform import DbFormPanel,\
-                    DbDateTimeField,\
-                    DbRelationField,\
-                    DbMultilineStringField,\
-                    DbOptionalMultilineStringField,\
-                    DbFloatField,\
-                    DbCheckBoxField,\
-                    DbStringField,\
-                    DbOptionsRelationField,\
-                    DbFormSwitcher,\
-                    DbBedField,\
-                    DbDateField,\
-                    DbDurationField,\
-                    DbEnumField,\
-                    DbAddressField
-
-
-
+from . import dbform as fm
 
 
 class PatientNotebookForm(EncounterNotebookForm):
     def __init__(self, parent, session, **kwds):
         fields = [
-            DbStringField("Hospital No.", "hospital_no", required=True),
-            DbStringField("National Id No.", "national_id_no", required=True),
-            DbStringField("Name", "name", required=True),
-            DbDateTimeField("Date of Birth", "time_of_birth", required=True),
-            DbEnumField("Sex", "sex", ["M", "F"], required=True),
-            DbOptionalMultilineStringField("Known Allergies", "allergies", lines=3),
-            DbStringField("Phone No.", "phone_no"),
-            DbAddressField("Current Address", "current_address"),
-            DbAddressField("Permanent Address", "permanent_address")
+            fm.StringField("Hospital No.", "hospital_no", required=True),
+            fm.StringField("National Id No.", "national_id_no", required=True),
+            fm.StringField("Name", "name", required=True),
+            fm.DateTimeField("Date of Birth", "time_of_birth", required=True),
+            fm.EnumField("Sex", "sex", ["M", "F"], required=True),
+            fm.OptionalMultilineStringField("Known Allergies", "allergies", lines=3),
+            fm.StringField("Phone No.", "phone_no"),
+            fm.AddressField("Current Address", "current_address"),
+            fm.AddressField("Permanent Address", "permanent_address")
         ]
         super(PatientNotebookForm, self).__init__(parent, session, db_encounter_class=db.Patient, fields=fields, **kwds)
         print self.form.db_object_class
@@ -92,10 +75,10 @@ class DischargeEditor(BaseClinicalEncounterPanel):
         self.notebook.AddPage(self.patient_details_page, "Patient Details")
         
         fields = [
-            DbRelationField("Admitting Doctor", 'personnel', self.session.query(db.Doctor), required=True),
-            DbBedField("Bed", 'discharged_bed', self.session.query(db.Ward), required=True),
-            DbDateTimeField("Admission Time", 'start_time', required=True),
-            DbDateTimeField("Discharge Time", 'end_time', required=True)
+            fm.RelationField("Admitting Doctor", 'personnel', self.session.query(db.Doctor), required=True),
+            fm.BedField("Bed", 'discharged_bed', self.session.query(db.Ward), required=True),
+            fm.DateTimeField("Admission Time", 'start_time', required=True),
+            fm.DateTimeField("Discharge Time", 'end_time', required=True)
         ]
         self.admission_details_page = EncounterNotebookForm(self.notebook, self.session, db.Admission, fields)
         self.notebook.AddPage(self.admission_details_page, "Admission Details")
@@ -104,9 +87,9 @@ class DischargeEditor(BaseClinicalEncounterPanel):
         self.notebook.AddPage(self.problems_panel, "Diagnosis")
 
         fields = [
-            DbMultilineStringField("Cheif Complaints", 'chief_complaints', lines=4),
-            DbMultilineStringField("History of Present Illness", 'history', lines=8),
-            DbMultilineStringField("Past History", 'past_history', lines=8),
+            fm.MultilineStringField("Cheif Complaints", 'chief_complaints', lines=4),
+            fm.MultilineStringField("History of Present Illness", 'history', lines=8),
+            fm.MultilineStringField("Past History", 'past_history', lines=8),
         ]
         self.history_page = EncounterNotebookForm(self.notebook, self.session, db.Admission, fields)
         self.notebook.AddPage(self.history_page, "History")
@@ -118,15 +101,15 @@ class DischargeEditor(BaseClinicalEncounterPanel):
         self.notebook.AddPage(self.measurements_panel, "Measurements")
 
         fields = [
-            DbOptionalMultilineStringField("General Inspection", 'general_inspection', lines=8),
-            DbOptionalMultilineStringField("Head Exam", 'exam_head', lines=8),
-            DbOptionalMultilineStringField("Neck Exam", 'exam_neck', lines=8),
-            DbOptionalMultilineStringField("Chest Exam", 'exam_chest', lines=8),
-            DbOptionalMultilineStringField("Abdomen Exam", 'exam_abdomen', lines=8),
-            DbOptionalMultilineStringField("Genitalia Exam", 'exam_genitalia', lines=8),
-            DbOptionalMultilineStringField("Pelvic/Rectal Exam", 'exam_pelvic_rectal', lines=8),
-            DbOptionalMultilineStringField("Extremities Exam", 'exam_extremities', lines=8),
-            DbOptionalMultilineStringField("Other Exam", 'exam_other', lines=8)
+            fm.OptionalMultilineStringField("General Inspection", 'general_inspection', lines=8),
+            fm.OptionalMultilineStringField("Head Exam", 'exam_head', lines=8),
+            fm.OptionalMultilineStringField("Neck Exam", 'exam_neck', lines=8),
+            fm.OptionalMultilineStringField("Chest Exam", 'exam_chest', lines=8),
+            fm.OptionalMultilineStringField("Abdomen Exam", 'exam_abdomen', lines=8),
+            fm.OptionalMultilineStringField("Genitalia Exam", 'exam_genitalia', lines=8),
+            fm.OptionalMultilineStringField("Pelvic/Rectal Exam", 'exam_pelvic_rectal', lines=8),
+            fm.OptionalMultilineStringField("Extremities Exam", 'exam_extremities', lines=8),
+            fm.OptionalMultilineStringField("Other Exam", 'exam_other', lines=8)
         ]
         self.examination_page = EncounterNotebookForm(self.notebook, self.session, db.Admission, fields)
         self.notebook.AddPage(self.examination_page, "Examination")
@@ -135,12 +118,12 @@ class DischargeEditor(BaseClinicalEncounterPanel):
         self.notebook.AddPage(self.investigations_page, "Investigations")
 
         imaging_fields = [
-            DbDateField("Date", 'record_time', required=True),
-            DbStringField("Imaging Type", 'imaging_type'),
-            DbStringField("Site", 'site'),
-            DbStringField("Radiologist", 'radiologist'),
-            DbMultilineStringField("Impression", 'impression'),
-            DbMultilineStringField("Report", 'report')
+            fm.DateField("Date", 'record_time', required=True),
+            fm.StringField("Imaging Type", 'imaging_type'),
+            fm.StringField("Site", 'site'),
+            fm.StringField("Radiologist", 'radiologist'),
+            fm.MultilineStringField("Impression", 'impression'),
+            fm.MultilineStringField("Report", 'report')
         ]
         self.investigations_page.add_subencounter_class("Imaging Report",
                                                   db.Imaging,
@@ -148,11 +131,11 @@ class DischargeEditor(BaseClinicalEncounterPanel):
                                                   lambda v: u"{0} {1}".format(v.imaging_type, v.site))
 
         endoscopy_fields = [
-            DbDateField("Time", 'record_time', required=True),
-            DbStringField("Site", 'site'),
-            DbStringField("Endoscopist", 'endoscopist'),
-            DbMultilineStringField("Impression", 'impression'),
-            DbMultilineStringField("Report", 'report')
+            fm.DateField("Time", 'record_time', required=True),
+            fm.StringField("Site", 'site'),
+            fm.StringField("Endoscopist", 'endoscopist'),
+            fm.MultilineStringField("Impression", 'impression'),
+            fm.MultilineStringField("Report", 'report')
         ]
         self.investigations_page.add_subencounter_class("Endoscopy Report",
                                                   db.Endoscopy,
@@ -160,11 +143,11 @@ class DischargeEditor(BaseClinicalEncounterPanel):
                                                   lambda v: u"{}".format(v.site))
 
         histopathology_fields = [
-            DbDateField("Time", 'record_time', required=True),
-            DbStringField("Site", 'site'),
-            DbStringField("Pathologist", 'pathologist'),
-            DbMultilineStringField("Impression", 'impression'),
-            DbMultilineStringField("Report", 'report')
+            fm.DateField("Time", 'record_time', required=True),
+            fm.StringField("Site", 'site'),
+            fm.StringField("Pathologist", 'pathologist'),
+            fm.MultilineStringField("Impression", 'impression'),
+            fm.MultilineStringField("Report", 'report')
         ]
         self.investigations_page.add_subencounter_class("Histopathology Report",
                                                   db.Histopathology,
@@ -172,11 +155,11 @@ class DischargeEditor(BaseClinicalEncounterPanel):
                                                   lambda v: u"{}".format(v.site))
 
         otherreport_fields = [
-            DbDateField("Time", 'record_time', required=True),
-            DbStringField("Name", 'name'),
-            DbStringField("Reported by", 'reported_by'),
-            DbMultilineStringField("Impression", 'impression'),
-            DbMultilineStringField("Report", 'report')
+            fm.DateField("Time", 'record_time', required=True),
+            fm.StringField("Name", 'name'),
+            fm.StringField("Reported by", 'reported_by'),
+            fm.MultilineStringField("Impression", 'impression'),
+            fm.MultilineStringField("Report", 'report')
         ]
         self.investigations_page.add_subencounter_class("Other Report",
                                                   db.OtherReport,
@@ -187,18 +170,18 @@ class DischargeEditor(BaseClinicalEncounterPanel):
         self.notebook.AddPage(self.surgical_procedures_page, "Surgical Procedures")
 
         fields = [
-            DbStringField("Procedure Name", 'procedure_name'),
-            DbCheckBoxField("Emergency", 'emergency'),
-            DbStringField("Preop Diagnosis", 'preoperative_diagnosis'),
-            DbStringField("Postop Diagnosis", 'postoperative_diagnosis'),
-            DbDateTimeField("Time Started", 'start_time', required=True),
-            DbDateTimeField("Time Completed", 'end_time', required=True),
-            DbRelationField("Surgeon", 'personnel', self.session.query(db.Doctor)),
-            DbStringField("Assistants(s)", 'assistant'),
-            DbStringField("Anesthetist(s)", 'anesthetist'),
-            DbStringField("Nurse(s)", 'nurse'),
-            DbMultilineStringField("Findings", 'findings'),
-            DbMultilineStringField("Steps", 'steps'),
+            fm.StringField("Procedure Name", 'procedure_name'),
+            fm.CheckBoxField("Emergency", 'emergency'),
+            fm.StringField("Preop Diagnosis", 'preoperative_diagnosis'),
+            fm.StringField("Postop Diagnosis", 'postoperative_diagnosis'),
+            fm.DateTimeField("Time Started", 'start_time', required=True),
+            fm.DateTimeField("Time Completed", 'end_time', required=True),
+            fm.RelationField("Surgeon", 'personnel', self.session.query(db.Doctor)),
+            fm.StringField("Assistants(s)", 'assistant'),
+            fm.StringField("Anesthetist(s)", 'anesthetist'),
+            fm.StringField("Nurse(s)", 'nurse'),
+            fm.MultilineStringField("Findings", 'findings'),
+            fm.MultilineStringField("Steps", 'steps'),
         ]
         self.surgical_procedures_page.add_subencounter_class("Surgery",
                                                        db.SurgicalProcedure,
@@ -206,18 +189,18 @@ class DischargeEditor(BaseClinicalEncounterPanel):
                                                        lambda v: u"&nbsp;{}".format(v.procedure_name))
 
         fields = [
-            DbMultilineStringField("", 'hospital_course', lines=8)
+            fm.MultilineStringField("", 'hospital_course', lines=8)
         ]
         self.course_page = EncounterNotebookForm(self.notebook, self.session, db.Admission, fields, scrollable=False)
         self.notebook.AddPage(self.course_page, "Hospital Course Summary")
 
         complication_fields = [
-            DbRelationField("Complication Grade",
+            fm.RelationField("Complication Grade",
                             'complication_grade',
                             self.session.query(db.ComplicationGrade),
                             help_text="\n\n".join(["Grade {0} - {1}".format(v.id, v.description) for v in self.session.query(db.ComplicationGrade).all()])),
-            DbCheckBoxField("Disability on Discharge", 'complication_disability'),
-            DbMultilineStringField("Complication Summary", 'complication_summary', lines=8)
+            fm.CheckBoxField("Disability on Discharge", 'complication_disability'),
+            fm.MultilineStringField("Complication Summary", 'complication_summary', lines=8)
         ]
         self.complication_panel = EncounterNotebookForm(self.notebook, self.session, db.Admission,
                                                           complication_fields)
@@ -227,9 +210,9 @@ class DischargeEditor(BaseClinicalEncounterPanel):
         self.notebook.AddPage(self.prescription_panel, "Prescription")
 
         fields = [
-            DbMultilineStringField("Advice", 'discharge_advice', lines=8),
-            DbMultilineStringField("Follow Up", 'follow_up', lines=8),
-            DbStringField("Discharge Prepared By", 'written_by', required=True)
+            fm.MultilineStringField("Advice", 'discharge_advice', lines=8),
+            fm.MultilineStringField("Follow Up", 'follow_up', lines=8),
+            fm.StringField("Discharge Prepared By", 'written_by', required=True)
         ]
         self.advice_page = EncounterNotebookForm(self.notebook, self.session, db.Admission, fields)
         self.notebook.AddPage(self.advice_page, "Discharge Advice")

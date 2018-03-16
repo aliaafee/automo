@@ -5,7 +5,7 @@ from .. import database as db
 from . import images
 from . import events
 from .dbqueryresultgrid import DbQueryResultGrid, GridColumnDateTime, GridColumnFloat
-from .dbform import DbFormDialog, DbDateTimeField, DbFloatField
+from .dbform import FormDialog, DateTimeField, FloatField
 
 
 class MeasurementsPanel(wx.Panel):
@@ -40,11 +40,11 @@ class MeasurementsPanel(wx.Panel):
 
     def _on_add(self, event):
         fields = [
-            DbDateTimeField("Time", 'record_time', required=True),
-            DbFloatField("Weight (kg)", 'weight'),
-            DbFloatField("Height (m)", 'height')
+            DateTimeField("Time", 'record_time', required=True),
+            FloatField("Weight (kg)", 'weight'),
+            FloatField("Height (m)", 'height')
         ]
-        with DbFormDialog(self, db.Measurements, fields, size=(500, 150), title="Add Measurement") as dlg:
+        with FormDialog(self, db.Measurements, fields, size=(500, 150), title="Add Measurement") as dlg:
             dlg.CenterOnParent()
             if dlg.ShowModal() == wx.ID_OK:
                 new_measurement = dlg.get_object()

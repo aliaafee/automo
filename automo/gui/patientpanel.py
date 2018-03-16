@@ -9,7 +9,7 @@ from . import events
 from . import images
 from .patientinfo import PatientInfoPanelSmall, PatientForm
 from .encounterspanel import EncountersPanel
-from .newadmission import NewAdmissionDialog
+from .newadmissionwizard import NewAdmissionWizard
 from .dischargedialog import DischargeDialog
 
 ID_ADMIT = wx.NewId()
@@ -101,7 +101,7 @@ class PatientPanel(wx.Panel):
         self.admit_patient(self)
 
     def admit_patient(self, *args):
-        with NewAdmissionDialog(self, self.session, patient=self.patient) as dlg:
+        with NewAdmissionWizard(self, self.session, patient=self.patient) as dlg:
             done = False
             while not done:
                 dlg.ShowModal()

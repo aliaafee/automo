@@ -6,7 +6,7 @@ from .. import config
 from . import images
 from . import events
 from .dbqueryresultbox import DbQueryResultBox
-from .dbform import DbFormPanel
+from .dbform import FormPanel
 from .encounternotebookpage import EncounterNotebookPage
 
 
@@ -37,7 +37,7 @@ class EncounterNotebookList(EncounterNotebookPage):
 
         self._left_panel = wx.Panel(splitter, style=wx.BORDER_THEME)
 
-        self.subencounter_form = DbFormPanel(self._left_panel, db_subencounter_class, fields, scrollable=False)
+        self.subencounter_form = FormPanel(self._left_panel, db_subencounter_class, fields, scrollable=False)
         self.subencounter_form.Bind(events.EVT_AM_DB_FORM_CHANGED, self._on_field_changed)
 
         sizer = wx.BoxSizer()

@@ -7,7 +7,7 @@ from . import images
 from .configeditor import ConfigEditor
 from .listformeditor import ListFormEditor
 from .wardeditor import WardEditor
-from .dbform import DbStringField, DbCheckBoxField
+from .dbform import StringField, CheckBoxField
 from .drughistoryeditor import DrugHistoryEditor
 
 
@@ -24,10 +24,10 @@ class SettingsDialog(wx.Dialog):
         self.listbook = wx.Notebook(self)
 
         fields = [
-            DbStringField("Record Card No.", 'record_card_no'),
-            DbStringField("Name", 'name'),
-            DbStringField("PMR Number", 'pmr_no'),
-            DbCheckBoxField("Active", 'active')
+            StringField("Record Card No.", 'record_card_no'),
+            StringField("Name", 'name'),
+            StringField("PMR Number", 'pmr_no'),
+            CheckBoxField("Active", 'active')
         ]
         doctor_editor = ListFormEditor(self.listbook, self.session, db.Doctor, fields)
         self.listbook.AddPage(doctor_editor, "Doctors")

@@ -8,7 +8,7 @@ from . import events
 from . import images
 from .wardinterface import WardInterface
 from .batchpatientimporter import BatchPatientImporter
-from .newadmission import NewAdmissionDialog
+from .newadmissionwizard import NewAdmissionWizard
 from .pdfviewer import PDFViewer
 
 ID_IMPORT_PATIENTS = wx.NewId()

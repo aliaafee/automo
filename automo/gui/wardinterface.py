@@ -10,7 +10,7 @@ from .shellinterface import ShellInterface
 from .patientlistpanel import PatientListPanel
 from .patientpanel import PatientPanel
 from .patientinfo import PatientForm
-from .newadmission import NewAdmissionDialog
+from .newadmissionwizard import NewAdmissionWizard
 
 ID_NEW_PATIENT = wx.NewId()
 ID_NEW_ADMISSION = wx.NewId()
@@ -121,7 +121,7 @@ class WardInterface(BaseInterface):
 
 
     def new_admission(self):
-        with NewAdmissionDialog(self, self.session) as dlg:
+        with NewAdmissionWizard(self, self.session) as dlg:
             done = False
             while not done:
                 dlg.ShowModal()

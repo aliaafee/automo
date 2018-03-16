@@ -4,14 +4,7 @@ import wx
 from .. import config
 from .. import database as db
 from . import images
-from .dbform import DbFormPanel,\
-                    DbFormDialog,\
-                    DbStringField,\
-                    DbDateTimeField,\
-                    DbAddressField,\
-                    DbEnumField,\
-                    DbOptionalMultilineStringField,\
-                    DbDurationField
+from . import dbform as fm
 
 
 class PatientInfoPanelSmall(wx.Panel):
@@ -183,36 +176,36 @@ class PatientInfoPanelSmall(wx.Panel):
 
 
 
-class PatientForm(DbFormDialog):
+class PatientForm(fm.FormDialog):
     """Patient Data Form"""
     def __init__(self, parent, **kwds):
         fields = [
-            DbStringField("Hospital No.", "hospital_no", required=True),
-            DbStringField("National Id No.", "national_id_no", required=True),
-            DbStringField("Name", "name", required=True),
-            DbDateTimeField("Date of Birth", "time_of_birth", required=True),
-            DbEnumField("Sex", "sex", ["M", "F"], required=True),
-            DbOptionalMultilineStringField("Known Allergies", "allergies", lines=3),
-            DbStringField("Phone No.", "phone_no"),
-            DbAddressField("Current Address", "current_address"),
-            DbAddressField("Permanent Address", "permanent_address")
+            fm.StringField("Hospital No.", "hospital_no", required=True),
+            fm.StringField("National Id No.", "national_id_no", required=True),
+            fm.StringField("Name", "name", required=True),
+            fm.DateTimeField("Date of Birth", "time_of_birth", required=True),
+            fm.EnumField("Sex", "sex", ["M", "F"], required=True),
+            fm.OptionalMultilineStringField("Known Allergies", "allergies", lines=3),
+            fm.StringField("Phone No.", "phone_no"),
+            fm.AddressField("Current Address", "current_address"),
+            fm.AddressField("Permanent Address", "permanent_address")
         ]
         super(PatientForm, self).__init__(parent, db.Patient, fields, size=(500, 500), **kwds)
 
 
 
-class PatientFormPanel(DbFormPanel):
+class PatientFormPanel(fm.FormPanel):
     """Patient Data Form"""
     def __init__(self, parent, **kwds):
         fields = [
-            DbStringField("Hospital No.", "hospital_no", required=True),
-            DbStringField("National Id No.", "national_id_no", required=True),
-            DbStringField("Name", "name", required=True),
-            DbDurationField("Age (_y _m _d)", "age", required=True),
-            DbEnumField("Sex", "sex", ["M", "F"], required=True),
-            DbOptionalMultilineStringField("Known Allergies", "allergies", lines=3),
-            DbStringField("Phone No.", "phone_no"),
-            DbAddressField("Current Address", "current_address"),
-            DbAddressField("Permanent Address", "permanent_address")
+            fm.StringField("Hospital No.", "hospital_no", required=True),
+            fm.StringField("National Id No.", "national_id_no", required=True),
+            fm.StringField("Name", "name", required=True),
+            fm.DurationField("Age (_y _m _d)", "age", required=True),
+            fm.EnumField("Sex", "sex", ["M", "F"], required=True),
+            fm.OptionalMultilineStringField("Known Allergies", "allergies", lines=3),
+            fm.StringField("Phone No.", "phone_no"),
+            fm.AddressField("Current Address", "current_address"),
+            fm.AddressField("Permanent Address", "permanent_address")
         ]
         super(PatientFormPanel, self).__init__(parent, db.Patient, fields, **kwds)
