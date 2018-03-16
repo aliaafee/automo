@@ -1,14 +1,14 @@
 """Discharge Interface"""
 import wx
 
-from .. import database as db
-from . import images
-from . import events
-from .shellinterface import ShellInterface
-from .baseinterface import BaseInterface
+from .... import database as db
+from ... import images
+from ... import events
 from .dischargelistpanel import DischargeListPanel
 from .dischargepanel import DischargePanel
-from .dischargewizard import DischargeWizard
+from ...dischargewizard import DischargeWizard
+from ..shellinterface import ShellInterface
+from ..baseinterface import BaseInterface
 
 ID_SHELL = wx.NewId()
 ID_NEW_DISCHARGE = wx.NewId()

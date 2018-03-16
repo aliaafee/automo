@@ -71,4 +71,3 @@ class DrugHistoryEditor(wx.Panel):
             query = query.filter(db.Drug.name.like("%{}%".format(str_filter)))
 
         self.drug_grid.set_result(query)
-

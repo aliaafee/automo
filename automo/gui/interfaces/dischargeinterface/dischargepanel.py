@@ -2,8 +2,8 @@
 import wx
 import wx.lib.pdfviewer
 
-from . import images
-from .pdfviewer import PDFViewer
+from ... import images
+from ...pdfviewer import PDFViewer
 
 wx.lib.pdfviewer.viewer.VERBOSE = False
 

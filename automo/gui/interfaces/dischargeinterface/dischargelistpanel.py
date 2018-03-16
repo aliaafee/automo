@@ -5,13 +5,13 @@ import dateutil.relativedelta as rd
 import wx
 from sqlalchemy import or_
 
-from .. import config
-from .. import database as db
+from .... import config
+from .... import database as db
 
-from . import images
-from . import events
-from .dbqueryresultbox import DbQueryResultBox
-from .patientpanel import PatientPanel
+from ... import images
+from ... import events
+from ...dbqueryresultbox import DbQueryResultBox
+from ...patientpanel import PatientPanel
 from .dischargeeditor import DischargeEditor
 
 ID_OPEN_PATIENT = wx.NewId()

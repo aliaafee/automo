@@ -1,15 +1,8 @@
 """Login dialog"""
 import wx
 
-from . import events
 from . import guiconfig
-from .baseinterface import BaseInterface
-from .shellinterface import ShellInterface
-from .wardinterface import WardInterface
-from .cwardinterface import CWardInterface
-
-GUI_INTERFACES_NAMES = ['Ward', 'Circum Ward', 'Python Shell', 'Discharges']
-GUI_INTERFACES_CODES = ['gui-ward', 'gui-cward', 'gui-shell', 'gui-discharge']
+from .interfaces import INTERFACES
 
 
 class LoginDlg(wx.Dialog):
@@ -18,6 +11,12 @@ class LoginDlg(wx.Dialog):
         super(LoginDlg, self).__init__(parent, size=size, **kwds)
 
         self.SetTitle("Automo")
+
+        self.interface_labels = []
+        self.interface_names = []
+        for name, (label, interface_class) in INTERFACES.items():
+            self.interface_labels.append(label)
+            self.interface_names.append(name)
 
         self.interface = guiconfig.STARTUP_INTERFACE
         self.main_frame = None
@@ -30,10 +29,10 @@ class LoginDlg(wx.Dialog):
 
         lbl_interface = wx.StaticText(self, label="Interface")
         self.choice_interface = wx.Choice(self)
-        self.choice_interface.AppendItems(GUI_INTERFACES_NAMES)
+        self.choice_interface.AppendItems(self.interface_labels)
         print guiconfig.STARTUP_INTERFACE
-        if self.interface in GUI_INTERFACES_CODES:
-            index = GUI_INTERFACES_CODES.index(self.interface)
+        if self.interface in self.interface_names:
+            index = self.interface_names.index(self.interface)
             self.choice_interface.SetSelection(index)
 
         grid_sizer = wx.FlexGridSizer(1,2, 10, 10)
@@ -57,7 +56,7 @@ class LoginDlg(wx.Dialog):
     def get_interface(self):
         sel_index = self.choice_interface.GetSelection()
         if sel_index >= 0:
-            self.interface = GUI_INTERFACES_CODES[sel_index]
+            self.interface = self.interface_names[sel_index]
             return self.interface
 
 

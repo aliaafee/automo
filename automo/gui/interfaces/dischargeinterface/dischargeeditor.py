@@ -2,16 +2,17 @@
 import wx
 import wx.lib.agw.labelbook
 
-from .. import database as db
-from .. import config
-from .baseclinicalencounterpanel import BaseClinicalEncounterPanel
-from .encounternotebookform import EncounterNotebookForm
-from .vitalspanel import VitalsPanel
-from .measurementspanel import MeasurementsPanel
-from .subencounters import Subencounters
-from .prescriptionpanel import PrescriptionPanel
-from .problempanel import ProblemPanel
-from . import dbform as fm
+from .... import database as db
+from .... import config
+
+from ...clinicalencounterspanel.baseclinicalencounterpanel import BaseClinicalEncounterPanel
+from ...encounternotebookform import EncounterNotebookForm
+from ...vitalspanel import VitalsPanel
+from ...measurementspanel import MeasurementsPanel
+from ...subencounters import Subencounters
+from ...prescriptionpanel import PrescriptionPanel
+from ...problempanel import ProblemPanel
+from ... import dbform as fm
 
 
 class PatientNotebookForm(EncounterNotebookForm):

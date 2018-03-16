@@ -2,15 +2,15 @@
 import wx
 import wx.py
 
-from .. import database as db
-from . import events
-from . import images
+from ... import database as db
+from .. import events
+from .. import images
+from ..patientlistpanel import PatientListPanel
+from ..patientpanel import PatientPanel
+from ..patientinfo import PatientForm
+from ..newadmissionwizard import NewAdmissionWizard
 from .baseinterface import BaseInterface
 from .shellinterface import ShellInterface
-from .patientlistpanel import PatientListPanel
-from .patientpanel import PatientPanel
-from .patientinfo import PatientForm
-from .newadmissionwizard import NewAdmissionWizard
 
 ID_NEW_PATIENT = wx.NewId()
 ID_NEW_ADMISSION = wx.NewId()

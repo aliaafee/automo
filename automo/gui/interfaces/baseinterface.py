@@ -1,10 +1,10 @@
 """Ward Interface"""
 import wx
 
-from .. import database as db
-from . import images
-from .about import AboutDlg
-from .settingsdialog import SettingsDialog
+from ... import database as db
+from .. import images
+from ..about import AboutDlg
+from ..settingsdialog import SettingsDialog
 
 
 ID_SETTINGS = wx.NewId()

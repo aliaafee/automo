@@ -6,18 +6,7 @@ import wx
 from . import guiconfig
 from . import configloader
 from .login import LoginDlg
-from .baseinterface import BaseInterface
-from .shellinterface import ShellInterface
-from .wardinterface import WardInterface
-from .cwardinterface import CWardInterface
-from .dischargeinterface import DischargeInterface
-
-INTERFACES = {
-    'gui-shell' : ShellInterface,
-    'gui-ward' : WardInterface,
-    'gui-cward' : CWardInterface,
-    'gui-discharge' : DischargeInterface
-}
+from . import interfaces
 
 
 class AutoMOApp(wx.App):
@@ -35,8 +24,9 @@ class AutoMOApp(wx.App):
         configloader.load_config()
 
         self.interface = guiconfig.STARTUP_INTERFACE
+        MainFrame = interfaces.get_by_name(self.interface)
 
-        if self.interface == "":
+        if MainFrame is None:
             with LoginDlg(None) as logindlg:
                 logindlg.CenterOnScreen()
                 if logindlg.ShowModal() == wx.ID_OK:
@@ -44,10 +34,9 @@ class AutoMOApp(wx.App):
                     if interface is not None:
                         guiconfig.STARTUP_INTERFACE = interface
                         self.interface = guiconfig.STARTUP_INTERFACE
+                        MainFrame = interfaces.get_by_name(self.interface)
                 else:
                     return False
-
-        MainFrame = INTERFACES[self.interface]
 
         self.main_frame = MainFrame(None)
         self.main_frame.Bind(wx.EVT_CLOSE, self._on_main_frame_close)
@@ -57,10 +46,10 @@ class AutoMOApp(wx.App):
 
 
     def exception_handler(self, type, value, trace_back):
-        error_msg = "And unexpected error has occured, AutoMO will close.\n\n{}"
+        error_msg = "And unexpected error has occured.\n\n{}"
         traceback_str = ''.join(traceback.format_exception(type, value, trace_back))
 
-        with wx.MessageDialog(None,error_msg.format(traceback_str), "Fatal Error",
+        with wx.MessageDialog(None,error_msg.format(traceback_str), "Unexpected Error",
                               wx.OK | wx.ICON_ERROR) as dlg:
             dlg.ShowModal()
             dlg.Destroy()

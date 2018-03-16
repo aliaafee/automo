@@ -4,9 +4,9 @@ from datetime import datetime, date
 import wx
 import wx.py
 
-from .. import database as db
+from ... import database as db
+from ..icd10coder import Icd10Coder
 from .baseinterface import BaseInterface
-from .icd10coder import Icd10Coder
 
 
 class ShellInterface(BaseInterface):
