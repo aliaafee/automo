@@ -18,7 +18,7 @@ ID_PRINT_OT_NOTE = wx.NewId()
 
 def circum_admit_patient(patient_panel):
     print "Alternate Admission"
-    with NewAdmissionDialog(patient_panel, patient_panel.session, patient=patient_panel.patient) as dlg:
+    with NewAdmissionWizard(patient_panel, patient_panel.session, patient=patient_panel.patient) as dlg:
         dlg.SetTitle("New Admission for Circumcision")
         done = False
         while not done:
@@ -151,7 +151,7 @@ class CWardInterface(WardInterface):
 
 
     def new_admission(self):
-        with NewAdmissionDialog(self, self.session) as dlg:
+        with NewAdmissionWizard(self, self.session) as dlg:
             done = False
             while not done:
                 dlg.ShowModal()

@@ -8,7 +8,7 @@ from .. import config
 from . import events
 from . import images
 from .patientinfo import PatientInfoPanelSmall, PatientForm
-from .encounterspanel import EncountersPanel
+from .clinicalencounterspanel import ClinicalEncountersPanel
 from .newadmissionwizard import NewAdmissionWizard
 from .dischargedialog import DischargeDialog
 
@@ -46,7 +46,7 @@ class PatientPanel(wx.Panel):
         #self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self._on_change_notebook)
 
         #self.encounters_panel = EncountersPanel(self.notebook, session)
-        self.encounters_panel = EncountersPanel(self, session)
+        self.encounters_panel = ClinicalEncountersPanel(self, session)
         self.Bind(events.EVT_AM_PATIENT_INFO_CHANGED, self._on_patient_info_changed)
         #self.notebook.AddPage(self.encounters_panel, "Encounters")
 
