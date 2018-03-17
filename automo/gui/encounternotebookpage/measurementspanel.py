@@ -1,24 +1,25 @@
 """Measurements Panel"""
 import wx
 
-from .. import database as db
-from . import images
-from . import events
-from .widgets import DbQueryResultGrid, GridColumnDateTime, GridColumnFloat
-from .dbform import FormDialog, DateTimeField, FloatField
+from ... import database as db
+from .. import images
+from .. import events
+from ..widgets import DbQueryResultGrid, GridColumnDateTime, GridColumnFloat
+from ..dbform import FormDialog, DateTimeField, FloatField
+from .encounternotebookpage import EncounterNotebookPage
 
 
-class MeasurementsPanel(wx.Panel):
+class MeasurementsPanel(EncounterNotebookPage):
     """Measurements Panel"""
     def __init__(self, parent, session, **kwds):
-        super(MeasurementsPanel, self).__init__(parent, **kwds)
+        super(MeasurementsPanel, self).__init__(parent, session, **kwds)
 
-        self.session = session
-        self.encounter = None
+        #self.session = session
+        #self.encounter = None
 
-        self.editable = True
+        #self.editable = True
 
-        self.toolbar = wx.ToolBar(self, style=wx.TB_FLAT | wx.TB_NODIVIDER)
+        #self.toolbar = wx.ToolBar(self, style=wx.TB_FLAT | wx.TB_NODIVIDER)
 
         self.toolbar.AddTool(wx.ID_ADD, "Add", images.get("add"), wx.NullBitmap, wx.ITEM_NORMAL, "Add", "")
         self.toolbar.Bind(wx.EVT_TOOL, self._on_add, id=wx.ID_ADD)
@@ -32,10 +33,10 @@ class MeasurementsPanel(wx.Panel):
         self.measurements_grid.add_column(GridColumnFloat(u"BMI (kg/m\u00B2)", 'bmi', precision=2, editable=False))
         self.measurements_grid.Bind(events.EVT_AM_DB_GRID_CELL_CHANGED, self._on_grid_changed)
 
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self.toolbar, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx.LEFT, border=5)
-        sizer.Add(self.measurements_grid, 1, wx.EXPAND | wx.ALL, border=5)
-        self.SetSizer(sizer)
+        #sizer = wx.BoxSizer(wx.VERTICAL)
+        #sizer.Add(self.toolbar, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx.LEFT, border=5)
+        self.sizer.Add(self.measurements_grid, 1, wx.EXPAND | wx.ALL, border=5)
+        #self.SetSizer(sizer)
 
 
     def _on_add(self, event):
@@ -61,19 +62,14 @@ class MeasurementsPanel(wx.Panel):
         wx.PostEvent(self, event)
 
 
-    def set_editable(self, editable):
-        """Set control to editable or not"""
-        if editable:
-            self.toolbar.Show()
-            self.measurements_grid.EnableEditing(True)
-        else:
-            self.toolbar.Hide()
-            self.measurements_grid.EnableEditing(False)
+    def editable_on(self):
+        super(MeasurementsPanel, self).editable_on()
+        self.measurements_grid.EnableEditing(True)
 
-        if self.editable != editable:
-            self.Layout()
-
-        self.editable = editable
+    
+    def editable_off(self):
+        super(MeasurementsPanel, self).editable_off()
+        self.measurements_grid.EnableEditing(False)
 
 
     def is_unsaved(self):
@@ -89,7 +85,7 @@ class MeasurementsPanel(wx.Panel):
 
     def set_encounter(self, encounter):
         """Set the current encounter"""
-        self.encounter = encounter
+        super(MeasurementsPanel, self).set_encounter(encounter)
 
         query_result = self.session.query(db.Measurements)\
                             .filter(db.Measurements.parent_id == self.encounter.id)\

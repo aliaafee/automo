@@ -6,16 +6,11 @@ from .... import database as db
 from .... import config
 
 from ...clinicalencounterspanel.baseclinicalencounterpanel import BaseClinicalEncounterPanel
-from ...encounternotebookform import EncounterNotebookForm
-from ...vitalspanel import VitalsPanel
-from ...measurementspanel import MeasurementsPanel
-from ...subencounters import Subencounters
-from ...prescriptionpanel import PrescriptionPanel
-from ...problempanel import ProblemPanel
+from ... import encounternotebookpage as notepage
 from ... import dbform as fm
 
 
-class PatientNotebookForm(EncounterNotebookForm):
+class PatientNotebookForm(notepage.Form):
     def __init__(self, parent, session, **kwds):
         fields = [
             fm.StringField("Hospital No.", "hospital_no", required=True),
@@ -81,10 +76,10 @@ class DischargeEditor(BaseClinicalEncounterPanel):
             fm.DateTimeField("Admission Time", 'start_time', required=True),
             fm.DateTimeField("Discharge Time", 'end_time', required=True)
         ]
-        self.admission_details_page = EncounterNotebookForm(self.notebook, self.session, db.Admission, fields)
+        self.admission_details_page = notepage.Form(self.notebook, self.session, db.Admission, fields)
         self.notebook.AddPage(self.admission_details_page, "Admission Details")
 
-        self.problems_panel = ProblemPanel(self.notebook, self.session)
+        self.problems_panel = notepage.ProblemPanel(self.notebook, self.session)
         self.notebook.AddPage(self.problems_panel, "Diagnosis")
 
         fields = [
@@ -92,13 +87,13 @@ class DischargeEditor(BaseClinicalEncounterPanel):
             fm.MultilineStringField("History of Present Illness", 'history', lines=8),
             fm.MultilineStringField("Past History", 'past_history', lines=8),
         ]
-        self.history_page = EncounterNotebookForm(self.notebook, self.session, db.Admission, fields)
+        self.history_page = notepage.Form(self.notebook, self.session, db.Admission, fields)
         self.notebook.AddPage(self.history_page, "History")
 
-        self.vitals_panel = VitalsPanel(self.notebook, self.session)
+        self.vitals_panel = notepage.VitalsPanel(self.notebook, self.session)
         self.notebook.AddPage(self.vitals_panel, "Vital Signs")
 
-        self.measurements_panel = MeasurementsPanel(self.notebook, self.session)
+        self.measurements_panel = notepage.MeasurementsPanel(self.notebook, self.session)
         self.notebook.AddPage(self.measurements_panel, "Measurements")
 
         fields = [
@@ -112,10 +107,10 @@ class DischargeEditor(BaseClinicalEncounterPanel):
             fm.OptionalMultilineStringField("Extremities Exam", 'exam_extremities', lines=8),
             fm.OptionalMultilineStringField("Other Exam", 'exam_other', lines=8)
         ]
-        self.examination_page = EncounterNotebookForm(self.notebook, self.session, db.Admission, fields)
+        self.examination_page = notepage.Form(self.notebook, self.session, db.Admission, fields)
         self.notebook.AddPage(self.examination_page, "Examination")
 
-        self.investigations_page = Subencounters(self.notebook, self.session)
+        self.investigations_page = notepage.Subencounters(self.notebook, self.session)
         self.notebook.AddPage(self.investigations_page, "Investigations")
 
         imaging_fields = [
@@ -167,7 +162,7 @@ class DischargeEditor(BaseClinicalEncounterPanel):
                                                   otherreport_fields,
                                                   lambda v: u"{}".format(v.name))
 
-        self.surgical_procedures_page = Subencounters(self.notebook, self.session)
+        self.surgical_procedures_page = notepage.Subencounters(self.notebook, self.session)
         self.notebook.AddPage(self.surgical_procedures_page, "Surgical Procedures")
 
         fields = [
@@ -192,7 +187,7 @@ class DischargeEditor(BaseClinicalEncounterPanel):
         fields = [
             fm.MultilineStringField("", 'hospital_course', lines=8)
         ]
-        self.course_page = EncounterNotebookForm(self.notebook, self.session, db.Admission, fields, scrollable=False)
+        self.course_page = notepage.Form(self.notebook, self.session, db.Admission, fields, scrollable=False)
         self.notebook.AddPage(self.course_page, "Hospital Course Summary")
 
         complication_fields = [
@@ -203,11 +198,11 @@ class DischargeEditor(BaseClinicalEncounterPanel):
             fm.CheckBoxField("Disability on Discharge", 'complication_disability'),
             fm.MultilineStringField("Complication Summary", 'complication_summary', lines=8)
         ]
-        self.complication_panel = EncounterNotebookForm(self.notebook, self.session, db.Admission,
+        self.complication_panel = notepage.Form(self.notebook, self.session, db.Admission,
                                                           complication_fields)
         self.notebook.AddPage(self.complication_panel, "Complications")
 
-        self.prescription_panel = PrescriptionPanel(self.notebook, self.session)
+        self.prescription_panel = notepage.PrescriptionPanel(self.notebook, self.session)
         self.notebook.AddPage(self.prescription_panel, "Prescription")
 
         fields = [
@@ -215,7 +210,7 @@ class DischargeEditor(BaseClinicalEncounterPanel):
             fm.MultilineStringField("Follow Up", 'follow_up', lines=8),
             fm.StringField("Discharge Prepared By", 'written_by', required=True)
         ]
-        self.advice_page = EncounterNotebookForm(self.notebook, self.session, db.Admission, fields)
+        self.advice_page = notepage.Form(self.notebook, self.session, db.Admission, fields)
         self.notebook.AddPage(self.advice_page, "Discharge Advice")
 
 

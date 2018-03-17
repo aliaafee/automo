@@ -3,7 +3,7 @@ import string
 import tempfile
 from reportlab.platypus import Paragraph, PageBreak, ListFlowable, KeepTogether
 from reportlab.platypus.flowables import HRFlowable
-from reportlab.lib.pagesizes import A5
+from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 
 from .. import config
@@ -13,7 +13,7 @@ from .doctemplate import DocTemplate, DefaultHeader, TableExpandable
 from .stylesheet import get_stylesheet
 
 
-def get_discharge_summary_elements(admission, session, pagesize=A5):
+def get_discharge_summary_elements(admission, session, pagesize=A4):
     patient = admission.patient
 
     stylesheet = get_stylesheet()
@@ -62,8 +62,8 @@ def get_discharge_summary_elements(admission, session, pagesize=A5):
 
     demography_table = TableExpandable(
         demography,
-        colWidths=[18*mm, None, 22*mm, 28*mm],
-        pagesize=pagesize, rightMargin=10*mm, leftMargin=10*mm,
+        colWidths=[22*mm, None, 22*mm, 28*mm],
+        pagesize=pagesize, rightMargin=20*mm, leftMargin=20*mm,
         style=stylesheet['table-default'])
 
     #demography_table.setStyle(stylesheet['table-default'])
@@ -108,7 +108,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A5):
         procedure_table = TableExpandable(
             procedure_data,
             colWidths=[20*mm, None],
-            pagesize=pagesize, rightMargin=10*mm, leftMargin=10*mm,
+            pagesize=pagesize, rightMargin=20*mm, leftMargin=20*mm,
             style=stylesheet['table-default'])
         elements.append(procedure_table)
         elements.append(HRFlowable(width="100%"))
@@ -165,8 +165,8 @@ def get_discharge_summary_elements(admission, session, pagesize=A5):
 
     signature_table = TableExpandable(
         signature,
-        colWidths=[25*mm, None, 15*mm, None],
-        pagesize=pagesize, rightMargin=10*mm, leftMargin=10*mm,
+        colWidths=[28*mm, None, 15*mm, None],
+        pagesize=pagesize, rightMargin=20*mm, leftMargin=20*mm,
         style=stylesheet['table-default'])
     elements.append(signature_table)
 
@@ -175,7 +175,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A5):
     return elements
 
 
-def get_admission_summary_elements(admission, session, pagesize=A5):
+def get_admission_summary_elements(admission, session, pagesize=A4):
     patient = admission.patient
 
     stylesheet = get_stylesheet()
@@ -224,7 +224,7 @@ def get_admission_summary_elements(admission, session, pagesize=A5):
     demography_table = TableExpandable(
         demography,
         colWidths=[18*mm, None, 22*mm, 28*mm],
-        pagesize=pagesize, rightMargin=10*mm, leftMargin=10*mm,
+        pagesize=pagesize, rightMargin=20*mm, leftMargin=20*mm,
         style=stylesheet['table-default'])
 
     #demography_table.setStyle(stylesheet['table-default'])
@@ -322,7 +322,7 @@ def get_admission_summary_elements(admission, session, pagesize=A5):
     signature_table = TableExpandable(
         signature,
         colWidths=[25*mm, None, 15*mm, None],
-        pagesize=pagesize, rightMargin=10*mm, leftMargin=10*mm,
+        pagesize=pagesize, rightMargin=20*mm, leftMargin=20*mm,
         style=stylesheet['table-default'])
     elements.append(signature_table)
 
@@ -332,7 +332,7 @@ def get_admission_summary_elements(admission, session, pagesize=A5):
 
 
 
-def get_ot_note_elements(admission, session, pagesize=A5):
+def get_ot_note_elements(admission, session, pagesize=A4):
     patient = admission.patient
 
     stylesheet = get_stylesheet()
@@ -378,7 +378,7 @@ def get_ot_note_elements(admission, session, pagesize=A5):
     demography_table = TableExpandable(
         demography,
         colWidths=[18*mm, None, 22*mm, 28*mm],
-        pagesize=pagesize, rightMargin=10*mm, leftMargin=10*mm,
+        pagesize=pagesize, rightMargin=20*mm, leftMargin=20*mm,
         style=stylesheet['table-default'])
 
     elements.append(demography_table)
@@ -402,16 +402,16 @@ def get_ot_note_elements(admission, session, pagesize=A5):
         [u"     Normal [ ]"],
         [u"     Phimosis [ ]"],
         [u"     Other Findings:"],
-        [" "],
-        [" "],
-        [" "],
-        [" "]
+        [""],
+        [""],
+        [""],
+        [""]
     ]
 
     details_table = TableExpandable(
         details,
         colWidths=[ None, None],
-        pagesize=pagesize, rightMargin=10*mm, leftMargin=10*mm,
+        pagesize=pagesize, rightMargin=20*mm, leftMargin=20*mm,
         style=stylesheet['table-default'])
     elements.append(details_table)
     elements.append(HRFlowable(width="100%"))
@@ -454,16 +454,18 @@ def get_ot_note_elements(admission, session, pagesize=A5):
     signature_table = TableExpandable(
         signature,
         colWidths=[25*mm, None, 15*mm, None],
-        pagesize=pagesize, rightMargin=10*mm, leftMargin=10*mm,
+        pagesize=pagesize, rightMargin=20*mm, leftMargin=20*mm,
         style=stylesheet['table-default'])
     elements.append(signature_table)
+
+    print elements
 
     return elements
 
 
 
 
-def generate_ot_note(admission, session, pagesize=A5):
+def generate_ot_note(admission, session, pagesize=A4):
     filename = tempfile.mktemp(".pdf")
 
     patient_name = admission.patient.name
@@ -481,17 +483,17 @@ def generate_ot_note(admission, session, pagesize=A5):
         page_footer=page_footer,
         page_header="Operative Note",
         pagesize=pagesize,
-        rightMargin=10*mm,
-        leftMargin=10*mm,
-        topMargin=15*mm,
-        bottomMargin=15*mm
+        rightMargin=20*mm,
+        leftMargin=20*mm,
+        topMargin=20*mm,
+        bottomMargin=20*mm
     )
     doc.build(get_ot_note_elements(admission, session, pagesize))
 
     return filename
 
 
-def generate_discharge_summary(admission, session, pagesize=A5):
+def generate_discharge_summary(admission, session, pagesize=A4):
     filename = tempfile.mktemp(".pdf")
 
     patient_name = admission.patient.name
@@ -509,17 +511,17 @@ def generate_discharge_summary(admission, session, pagesize=A5):
         page_footer=page_footer,
         page_header="Circumcision Discharge Summary",
         pagesize=pagesize,
-        rightMargin=10*mm,
-        leftMargin=10*mm,
-        topMargin=15*mm,
-        bottomMargin=15*mm
+        rightMargin=20*mm,
+        leftMargin=20*mm,
+        topMargin=20*mm,
+        bottomMargin=20*mm
     )
     doc.build(get_discharge_summary_elements(admission, session, pagesize))
 
     return filename
 
 
-def generate_admission_summary(admission, session, pagesize=A5):
+def generate_admission_summary(admission, session, pagesize=A4):
     filename = tempfile.mktemp(".pdf")
 
     patient_name = admission.patient.name
@@ -537,10 +539,10 @@ def generate_admission_summary(admission, session, pagesize=A5):
         page_footer=page_footer,
         page_header="Circumcision Admission Sheet",
         pagesize=pagesize,
-        rightMargin=10*mm,
-        leftMargin=10*mm,
-        topMargin=15*mm,
-        bottomMargin=15*mm
+        rightMargin=20*mm,
+        leftMargin=20*mm,
+        topMargin=20*mm,
+        bottomMargin=20*mm
     )
     doc.build(get_admission_summary_elements(admission, session, pagesize))
 

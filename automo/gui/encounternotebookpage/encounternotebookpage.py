@@ -1,6 +1,7 @@
 """Encounter Notebook Page"""
 import wx
 
+
 class EncounterNotebookPage(wx.Panel):
     """Encounter Notebook Page"""
     def __init__(self, parent, session, toolbar=True, **kwds):
@@ -22,7 +23,7 @@ class EncounterNotebookPage(wx.Panel):
 
 
     def set_editable(self, editable):
-        """Set control to editable or not"""
+        """Set control to editable or not, donot directly use editable_on/off"""
         if editable:
             self.editable_on()
         else:
@@ -34,12 +35,12 @@ class EncounterNotebookPage(wx.Panel):
 
 
     def editable_on(self):
-        """Make controls editable"""
+        """Make controls editable. override as per need."""
         self.toolbar.Show()
 
 
     def editable_off(self):
-        """Lock controls"""
+        """Lock controls. override as per need."""
         self.toolbar.Hide()
 
 

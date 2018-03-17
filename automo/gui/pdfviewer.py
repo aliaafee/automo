@@ -2,7 +2,6 @@
 import wx
 import wx.lib.sized_controls as sc
 import wx.lib.pdfviewer
-#from wx.lib.pdfviewer import pdfViewer, pdfButtonPanel
 
 from . import images
 

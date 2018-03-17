@@ -39,8 +39,8 @@ class DischargeListPanel(wx.Panel):
         self.context_menu = wx.Menu()
         self.context_menu.Append(ID_EDIT_DISCHARGE, "Edit Discharge", "Open Discharge Editor")
         self.context_menu.Bind(wx.EVT_MENU, self._on_discharge_edit, id=ID_EDIT_DISCHARGE)
-        #self.context_menu.Append(ID_OPEN_PATIENT, "Patient File", "Open Patient File in New Window")
-        #self.context_menu.Bind(wx.EVT_MENU, self._on_patient_file, id=ID_OPEN_PATIENT)
+        self.context_menu.Append(ID_OPEN_PATIENT, "Patient File", "Open Patient File in New Window")
+        self.context_menu.Bind(wx.EVT_MENU, self._on_patient_file, id=ID_OPEN_PATIENT)
 
         self.refresh()
 

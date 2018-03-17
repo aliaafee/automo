@@ -2,18 +2,18 @@
 from datetime import datetime
 import wx
 
-from .. import config
-from . import images
-from . import events
-from .widgets import DbQueryResultBox
-from .dbform import FormPanel
+from ... import config
+from .. import images
+from .. import events
+from ..widgets import DbQueryResultBox
+from ..dbform import FormPanel
 from .encounternotebookpage import EncounterNotebookPage
 
 
-class EncounterNotebookList(EncounterNotebookPage):
+class ListForm(EncounterNotebookPage):
     """List with Form View for Subencounters"""
     def __init__(self, parent, session, db_subencounter_class, fields, **kwds):
-        super(EncounterNotebookList, self).__init__(parent, session, **kwds)
+        super(ListForm, self).__init__(parent, session, **kwds)
 
         self.subencounter = None
         self.fields = fields
@@ -143,12 +143,12 @@ class EncounterNotebookList(EncounterNotebookPage):
 
 
     def editable_on(self):
-        super(EncounterNotebookList, self).editable_on()
+        super(ListForm, self).editable_on()
         self.subencounter_form.unlock()
 
 
     def editable_off(self):
-        super(EncounterNotebookList, self).editable_off()
+        super(ListForm, self).editable_off()
         self.subencounter_form.lock()
 
 
@@ -173,7 +173,7 @@ class EncounterNotebookList(EncounterNotebookPage):
         if self.encounter is not None and self.encounter == encounter and preserve_selection:
             selection, cookie = self.subencounter_list.GetFirstSelected()
 
-        super(EncounterNotebookList, self).set_encounter(encounter)
+        super(ListForm, self).set_encounter(encounter)
 
         result = self.session.query(self.db_subencounter_class)\
                     .filter(self.db_subencounter_class.parent == self.encounter)\

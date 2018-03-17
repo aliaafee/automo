@@ -2,8 +2,8 @@
 import wx
 from ObjectListView import ColumnDefn
 
+from ..baseprescriptionpanel import BasePrescriptionPanel
 from .encounternotebookpage import EncounterNotebookPage
-from .baseprescriptionpanel import BasePrescriptionPanel
 
 
 ID_PRESET_ADD = wx.NewId()

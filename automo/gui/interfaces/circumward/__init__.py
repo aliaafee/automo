@@ -3,13 +3,13 @@ import tempfile
 import wx
 import PyPDF2
 
-from ... import database as db
-from .. import events
-from .. import images
-from ..batchpatientimporter import BatchPatientImporter
-from ..newadmissionwizard import NewAdmissionWizard
-from ..pdfviewer import PDFViewer
-from .wardinterface import WardInterface
+from .... import database as db
+from ... import events
+from ... import images
+from ...newadmissionwizard import NewAdmissionWizard
+from ...pdfviewer import PDFViewer
+from ..wardinterface import WardInterface
+from .batchpatientimporter import BatchPatientImporter
 
 ID_IMPORT_PATIENTS = wx.NewId()
 ID_PRINT_ADMISSION_MULTIPLE = wx.NewId()

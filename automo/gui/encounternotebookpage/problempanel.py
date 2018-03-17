@@ -1,13 +1,13 @@
 """Problem Panel"""
 import wx
 
-from .. import config
-from . import events
-from . import images
+from ... import config
+from .. import events
+from .. import images
+from ..icd10coder import Icd10Coder
+from ..widgets import DbListBox
+from ..problempickerdialog import ProblemPickerDialog
 from .encounternotebookpage import EncounterNotebookPage
-from .icd10coder import Icd10Coder
-from .widgets import DbListBox
-from .problempickerdialog import ProblemPickerDialog
 
 
 def problems_decorator(problem_object):

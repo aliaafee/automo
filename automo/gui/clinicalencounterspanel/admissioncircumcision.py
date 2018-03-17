@@ -4,14 +4,9 @@ import wx
 from ... import database as db
 
 from .admissionpanel import AdmissionPanel
-from ..measurementspanel import MeasurementsPanel
-from ..vitalspanel import VitalsPanel
-from ..prescriptionpanel import PrescriptionPanel
-from ..encounternotebookform import EncounterNotebookForm
-from ..subencounters import Subencounters
 from .. import dbform as fm
 from ..pdfviewer import PDFViewer
-
+from .. import encounternotebookpage as notepage
 ID_PRINT_ADMISSION = wx.NewId()
 ID_PRINT_OT_NOTE = wx.NewId()
 
@@ -67,17 +62,17 @@ class AdmissionCircumcisionPanel(AdmissionPanel):
             fm.OptionalMultilineStringField("Other Exam", 'exam_other', lines=4),
             fm.MultilineStringField("Preoperative Orders", 'preoperative_orders', lines=4)
         ]
-        self.admission_note_panel = EncounterNotebookForm(self.notebook, self.session, db.Admission,
+        self.admission_note_panel = notepage.Form(self.notebook, self.session, db.Admission,
                                                           admission_note_fields)
         self.notebook.AddPage(self.admission_note_panel, "Admission Notes")
 
-        self.vitals_panel = VitalsPanel(self.notebook, self.session)
+        self.vitals_panel = notepage.VitalsPanel(self.notebook, self.session)
         self.notebook.AddPage(self.vitals_panel, "Vitals")
 
-        self.measurements_panel = MeasurementsPanel(self.notebook, self.session)
+        self.measurements_panel = notepage.MeasurementsPanel(self.notebook, self.session)
         self.notebook.AddPage(self.measurements_panel, "Measurements")
 
-        self.subencounters = Subencounters(self.notebook, self.session)
+        self.subencounters = notepage.Subencounters(self.notebook, self.session)
         progress_fields = [
             fm.DateTimeField("Time", 'examination_time', required=True),
             fm.RelationField("Doctor", 'personnel', self.session.query(db.Doctor)),
@@ -140,15 +135,27 @@ class AdmissionCircumcisionPanel(AdmissionPanel):
 
         self.notebook.AddPage(self.subencounters, "Notes and Reports")
 
+        complication_fields = [
+            fm.RelationField("Complication Grade",
+                            'complication_grade',
+                            self.session.query(db.ComplicationGrade),
+                            help_text="\n\n".join(["Grade {0} - {1}".format(v.id, v.description) for v in self.session.query(db.ComplicationGrade).all()])),
+            fm.CheckBoxField("Disability on Discharge", 'complication_disability'),
+            fm.MultilineStringField("Complication Summary", 'complication_summary', lines=8)
+        ]
+        self.complication_panel = notepage.Form(self.notebook, self.session, db.Admission,
+                                                          complication_fields)
+        self.notebook.AddPage(self.complication_panel, "Complications")
+
         discharge_note_fields = [
             fm.OptionsField("Hospital Course", 'hospital_course',options=['Uneventful'],
                            nonelabel="Unspecified", otherlabel="Issues", lines=4),
             fm.MultilineStringField("Discharge Advice", 'discharge_advice', lines=4),
             fm.MultilineStringField("Follow Up", 'follow_up', lines=4)
         ]
-        self.discharge_note_panel = EncounterNotebookForm(self.notebook, self.session, db.Admission,
+        self.discharge_note_panel = notepage.Form(self.notebook, self.session, db.Admission,
                                                           discharge_note_fields)
         self.notebook.AddPage(self.discharge_note_panel, "Discharge Notes")
 
-        self.prescription_panel = PrescriptionPanel(self.notebook, self.session)
+        self.prescription_panel = notepage.PrescriptionPanel(self.notebook, self.session)
         self.notebook.AddPage(self.prescription_panel, "Prescription")

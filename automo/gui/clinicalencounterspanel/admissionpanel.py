@@ -6,16 +6,11 @@ from ... import config
 from .. import events
 from .. import images
 from ..widgets import DbRelationCtrl
-from .baseclinicalencounterpanel import BaseClinicalEncounterPanel
-from ..problempanel import ProblemPanel
-from ..measurementspanel import MeasurementsPanel
-from ..vitalspanel import VitalsPanel
-from ..prescriptionpanel import PrescriptionPanel
 from ..bedselector import BedSelectorDialog
-from ..encounternotebookform import EncounterNotebookForm
-from ..subencounters import Subencounters
+from .. import encounternotebookpage as notepage
 from .. import dbform as fm
 from ..pdfviewer import PDFViewer
+from .baseclinicalencounterpanel import BaseClinicalEncounterPanel
 
 ID_TRANSFER_BED = wx.NewId()
 ID_PRINT_DISCHARGE = wx.NewId()
@@ -68,20 +63,20 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
             fm.OptionalMultilineStringField("Extremities Exam", 'exam_extremities', lines=8),
             fm.OptionalMultilineStringField("Other Exam", 'exam_other', lines=8)
         ]
-        self.admission_note_panel = EncounterNotebookForm(self.notebook, self.session, db.Admission,
+        self.admission_note_panel = notepage.Form(self.notebook, self.session, db.Admission,
                                                           admission_note_fields)
         self.notebook.AddPage(self.admission_note_panel, "Admission Notes")
 
-        self.problems_panel = ProblemPanel(self.notebook, self.session)
+        self.problems_panel = notepage.ProblemPanel(self.notebook, self.session)
         self.notebook.AddPage(self.problems_panel, "Diagnosis")
 
-        self.measurements_panel = MeasurementsPanel(self.notebook, self.session)
+        self.measurements_panel = notepage.MeasurementsPanel(self.notebook, self.session)
         self.notebook.AddPage(self.measurements_panel, "Measurements")
 
-        self.vitals_panel = VitalsPanel(self.notebook, self.session)
+        self.vitals_panel = notepage.VitalsPanel(self.notebook, self.session)
         self.notebook.AddPage(self.vitals_panel, "Vitals")
 
-        self.subencounters = Subencounters(self.notebook, self.session)
+        self.subencounters = notepage.Subencounters(self.notebook, self.session)
         self.notebook.AddPage(self.subencounters, "Notes && Reports")
 
         progress_fields = [
@@ -181,7 +176,7 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
             fm.CheckBoxField("Disability on Discharge", 'complication_disability'),
             fm.MultilineStringField("Complication Summary", 'complication_summary', lines=8)
         ]
-        self.complication_panel = EncounterNotebookForm(self.notebook, self.session, db.Admission,
+        self.complication_panel = notepage.Form(self.notebook, self.session, db.Admission,
                                                           complication_fields)
         self.notebook.AddPage(self.complication_panel, "Complications")
 
@@ -191,11 +186,11 @@ class AdmissionPanel(BaseClinicalEncounterPanel):
             fm.MultilineStringField("Follow Up", 'follow_up', lines=8),
             fm.StringField("Discharge Prepared By", 'written_by')
         ]
-        self.discharge_note_panel = EncounterNotebookForm(self.notebook, self.session, db.Admission,
+        self.discharge_note_panel = notepage.Form(self.notebook, self.session, db.Admission,
                                                           discharge_note_fields)
         self.notebook.AddPage(self.discharge_note_panel, "Discharge Notes")
 
-        self.prescription_panel = PrescriptionPanel(self.notebook, self.session)
+        self.prescription_panel = notepage.PrescriptionPanel(self.notebook, self.session)
         self.notebook.AddPage(self.prescription_panel, "Prescription")
 
 

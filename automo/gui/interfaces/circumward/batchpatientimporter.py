@@ -1,13 +1,12 @@
 """Batch import patients"""
-import datetime
 import csv
 import wx
 import wx.grid
 
-from .. import config
-from .. import database as db
-from . import images
-from .widgets import DbComboBox
+from .... import config
+from .... import database as db
+from ... import images
+from ...widgets import DbComboBox
 
 COL_INT = 0
 COL_STR = 1
@@ -28,7 +27,7 @@ COLUMNS = {
 
 
 class BatchPatientImporter(wx.Dialog):
-    """Dialog to import a group of patients from tab delimated file/clipboard"""
+    """Dialog to import a group of patients from tab delimated file/clipboard for circumcisions"""
     def __init__(self, parent, session, size=wx.Size(1000, 600), **kwds):
         super(BatchPatientImporter, self).__init__(
              parent, style=wx.CLOSE_BOX | wx.RESIZE_BORDER | wx.SYSTEM_MENU | wx.CAPTION,
@@ -59,9 +58,6 @@ class BatchPatientImporter(wx.Dialog):
         self.col_count = len(self.col_definition)
         self.validation_errors = []
 
-        #self.cmd_paste = wx.Button(self, label="Paste")
-        #self.cmd_paste.Bind(wx.EVT_BUTTON, self._on_paste)
-
         self.cmd_save = wx.Button(self, label="Import and Admit")
         self.cmd_save.Bind(wx.EVT_BUTTON, self._on_save)
 
@@ -73,7 +69,7 @@ class BatchPatientImporter(wx.Dialog):
         self.cmb_doctor.set_items(self.session.query(db.Doctor).all())
 
         self.lbl_ward = wx.StaticText(self, label="Ward")
-        self.cmb_ward = DbComboBox(self, self.session, size=(200, -1))
+        self.cmb_ward = DbComboBox(self, size=(200, -1))
         self.cmb_ward.set_items(self.session.query(db.Ward).all())
 
         self.patient_grid = wx.grid.Grid(self)

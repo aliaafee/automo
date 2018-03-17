@@ -1,16 +1,16 @@
 """Form to edit fields of encounter"""
 import wx
 
-from . import images
-from . import events
+from .. import images
+from .. import events
+from ..dbform import FormPanel
 from .encounternotebookpage import EncounterNotebookPage
-from .dbform import FormPanel
 
 
-class EncounterNotebookForm(EncounterNotebookPage):
+class Form(EncounterNotebookPage):
     """Form to edit fields of encounter"""
     def __init__(self, parent, session, db_encounter_class, fields, scrollable=True, **kwds):
-        super(EncounterNotebookForm, self).__init__(parent, session, **kwds)
+        super(Form, self).__init__(parent, session, **kwds)
 
         self.db_encounter_class = db_encounter_class
         self.fields = fields
@@ -61,17 +61,17 @@ class EncounterNotebookForm(EncounterNotebookPage):
 
 
     def editable_on(self):
-        super(EncounterNotebookForm, self).editable_on()
+        super(Form, self).editable_on()
         self.form.unlock()
 
 
     def editable_off(self):
-        super(EncounterNotebookForm, self).editable_off()
+        super(Form, self).editable_off()
         self.form.lock()
 
 
     def set_encounter(self, encounter):
-        super(EncounterNotebookForm, self).set_encounter(encounter)
+        super(Form, self).set_encounter(encounter)
 
         self.form.set_object(self.encounter)
 

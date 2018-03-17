@@ -5,7 +5,7 @@ from ... import database as db
 from .. import images
 from ..widgets import DbListBox
 from ..icd10coder import Icd10Coder
-from ..problempanel import problems_decorator
+from ..encounternotebookpage.problempanel import problems_decorator
 from .basepage import BasePage
 
 

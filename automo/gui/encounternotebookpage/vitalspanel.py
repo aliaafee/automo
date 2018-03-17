@@ -1,23 +1,24 @@
 """Vital Signs Panel"""
 import wx
 
-from .. import database as db
-from . import images
-from .widgets import DbQueryResultGrid, GridColumnDateTime, GridColumnFloat
-from .dbform import FormDialog, DateTimeField, FloatField
+from ... import database as db
+from .. import images
+from ..widgets import DbQueryResultGrid, GridColumnDateTime, GridColumnFloat
+from ..dbform import FormDialog, DateTimeField, FloatField
+from .encounternotebookpage import EncounterNotebookPage
 
 
-class VitalsPanel(wx.Panel):
+class VitalsPanel(EncounterNotebookPage):
     """Vital Signs Panel"""
     def __init__(self, parent, session, **kwds):
-        super(VitalsPanel, self).__init__(parent, **kwds)
+        super(VitalsPanel, self).__init__(parent, session, **kwds)
 
-        self.session = session
-        self.encounter = None
+        #self.session = session
+        #self.encounter = None
 
-        self.editable = True
+        #self.editable = True
 
-        self.toolbar = wx.ToolBar(self, style=wx.TB_FLAT | wx.TB_NODIVIDER)
+        #self.toolbar = wx.ToolBar(self, style=wx.TB_FLAT | wx.TB_NODIVIDER)
 
         self.toolbar.AddTool(wx.ID_ADD, "Add", images.get("add"), wx.NullBitmap, wx.ITEM_NORMAL, "Add", "")
         self.toolbar.Bind(wx.EVT_TOOL, self._on_add, id=wx.ID_ADD)
@@ -32,10 +33,10 @@ class VitalsPanel(wx.Panel):
         self.vitals_grid.add_column(GridColumnFloat("DBP (mmHg)", 'diastolic_bp', precision=0, editable=True))
         self.vitals_grid.add_column(GridColumnFloat(u"Temp (\u00B0C)", 'temperature', precision=1, editable=True))
 
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self.toolbar, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx.LEFT, border=5)
-        sizer.Add(self.vitals_grid, 1, wx.EXPAND | wx.ALL, border=5)
-        self.SetSizer(sizer)
+        #sizer = wx.BoxSizer(wx.VERTICAL)
+        #sizer.Add(self.toolbar, 0, wx.EXPAND | wx.TOP | wx.RIGHT | wx.LEFT, border=5)
+        self.sizer.Add(self.vitals_grid, 1, wx.EXPAND | wx.ALL, border=5)
+        #self.SetSizer(sizer)
 
 
     def _on_add(self, event):
@@ -56,20 +57,15 @@ class VitalsPanel(wx.Panel):
                 self.session.commit()
                 self.set_encounter(self.encounter)
 
+    
+    def editable_on(self):
+        super(VitalsPanel, self).editable_on()
+        self.vitals_grid.EnableEditing(True)
 
-    def set_editable(self, editable):
-        """Set control to editable or not"""
-        if editable:
-            self.toolbar.Show()
-            self.vitals_grid.EnableEditing(True)
-        else:
-            self.toolbar.Hide()
-            self.vitals_grid.EnableEditing(False)
-
-        if self.editable != editable:
-            self.Layout()
-
-        self.editable = editable
+    
+    def editable_off(self):
+        super(VitalsPanel, self).editable_off()
+        self.vitals_grid.EnableEditing(False)
 
 
     def is_unsaved(self):
@@ -85,7 +81,7 @@ class VitalsPanel(wx.Panel):
 
     def set_encounter(self, encounter):
         """Set the current encounter"""
-        self.encounter = encounter
+        super(VitalsPanel, self).set_encounter(encounter)
 
         query_result = self.session.query(db.VitalSigns)\
                             .filter(db.VitalSigns.parent_id == self.encounter.id)\
