@@ -7,7 +7,6 @@ from .dblistbox import DbListBox
 from .dbqueryresultbox import DbQueryResultBox
 from .dbrelationcombo import DbRelationCombo
 from .dbrelationctrl import DbRelationCtrl
-from .dbrichtextctrl import DbRichTextCtrl
 from .dbtextctrl import DbTextCtrl
 from .pydatepickerctrl import PyDatePickerCtrl, EVT_DATETIME_CHANGED
 from .pydatetimepickerctrl import PyDateTimePickerCtrl

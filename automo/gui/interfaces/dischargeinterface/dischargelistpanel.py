@@ -48,7 +48,8 @@ class DischargeListPanel(wx.Panel):
     def _search(self, str_search):
         items = self.session.query(db.Admission)
 
-        items = items.order_by(db.Admission.start_time.desc())
+        items = items.filter(db.Admission.end_time != None)\
+                    .order_by(db.Admission.end_time.desc())
 
         self.discharge_list.set_result(items, str_search)
 

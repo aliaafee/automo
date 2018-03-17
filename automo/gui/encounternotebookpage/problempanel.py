@@ -82,6 +82,8 @@ class ProblemPanel(EncounterNotebookPage):
         self.icd10_coder = Icd10Coder(self, self.session)
 
         self.problems_menu = wx.Menu()
+        self.problems_menu.Append(wx.ID_EDIT, "Edit", "Edit Selected Condition.")
+        self.problems_menu.Bind(wx.EVT_MENU, self._on_edit_problem, id=wx.ID_EDIT)
         self.problems_menu.Append(wx.ID_REMOVE, "Remove", "Remove Selected Conditions.")
         self.problems_menu.Bind(wx.EVT_MENU, self._on_remove_problems, id=wx.ID_REMOVE)
 
@@ -132,11 +134,38 @@ class ProblemPanel(EncounterNotebookPage):
         """Add Condition with Full Icd10 Coder"""
         pass
 
+
     def _on_problems_context(self, event):
         if not self.editable:
             return
 
         self.PopupMenu(self.problems_menu)
+
+
+    def _on_edit_problem(self, event):
+        if self.encounter is None:
+            return
+
+        selected_problem = self.problems_list.get_selected_object()
+
+        if selected_problem is None:
+            return
+
+        self.icd10_coder.CenterOnScreen()
+        #self.icd10_coder.set_problem(selected_problem)
+        result = self.icd10_coder.ShowModal(
+            start_time=selected_problem.start_time,
+            icd10class=selected_problem.icd10class,
+            modifier_class=selected_problem.icd10modifier_class,
+            modifier_extra_class=selected_problem.icd10modifier_extra_class,
+            comment=selected_problem.comment
+        )
+        if result == wx.ID_OK:
+            self.icd10_coder.update_problem(selected_problem)
+            self.session.commit()
+            self.set_encounter(self.encounter)
+            new_event = events.EncounterChangedEvent(events.ID_ENCOUNTER_CHANGED, object=selected_problem) 
+            wx.PostEvent(self, new_event)
 
 
     def _on_remove_problems(self, event):
