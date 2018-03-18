@@ -1,6 +1,5 @@
 """Discharge list Panel"""
 import string
-import re
 import dateutil.relativedelta as rd
 import wx
 from sqlalchemy import or_
@@ -8,6 +7,7 @@ from sqlalchemy import or_
 from .... import config
 from .... import database as db
 
+from ... import guiconfig
 from ... import images
 from ... import events
 from ...widgets import DbQueryResultBox
@@ -16,6 +16,7 @@ from .dischargeeditor import DischargeEditor
 
 ID_OPEN_PATIENT = wx.NewId()
 ID_EDIT_DISCHARGE = wx.NewId()
+
 
 class DischargeListPanel(wx.Panel):
     """Discharge list Panel"""
@@ -46,26 +47,24 @@ class DischargeListPanel(wx.Panel):
 
 
     def _search(self, str_search):
-        items = self.session.query(db.Admission)
+        items = self.session.query(db.Admission).join(db.Patient)
 
-        items = items.filter(db.Admission.end_time != None)\
-                    .order_by(db.Admission.end_time.desc())
+        items = items.filter(db.Admission.end_time != None)
 
-        self.discharge_list.set_result(items, str_search)
-
-        """
         if str_search != "":
             items = items.filter(
                 or_(
-                    db.Patient.hospital_no.like("%{0}%".format(str_search)),
-                    db.Patient.name.like("%{0}%".format(str_search))
+                    or_(
+                        db.Patient.hospital_no.like("%{0}%".format(str_search)),
+                        db.Patient.national_id_no.like("%{0}%".format(str_search))
+                    ),
+                    db.Patient.name.like("%{}%".format(str_search))
                 )
             )
 
-            self.discharge_list.set_result(items, str_search)
-        else:
-            self.discharge_list.clear()
-        """
+        items = items.order_by(db.Admission.end_time.desc())
+
+        self.discharge_list.set_result(items, str_search)
 
 
     def _on_context(self, event):
@@ -177,11 +176,11 @@ class DischargeListPanel(wx.Panel):
                         admission_object.end_time, admission_object.start_time
                     )
                 )
-            )
+            ).replace(" ", "&nbsp;")
 
         patient = admission_object.patient
-        str_hospital_no = unicode(patient.hospital_no)
-        str_name = unicode(patient.name)
+        str_hospital_no = guiconfig.higlight_query(unicode(patient.hospital_no), query_string)
+        str_name = guiconfig.higlight_query(unicode(patient.name), query_string)
         str_age = self._non_breaking(config.format_duration(patient.age))
         str_sex = patient.sex
         patient_str = "{0} {1} {2}/{3}".format(str_hospital_no, str_name, str_age, str_sex)
@@ -194,7 +193,7 @@ class DischargeListPanel(wx.Panel):
         html = u'<font size="2"><table width="100%" cellspacing="0">'\
                     '<tr>'\
                         '<td valign="top">{0}</td>'\
-                        '<td width="100%">{2}</td>'\
+                        '<td valign="top" width="100%">{2}</td>'\
                         '<td valign="top">{1}</td>'\
                     '</tr>'\
                     '<tr>'\
@@ -208,4 +207,3 @@ class DischargeListPanel(wx.Panel):
             patient_str,
             diagnoses_str
         )
-

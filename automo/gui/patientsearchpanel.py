@@ -7,6 +7,7 @@ from sqlalchemy import or_
 from .. import config
 from .. import database as db
 
+from . import guiconfig
 from . import events
 from .widgets import DbQueryResultBox
 
@@ -100,9 +101,9 @@ class PatientSearchPanel(wx.Panel):
         str_name = unicode(patient.name)
 
         if len(query_string) != 0:
-            str_hospital_no = self._higlight_query(str_hospital_no, query_string)
-            str_national_id_no = self._higlight_query(str_national_id_no, query_string)
-            str_name = self._higlight_query(str_name, query_string)
+            str_hospital_no = guiconfig.higlight_query(str_hospital_no, query_string)
+            str_national_id_no = guiconfig.higlight_query(str_national_id_no, query_string)
+            str_name = guiconfig.higlight_query(str_name, query_string)
     
         html = '<font size="2">'\
                     '<table width="100%">'\
@@ -128,4 +129,3 @@ class PatientSearchPanelAdv(wx.Panel):
     """Advanced Patient Search Panel"""
     def __init__(self, parent, session, **kwds):
         super(PatientSearchPanelAdv, self).__init__(parent, **kwds)
-
