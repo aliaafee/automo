@@ -10,6 +10,8 @@ from .stringfield import StringField
 class AddressField(Field):
     def __init__(self, label, str_attr, required=False, editable=True):
         super(AddressField, self).__init__(label, str_attr, required, editable)
+        self.current_object = None
+
         self.fields = [
             StringField("Line 1", "line_1", editable=editable),
             StringField("Line 2", "line_2", editable=editable),
@@ -34,6 +36,11 @@ class AddressField(Field):
 
     def set_editor_value(self, value):
         self.editor.set_object(value)
+        self.current_object = value
 
     def get_editor_value(self):
-        return self.editor.get_object()
+        if self.current_object is None:
+            self.current_object = self.editor.get_object()
+        else:
+            self.editor.update_object(self.current_object)
+        return self.current_object
