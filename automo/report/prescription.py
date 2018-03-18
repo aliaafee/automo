@@ -35,7 +35,11 @@ class PrescriptionTemplate(SimpleDocTemplate):
         """ Draw header of prescription """
         presc_canvas.drawString(15*mm, 181*mm, patient.name)
 
-        presc_canvas.drawString(15*mm, 173*mm, config.format_date(datetime.date.today()))
+        presc_date = datetime.datetime.now()
+        if self.encounter.end_time is not None:
+            presc_date = self.encounter.end_time
+
+        presc_canvas.drawString(15*mm, 173*mm, config.format_date(presc_date))
         presc_canvas.drawString(63*mm, 173*mm, config.format_duration(patient.age))
         presc_canvas.drawString(82*mm, 173*mm, patient.sex)
 
