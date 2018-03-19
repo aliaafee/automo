@@ -17,6 +17,8 @@ CONFIG_FIELDS = {
         ("Date Format", config, 'DATE_FORMAT'),
     'datetime-format':
         ("Date Time Format", config, 'DATETIME_FORMAT'),
+    'time-format':
+        ("Time Format", config, 'TIME_FORMAT'),
     'report-head-title':
         ("Report Title", config, 'REPORT_HEAD_TITLE'),
     'report-head-subtitle1':

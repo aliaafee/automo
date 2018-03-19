@@ -6,6 +6,7 @@ from ..configloader import CONFIG_FIELDS
 EDITABLE_FIELDS = [
     'default-interface',
     'date-format',
+    'time-format',
     'datetime-format',
     'report-head-title',
     'report-head-subtitle1',

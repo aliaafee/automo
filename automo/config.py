@@ -5,6 +5,7 @@ from dateutil.relativedelta import relativedelta
 
 DATE_FORMAT = "%d/%m/%Y"
 DATETIME_FORMAT = "%d/%m/%Y %H:%M:%S"
+TIME_FORMAT = "%H:%M"
 
 REPORT_HEAD_SUPTITLE = ""
 REPORT_HEAD_TITLE = "SOME MEMORIAL HOSPITAL"
@@ -115,3 +116,11 @@ def format_datetime(datetime_object):
 def parse_datetime(datetime_str):
     """Parse datetime"""
     return datetime.strptime(datetime_str, DATETIME_FORMAT)
+
+
+def formate_time(datetime_object):
+    """Format Time"""
+    if datetime_object is None:
+        return ""
+
+    return datetime_object.strftime(DATETIME_FORMAT)

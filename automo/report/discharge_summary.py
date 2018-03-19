@@ -251,7 +251,7 @@ def get_discharge_summary_elements(admission, session, pagesize=A4):
                     Paragraph(
                         u"<b>{}</b> at {}".format(
                             config.format_date(procedure.start_time),
-                            datetime.datetime.strftime(procedure.start_time, "%H:%M")
+                            config.formate_time(procedure.start_time)
                         ),
                         stylesheet['text']
                     ),
