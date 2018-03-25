@@ -17,6 +17,8 @@ class Patient(Base):
     """Patient demographic data and list of problems and encounters of the patient.
       Each patient also has single prescription of medications that have been adviced for the
       patient."""
+    __versioned__ = {}
+    
     id = Column(Integer, primary_key=True)
 
     hospital_no = Column(String(10))

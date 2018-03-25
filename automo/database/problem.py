@@ -18,6 +18,8 @@ class Problem(Base):
 
       TODO: Consider making the problems into a tree structure, eg: Dabetes Mellitus as
       root problem and child problem like Diabetic foot infections etc..."""
+    __versioned__ = {}
+
     id = Column(Integer, primary_key=True)
 
     patient_id = Column(Integer, ForeignKey('patient.id'))

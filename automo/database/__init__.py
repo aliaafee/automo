@@ -3,10 +3,16 @@
   module files"""
 
 import sqlalchemy.exc
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, configure_mappers
 from sqlalchemy import create_engine
+#from sqlalchemy_continuum import make_versioned
+
+from .user import UserPlugin
+
+#make_versioned(plugins=[UserPlugin()])
 
 from .base import Base
+from .user import User
 from .icd10 import Icd10Modifier, Icd10ModifierClass, Icd10Class
 from .patient import Patient
 from .address import Address
@@ -43,6 +49,7 @@ from .personnel import Personnel,\
                        Nurse
 from .preset_prescription import PresetMedication, PresetPrescription
 
+#configure_mappers()
 
 Session = sessionmaker()
 

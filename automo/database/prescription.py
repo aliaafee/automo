@@ -7,6 +7,8 @@ from .base import Base
 
 class Prescription(Base):
     """Patient Prescription"""
+    __versioned__ = {}
+    
     id = Column(Integer, primary_key=True)
 
     clinicalencounter_id = Column(Integer, ForeignKey('clinicalencounter.id'))

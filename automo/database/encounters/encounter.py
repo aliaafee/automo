@@ -20,6 +20,8 @@ class Encounter(Base):
       instance.
       Each encounter has a start time and end time, and is associated with a personnel, and 
       multiple notes."""
+    __versioned__ = {}
+
     id = Column(Integer, primary_key=True)
 
     type = Column(String(50))
