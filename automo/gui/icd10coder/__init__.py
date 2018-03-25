@@ -179,6 +179,8 @@ class Icd10Coder(wx.Dialog):
 
         if self.selected_comment is not None:
             self.txt_comment.ChangeValue(self.selected_comment)
+        else:
+            self.txt_comment.ChangeValue("")
         
         if modifier_class is not None:
             self.cmb_modifier.set_selected_item(modifier_class)
