@@ -12,7 +12,7 @@ class Ward(Base):
     name = Column(String(250))
     bed_prefix = Column(String(250))
 
-    active = Column(Boolean)
+    active = Column(Boolean, default=True)
 
     beds = relationship("Bed", back_populates="ward")
 

@@ -46,6 +46,7 @@ from .prescription import Prescription
 from .drug import Drug
 from .personnel import Personnel,\
                        Doctor,\
+                       MedicalOfficer,\
                        Nurse
 from .preset_prescription import PresetMedication, PresetPrescription
 

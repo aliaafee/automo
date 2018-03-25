@@ -30,7 +30,16 @@ class SettingsDialog(wx.Dialog):
             CheckBoxField("Active", 'active')
         ]
         doctor_editor = ListFormEditor(self.listbook, self.session, db.Doctor, fields)
-        self.listbook.AddPage(doctor_editor, "Doctors")
+        self.listbook.AddPage(doctor_editor, "Consultants")
+
+        fields = [
+            StringField("Record Card No.", 'record_card_no'),
+            StringField("Name", 'name'),
+            StringField("PMR Number", 'pmr_no'),
+            CheckBoxField("Active", 'active')
+        ]
+        mo_editor = ListFormEditor(self.listbook, self.session, db.MedicalOfficer, fields)
+        self.listbook.AddPage(mo_editor, "Medical Officers")
 
         ward_editor = WardEditor(self.listbook, self.session)
         self.listbook.AddPage(ward_editor, "Ward and Beds")
