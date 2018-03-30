@@ -70,6 +70,12 @@ def generate():
     doctor1.name = "Dr. One"
     session.add(doctor1)
 
+    user1 = db.User()
+    user1.username = "one"
+    user1.password = "one.log"
+    user1.personnel = doctor1
+    session.add(user1)
+
     doctor2 = db.Doctor()
     doctor2.record_card_no = "1232"
     doctor2.name = "Dr. Two"

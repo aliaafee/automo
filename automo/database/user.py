@@ -23,6 +23,15 @@ class User(Base):
     personnel = relationship("Personnel", back_populates="user")
 
     @property
+    def complete_name(self):
+        if self.personnel is not None:
+            if self.personnel.name is not None:
+                return self.personnel.name
+        if self.fullname is not None:
+            return self.fullname
+        return self.username
+
+    @property
     def password(self):
         """Prevent Password from being accessed"""
         raise AttributeError("Password is not a readable attribute")
@@ -36,6 +45,21 @@ class User(Base):
         if self.password_hash is None:
             return False
         return pbkdf2_sha256.verify(password, self.password_hash)
+
+    @property
+    def is_active(self):
+        return self.active
+
+    @property
+    def is_authenticated(self):
+        return True
+
+    @property
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return unicode(self.id)
 
 
 class UserPlugin(plugins.base.Plugin):

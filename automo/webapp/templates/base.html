@@ -1,0 +1,48 @@
+{% import "bootstrap/utils.html" as utils %}
+{% extends "bootstrap/base.html" %}
+{% block title %}
+    {% if title %}
+        {{ title }} - AutoMO
+    {% else %}
+        AutomO
+    {% endif %}
+{% endblock %}
+{% block navbar %}
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">AutoMO</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li><a href="{{ url_for('home.homepage') }}">Home</a></li>
+                <li>
+                    <a href="{{ url_for('patient.patient_search') }}">Patients</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                {% if current_user.is_authenticated %}
+                <li>
+                    <a href="{{ url_for('auth.user') }}">
+                        <span class="glyphicon glyphicon-user"></span>
+                        {{ current_user.complete_name }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('auth.logout') }}">
+                        <span class="glyphicon glyphicon-log-out"></span>
+                        Logout
+                    </a>
+                </li>
+                {% else %}
+                <li>
+                    <a href="{{ url_for('auth.login') }}">
+                        <span class="glyphicon glyphicon-log-in"></span>
+                        Login
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+    {{ utils.flashed_messages() }}
+{% endblock %}

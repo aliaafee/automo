@@ -1,0 +1,14 @@
+{% import "bootstrap/wtf.html" as wtf %}
+{% extends "base.html" %}
+{% block content %}
+    <div id="top" class="container">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Edit User <b>{{ current_user.complete_name }} ({{ current_user.username }})</b>
+            </div>
+            <div class="panel-body">
+                {{ wtf.quick_form(form) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

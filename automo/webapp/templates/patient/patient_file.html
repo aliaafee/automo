@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block content %}
+    <div id="top" class="container">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <b>{{ patient.name }}</b>,
+                {{ format_duration(patient.age) }}/{{ patient.sex }}
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">Encounters</div>
+                            <div class="list-group">
+                                {% for encounter in patient.encounters %}
+                                {% if encounter.parent == None %}
+                                <a class="list-group-item" href="#encounter-{{ encounter.id }}">
+                                    <h5 class="list-group-item-heading">
+                                        {{ format_date(encounter.start_time) }}
+                                        <b>{{ encounter.label }}</b>
+                                    </h4>
+                                    <p class="list-group-item-text">
+                                        <ul>
+                                            {% for problem in encounter.problems %}
+                                            <li>{{ problem.icd10class.preferred_plain }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </ul>
+                                    </p>
+                                </a>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-8">
+                        {% for encounter in patient.encounters %}
+                        {% if encounter.parent == None %}
+                        <div id="encounter-{{ encounter.id }}" class="panel panel-default">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <b>{{ encounter.label }}</b>
+                                        {{ format_date(encounter.start_time) }} to {{ format_date(encounter.end_time) }}
+                                    </div>
+                                    <div class="col-sm-6 text-right">
+                                        <a href="#top">Back to Top <span class="glyphicon glyphicon-triangle-top"></span></a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                                Contents here
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

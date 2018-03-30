@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+    <div id="top" class="container">
+        {% for patient in patients %}
+        <div>
+            <a href="{{ url_for('patient.patient_file', patient_id=patient.id) }}">
+                {{ patient.name }}
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}
