@@ -1,5 +1,8 @@
 """Discharge Interface"""
 import wx
+import os
+import shutil
+from slugify import slugify
 
 from .... import database as db
 from ... import images
@@ -12,6 +15,7 @@ from ..baseinterface import BaseInterface
 
 ID_SHELL = wx.NewId()
 ID_NEW_DISCHARGE = wx.NewId()
+ID_EXPORT_ALL = wx.NewId()
 
 
 class DischargeInterface(BaseInterface):
@@ -57,9 +61,11 @@ class DischargeInterface(BaseInterface):
 
     def create_file_menu(self):
         self.file_menu.Append(ID_NEW_DISCHARGE, "New Discharge", "Create New Discharge")
+        self.file_menu.Append(ID_EXPORT_ALL, "Export All", "Export All Discharges as PDFs")
         self.file_menu.AppendSeparator()
 
         self.Bind(wx.EVT_MENU, self._on_new_discharge, id=ID_NEW_DISCHARGE)
+        self.Bind(wx.EVT_MENU, self._on_export_all, id=ID_EXPORT_ALL)
         super(DischargeInterface, self).create_file_menu()
 
 
@@ -114,6 +120,33 @@ class DischargeInterface(BaseInterface):
                         done = True
                 else:
                     done = True
+
+
+    def _on_export_all(self, event):
+        dlg = wx.DirDialog (None, "Choose input directory", "", wx.DD_DEFAULT_STYLE)
+
+        if dlg.ShowModal() == wx.ID_CANCEL:
+            return
+
+        admissions = self.session.query(db.Admission).all()
+
+        for adm in admissions:
+            year = "{}".format(adm.start_time.year)
+            month = "{}".format(adm.start_time.month)
+            filename = slugify("{} {} {}.pdf".format(adm.patient.national_id_no, adm.patient.hospital_no, adm.patient.name))
+
+            src_fpath = adm.generate_discharge_summary(self.session)
+
+            dest_fpath = os.path.join(dlg.GetPath(), year, month, filename)
+
+            print "Generating... {}".format(dest_fpath)
+            
+            try:
+                shutil.copy(src_fpath, dest_fpath)
+            except IOError as io_err:
+                os.makedirs(os.path.dirname(dest_fpath))
+                shutil.copy(src_fpath, dest_fpath)
+
 
 
     def _on_encounter_selected(self, event):

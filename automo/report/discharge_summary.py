@@ -5,8 +5,8 @@ import dateutil.relativedelta
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Paragraph, PageBreak, Table, TableStyle, ListFlowable, Image, Spacer
 from reportlab.platypus.flowables import HRFlowable
-from reportlab.lib.pagesizes import A5, A4, cm, A3
-from reportlab.lib.units import mm
+from reportlab.lib.pagesizes import A5, A4, A3
+from reportlab.lib.units import mm, cm
 
 from .. import database as db
 from .. import config
